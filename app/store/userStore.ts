@@ -1,13 +1,13 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import {
-  authApi,
-  profileApi,
   setAuthToken,
   removeAuthToken,
   getAuthToken,
   handleApiError,
 } from "@/app/lib/api";
+import { authApi } from "@/app/api/authApi";
+import { profileApi } from "@/app/api/profileApi";
 
 export interface User {
   id: number;
