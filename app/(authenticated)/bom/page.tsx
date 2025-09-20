@@ -7,24 +7,32 @@ import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useUserStore } from "@/app/store/userStore";
 import { useBOMStore } from "@/app/store/bomStore";
+import { useProductStore } from "@/app/store/productStore";
 
 const Page = () => {
   const router = useRouter();
   const [searchQuery, setSearchQuery] = useState("");
   const { isLoggedIn } = useUserStore();
   const { billOfMaterials, fetchBillOfMaterials, loading, error } = useBOMStore();
+  const { products, fetchProducts } = useProductStore();
 
   useEffect(() => {
     if (!isLoggedIn) {
       router.push("/login");
     } else {
       fetchBillOfMaterials();
+      fetchProducts(); // Fetch products for name lookup
     }
-  }, [isLoggedIn, router, fetchBillOfMaterials]);
+  }, [isLoggedIn, router, fetchBillOfMaterials, fetchProducts]);
 
   // Filter and search logic
   const filteredBOMs = billOfMaterials.filter(bom => {
-    return bom.productId.toString().includes(searchQuery) || bom.componentId.toString().includes(searchQuery);
+    const product = products.find((p) => p.id === bom.productId);
+    return (
+      bom.productId.toString().includes(searchQuery) ||
+      bom.componentId.toString().includes(searchQuery) ||
+      (product && product.name.toLowerCase().includes(searchQuery.toLowerCase()))
+    );
   });
 
   return (
@@ -70,20 +78,23 @@ const Page = () => {
         )}
         {!loading && !error && filteredBOMs.length > 0 && (
           <div className="space-y-4">
-            {filteredBOMs.map((bom) => (
-              <div key={bom.id} className="border rounded p-4 flex flex-col md:flex-row md:items-center md:justify-between">
-                <div>
-                  <div className="font-bold">BOM #{bom.id}</div>
-                  <div>Product ID: {bom.productId}</div>
-                  <div>Component ID: {bom.componentId}</div>
-                  <div>Quantity: {bom.quantity}</div>
-                  <div>Created: {bom.createdAt ? String(bom.createdAt) : 'N/A'}</div>
+            {filteredBOMs.map((bom) => {
+              const product = products.find((p) => p.id === bom.productId);
+              return (
+                <div key={bom.id} className="border rounded p-4 flex flex-col md:flex-row md:items-center md:justify-between">
+                  <div>
+                    <div className="font-bold">BOM #{bom.id}</div>
+                    <div>Product: {product ? `${product.name} (ID: ${product.id})` : `ID: ${bom.productId}`}</div>
+                    <div>Component ID: {bom.componentId}</div>
+                    <div>Quantity: {bom.quantity}</div>
+                    <div>Created: {bom.createdAt ? String(bom.createdAt) : 'N/A'}</div>
+                  </div>
+                  <Button className="mt-2 md:mt-0" onClick={() => router.push(`/bom/${bom.id}`)}>
+                    View Details
+                  </Button>
                 </div>
-                <Button className="mt-2 md:mt-0" onClick={() => router.push(`/bom/${bom.id}`)}>
-                  View Details
-                </Button>
-              </div>
-            ))}
+              );
+            })}
           </div>
         )}
       </div>

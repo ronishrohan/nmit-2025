@@ -8,6 +8,8 @@ import { useRouter } from "next/navigation";
 import { useUserStore } from "@/app/store/userStore";
 import { Dropdown } from "@/app/components/ui/dropdown/Dropdown";
 import { useWorkOrderStore } from "@/app/store/workOrderStore";
+import { useMoStore } from "@/app/store/moStore";
+import { useProductStore } from "@/app/store/productStore";
 
 type FilterCardProps = {
   number: number | string;
@@ -43,14 +45,18 @@ const Page = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const { isLoggedIn } = useUserStore();
   const { workOrders, fetchWorkOrders, loading, error } = useWorkOrderStore();
+  const { manufacturingOrders, fetchManufacturingOrders } = useMoStore();
+  const { products, fetchProducts } = useProductStore();
 
   useEffect(() => {
     if (!isLoggedIn) {
       router.push("/login");
     } else {
       fetchWorkOrders();
+      fetchManufacturingOrders();
+      fetchProducts();
     }
-  }, [isLoggedIn, router, fetchWorkOrders]);
+  }, [isLoggedIn, router, fetchWorkOrders, fetchManufacturingOrders, fetchProducts]);
 
   const filters = [
     { number: 4, title: "Pending" },
@@ -63,8 +69,14 @@ const Page = () => {
   const [mode, setMode] = useState("All");
 
   const filteredWorkOrders = workOrders.filter((order) => {
+    const mo = manufacturingOrders.find((mo: any) => mo.id === order.moId);
+    const product = mo ? products.find((p: any) => p.id === mo.productId) : undefined;
     const statusMatch = selectedFilter !== null ? order.status === filters[selectedFilter].title : true;
-    const searchMatch = order.operation.toLowerCase().includes(searchQuery.toLowerCase()) || order.moId.toString().includes(searchQuery);
+    const searchMatch =
+      order.operation.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      order.moId.toString().includes(searchQuery) ||
+      (product && product.name.toLowerCase().includes(searchQuery.toLowerCase())) ||
+      (product && product.id.toString().includes(searchQuery));
     return statusMatch && searchMatch;
   });
 
