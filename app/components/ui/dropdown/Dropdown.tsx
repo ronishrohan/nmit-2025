@@ -23,9 +23,9 @@ export const Dropdown: React.FC<DropdownProps> = ({
     <motion.div className="relative inline-block" style={{ width }}>
       <motion.button
         onClick={() => setIsOpen((v) => !v)}
-        className="h-full outline-none px-6 rounded-xl bg-white hover:bg-zinc-100 transition-colors duration-100 flex items-center justify-between border-2 border-border font-medium text-xl w-full"
+        className="h-full shrink-0 outline-none whitespace-nowrap px-6 rounded-xl bg-white hover:bg-zinc-100 transition-colors duration-100 flex items-center justify-between border-2 border-border font-medium text-xl w-full"
       >
-        {currentValue}
+        <div className="overflow-hidden" >{currentValue}</div>
         <motion.div
           transition={{ duration: 0.2, ease: "circInOut" }}
           animate={{ rotateZ: isOpen ? 180 : 0 }}
@@ -50,9 +50,10 @@ export const Dropdown: React.FC<DropdownProps> = ({
             key={value}
             onClick={() => {
               setValue(value)
+              console.log(value)
               setIsOpen(false)
             }}
-            className="px-6 h-[60px] flex items-center w-full hover:bg-zinc-100 transition-colors duration-100 cursor-pointer"
+            className="px-6 h-[60px] whitespace-nowrap flex items-center w-full hover:bg-zinc-100 transition-colors duration-100 cursor-pointer"
           >
             {value}
           </div>

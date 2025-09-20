@@ -10,6 +10,7 @@ type InputProps = {
   className?: string;
   fullWidth?: boolean;
   disabled?: boolean;
+  defaultValue?: string;
 };
 
 const Input: React.FC<InputProps> = ({
@@ -21,6 +22,7 @@ const Input: React.FC<InputProps> = ({
   className,
   fullWidth = true,
   disabled = false,
+  defaultValue,
 }) => {
   return (
     <div
@@ -38,6 +40,7 @@ const Input: React.FC<InputProps> = ({
         onChange={onChange}
         placeholder={placeholder}
         disabled={disabled}
+        defaultValue={defaultValue}
         className={cn(
           "outline-none py-4  px-6 h-full text-xl font-medium bg-transparent",
           fullWidth ? "w-full h-full" : ""
