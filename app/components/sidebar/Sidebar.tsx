@@ -21,7 +21,7 @@ const SidebarButton = ({ children, icon, active, open, onClick }: { children: Re
 function Sidebar() {
     const router = useRouter()
     const [open, setOpen] = useState(true)
-    return <motion.div animate={{ width: open ? "320px" : "86px" }} className=" shrink-0 h-full flex flex-col rounded-xl border-2 border-border">
+    return <motion.div initial={{width: "320px"}} animate={{ width: open ? "320px" : "86px" }} className=" shrink-0 h-full flex flex-col rounded-xl border-2 border-border">
         <div className="h-[84px] overflow-hidden
          text-3xl font-bold border-b-2 flex items-center  relative pl-6 border-border " >
             {/* <div className="size-full z-40 rounded-full border-[20px]   border-white mix-blend-difference absolute  " ></div> */}
@@ -45,7 +45,9 @@ function Sidebar() {
         </div>
         <div className="border-t-2 border-border h-[84px] overflow-hidden w-full mt-auto p-2 gap-4 flex" >
             <div className="h-full aspect-square shrink-0
-            rounded-lg bg-gradient-to-br from-accent to-accent-red" ></div>
+            rounded-lg bg-gradient-to-br from-accent to-accent-red relative overflow-hidden" >
+                <img src="https://cdn.jsdelivr.net/gh/alohe/avatars/png/3d_2.png" className="absolute left-0 top-0 size-full object-cover" alt="" />
+            </div>
             <AnimatePresence>
                 {open && <>
                     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="flex flex-col h-full justify-center" >

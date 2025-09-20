@@ -4,6 +4,7 @@ import { ArrowClockwise } from '@phosphor-icons/react/dist/ssr/ArrowClockwise'
 import { MagnifyingGlass } from '@phosphor-icons/react/dist/ssr/MagnifyingGlass'
 import { Plus } from '@phosphor-icons/react/dist/ssr/Plus'
 import React, { useState } from 'react'
+import ProductionTable, { Column } from './Table'
 
 type FilterCardProps = {
   number: number | string
@@ -17,8 +18,8 @@ const FilterCard = ({ number, title, isSelected, onClick, className }: FilterCar
   return (
     <button
       onClick={onClick}
-      className={`rounded-xl outline-none border-2 gap-2 px-4 h-full w-fit font-medium cursor-pointer duration-100 text-xl flex items-center justify-between transition-colors 
-        ${isSelected ? 'bg-accent-green/40 border-[#B9DDBA] text-black' : 'bg-white hover:bg-zinc-200 border-border text-black/80'} 
+      className={`rounded-xl outline-none border-2 gap-2 px-6 h-full w-fit font-medium cursor-pointer duration-100 text-xl flex items-center justify-between transition-colors 
+        ${isSelected ? 'bg-accent-green/730 border-transparent text-black' : 'bg-white hover:bg-zinc-200 border-border text-black/80'} 
         ${className}`}
     >
       <div>{number}</div>
@@ -26,6 +27,25 @@ const FilterCard = ({ number, title, isSelected, onClick, className }: FilterCar
     </button>
   )
 }
+
+interface Item {
+  id: number;
+  name: string;
+  quantity: number;
+  status: string;
+}
+
+const columns: Column[] = [
+  { key: "name", label: "Name" },
+  { key: "quantity", label: "Quantity" },
+  { key: "status", label: "Status" },
+];
+
+const data: Item[] = [
+  { id: 1, name: "Item 1", quantity: 5, status: "Finished" },
+  { id: 2, name: "Item 2", quantity: 3, status: "Pending" },
+  { id: 3, name: "Item 3", quantity: 8, status: "In Progress" },
+];
 
 const Page = () => {
   const [selectedFilter, setSelectedFilter] = useState<number | null>(null)
@@ -40,9 +60,9 @@ const Page = () => {
   ]
 
   return (
-    <div className='h-fit w-full p-4 flex flex-col'>
+    <div className='h-fit w-full p-2 flex flex-col'>
       {/* Search & Buttons */}
-      <div className='w-full flex h-[60px] gap-2 items-center'>
+      <div className='w-full flex h-[66px] gap-2 items-center'>
         <Button className='px-6 shrink-0 h-[calc(100%-4px)]'>
           <Plus size={20} weight='regular' /> Create Order
         </Button>
@@ -65,7 +85,7 @@ const Page = () => {
       </div>
 
       {/* Filter Cards */}
-      <div className='h-[60px] mt-4 w-full flex gap-2'>
+      <div className='h-[66px] mt-2 w-full flex gap-2'>
         {filters.map((filter, index) => (
           <FilterCard
             key={index}
@@ -82,6 +102,9 @@ const Page = () => {
             }}
           />
         ))}
+      </div>
+      <div className='w-full h-fit mt-4' >
+        <ProductionTable columns={columns} data={data} />
       </div>
     </div>
   )
