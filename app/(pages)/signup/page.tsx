@@ -14,7 +14,7 @@ export default function page() {
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
-  const { login, setUser,setToken } = useUserStore();
+  const { login, setUser,setToken,setName,setLoginId,setEmail } = useUserStore();
   const validateForm = () => {
     // Login ID validation
     if (!loginId.trim()) {
@@ -100,11 +100,14 @@ export default function page() {
       console.log("Signup successful", response.data);
       // Redirect to login page on success
       setUser(response.data.user);
+      setName(response.data.user.name);
+      setLoginId(response.data.user.loginId);
       setToken(response.data.message);
+      setEmail(response.data.user.email);
       login(response.data.user.loginId,"hardcoded for now");
       router.push("/");
     } catch (err: any) {
-      console.log("Signup error:", err);
+      console.log("Signup errorr:", err);
 
       // Handle different types of errors
       if (err.response?.status === 400) {
