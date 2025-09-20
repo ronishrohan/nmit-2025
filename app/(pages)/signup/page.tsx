@@ -107,7 +107,7 @@ export default function page() {
       login(response.data.user.loginId,"hardcoded for now");
       router.push("/");
     } catch (err: any) {
-      console.log("Signup error:", err);
+      console.log("Signup errorr:", err);
 
       // Handle different types of errors
       if (err.response?.status === 400) {
