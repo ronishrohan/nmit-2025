@@ -6,7 +6,7 @@ import {
   PaginatedResponse,
 } from "@/app/types";
 import { fetchApi } from "@/app/lib/api";
-import { workCenterApi } from "@/app/lib/api";
+import { workCenterApi } from "@/app/api/workCenterApi";
 
 interface WorkCenterStore {
   // State

@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import { bomApi } from "@/app/lib/api";
+import { bomApi } from "@/app/api/bomApi";
 import {
   BillOfMaterial,
   CreateBillOfMaterialDto,

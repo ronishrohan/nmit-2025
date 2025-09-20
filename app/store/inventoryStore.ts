@@ -9,7 +9,7 @@ import {
   ApiResponse,
   PaginatedResponse,
 } from "@/app/types";
-import { stockApi } from "@/app/lib/api";
+import { stockApi } from "@/app/api/stockApi";
 
 interface StockFilters {
   productId?: number;

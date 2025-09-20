@@ -7,7 +7,7 @@ import {
   PaginatedResponse,
 } from "@/app/types";
 import { fetchApi } from "@/app/lib/api";
-import { woApi } from "@/app/lib/api";
+import { woApi } from "@/app/api/woApi";
 
 interface WorkOrderStore {
   // State

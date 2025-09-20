@@ -6,7 +6,7 @@ import {
   ApiResponse,
   PaginatedResponse,
 } from "@/app/types";
-import { moApi } from "@/app/lib/api";
+import { moApi } from "@/app/api/moApi";
 
 interface ManufacturingOrderStore {
   // State

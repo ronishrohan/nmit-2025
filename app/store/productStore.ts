@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import { productApi } from "@/app/lib/api";
+import { productApi } from "@/app/api/productApi";
 import {
   Product,
   ProductFilters,
