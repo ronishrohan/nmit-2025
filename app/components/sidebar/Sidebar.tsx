@@ -5,9 +5,10 @@ import { House } from "@phosphor-icons/react/dist/ssr/House";
 import { PlusCircle } from "@phosphor-icons/react/dist/ssr/PlusCircle";
 import { Package } from "@phosphor-icons/react/dist/ssr/Package";
 import { Files } from "@phosphor-icons/react/dist/ssr/Files";
+import { GearSix } from "@phosphor-icons/react/dist/ssr/GearSix";
 
 const SidebarButton = ({ children, icon, active }: { children: ReactNode, icon: ReactNode, active: boolean }) => {
-    return <button className={`rounded-xl flex gap-4 items-center  text-xl outline-none  p-4 ${active ? "text-zinc-900 bg-accent-green font-medium" : "text-inactive font-medium hover:bg-white hover:text-zinc-900"}  transition-all duration-100`} >
+    return <button className={`rounded-xl cursor-pointer flex gap-4 items-center  text-xl outline-none  p-4 ${active ? "text-zinc-900 bg-accent-green font-medium " : "text-inactive font-medium hover:bg-white hover:text-zinc-900"}  transition-all duration-100`} >
         {icon} {children}
     </button>
 }
@@ -15,8 +16,13 @@ const SidebarButton = ({ children, icon, active }: { children: ReactNode, icon: 
 function Sidebar() {
 
     return <div className="w-[320px] shrink-0 h-full flex flex-col rounded-xl border-2 border-border">
-        <div className="h-[84px] text-3xl font-bold border-b-2 flex items-center px-6 border-border" >
-            MANUFAC4
+        <div className="h-[84px] overflow-hidden
+         text-3xl font-bold border-b-2 flex items-center  relative px-6 border-border " >
+            {/* <div className="size-full z-40 rounded-full border-[20px]   border-white mix-blend-difference absolute  " ></div> */}
+            <motion.div className="translate-y-[-1px]" initial={{ rotateZ: "0deg" }} animate={{ rotateZ: "360deg" }} transition={{duration: 8, repeatType: "loop", repeat: Infinity, ease: "linear"}}>
+                <GearSix size={30} weight="fill"  />
+            </motion.div>
+            <div className="z-20">UTWORKS</div>
         </div>
         <div className="h-fit flex flex-col w-full p-4 gap-2" >
             <SidebarButton active={true} icon={<House size={26} weight="bold" />} >Dashboard</SidebarButton>
