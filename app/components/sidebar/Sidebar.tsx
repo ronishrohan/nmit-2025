@@ -55,7 +55,7 @@ function Sidebar() {
   const router = useRouter();
   const [open, setOpen] = useState(true);
   const pathname = usePathname();
-  const { fullName, email } = useUserStore();
+  const { loginId, email } = useUserStore();
   return (
     <motion.div
       initial={{ width: "320px" }}
@@ -157,7 +157,7 @@ function Sidebar() {
                 className="flex flex-col h-full shrink-1 justify-center"
               >
                 <div className="text-lg font-semibold leading-4">
-                  {fullName ? fullName : "Login please"}
+                  {loginId ? loginId : "Login please"}
                 </div>
                 <div className="font-medium text-inactive">{email}</div>
               </motion.div>
