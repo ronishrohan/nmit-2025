@@ -28,7 +28,7 @@ const TextInputField: React.FC<TextInputFieldProps> = ({
     <div
       className={cn(
         "bg-white rounded-xl overflow-hidden group border-2 focus-within:border-accent transition-colors duration-150 border-border flex items-center relative",
-        fullWidth ? "w-full h-full" : "w-fit",
+        fullWidth ? "w-full " : "w-fit",
         className
       )}
     >

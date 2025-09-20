@@ -1,5 +1,6 @@
 "use client";
 
+import React from "react";
 import { useUserStore } from "../store/userStore";
 import { useRouter } from "next/navigation";
 import Sidebar from "../components/sidebar/Sidebar";
@@ -10,19 +11,18 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const { isLoggedIn } = useUserStore();
+  const { isLoggedIn,name } = useUserStore();
   const router = useRouter();
-  useEffect(() => {
-    if (!isLoggedIn) {
+  // Wait for hydration to check isLoggedIn
+  console.log(name);
+  const [hydrated, setHydrated] = React.useState(false);
+  React.useEffect(() => {
+    setHydrated(true);
+  }, []);
+  React.useEffect(() => {
+    if (hydrated && !isLoggedIn) {
       router.push("/login");
     }
-
-  }, [isLoggedIn])
-  return (
-
-
-    <div >{children}</div>
-
-
-  );
+  }, [hydrated, isLoggedIn, router]);
+  return <div>{children}</div>;
 }
