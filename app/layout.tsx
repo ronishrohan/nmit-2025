@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono, Instrument_Sans } from "next/font/google";
 import "./globals.css";
+import Sidebar from "./components/sidebar/Sidebar";
+import Topbar from "./components/topbar/Topbar";
 
 const fontPrimary = Instrument_Sans({
   weight: ["400", "500", "600", "700"],
@@ -20,9 +22,13 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${fontPrimary.className} antialiased font-primary text-foreground bg-background`}
+        className={`${fontPrimary.className} antialiased font-primary text-foreground bg-background flex`}
       >
-        {children}
+        <Sidebar />
+        <div className="flex flex-col size-full" >
+          <Topbar />
+          {children}
+        </div>
       </body>
     </html>
   );
