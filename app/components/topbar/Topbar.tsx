@@ -3,18 +3,23 @@ import { MagnifyingGlass } from '@phosphor-icons/react/dist/ssr/MagnifyingGlass'
 import { usePathname } from 'next/navigation'
 import React from 'react'
 
-const titles = {
-  "/dashboard": "Dashboard",
+const titles: Record<string, string[]> = {
+  "/dashboard": ["Dashboard", "See all your important data in one place"],
+  "/order" : ["Order", "Overview of a order"]
 } as const;
 
 const Topbar = () => {
   const pathname = usePathname();
-  const title = (titles as Record<string, string>)[pathname as string] ?? "";
+  const matchedKey = Object.keys(titles).find(key => pathname.includes(key));
+const title = matchedKey ? titles[matchedKey] : "";
 
   return (
     <div className='h-[86px] shrink-0 border-b-2 border-b-border p-4 flex'>
-      <div className='h-full flex items-center text-2xl font-bold px-4'>
-        {title}
+      <div className='h-full flex flex-col items-start justify-between  text-2xl font-bold px-4'>
+        <div className='leading-5'>
+          {title[0]}
+        </div>
+        <div className='text-lg font-medium text-inactive'>{title[1]}</div>
       </div>
     </div>
   );
