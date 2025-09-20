@@ -359,9 +359,7 @@ const StockLevelsChart = () => {
               />
               <Bar
                 dataKey="stock"
-                fill={(entry: any) =>
-                  entry.stock < 50 ? "#ef4444" : "var(--color-stock)"
-                }
+                fill="var(--color-stock)"
                 radius={4}
               />
             </BarChart>

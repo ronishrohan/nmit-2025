@@ -105,7 +105,7 @@ export default function page() {
       setToken(response.data.message);
       setEmail(response.data.user.email);
       login(response.data.user.loginId,"hardcoded for now");
-      router.push("/");
+      router.push("/dashboard");
     } catch (err: any) {
       console.log("Signup errorr:", err);
 

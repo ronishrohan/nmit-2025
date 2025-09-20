@@ -90,31 +90,6 @@ const Page = () => {
 
   const filterCounts = getFilterCounts();
 
-  // Calculate counts for each filter dynamically
-  const getFilterCounts = () => {
-    const counts = {
-      draft: manufacturingOrders.filter((order) => order.status === "draft")
-        .length,
-      confirmed: manufacturingOrders.filter(
-        (order) => order.status === "confirmed"
-      ).length,
-      in_progress: manufacturingOrders.filter(
-        (order) => order.status === "in_progress"
-      ).length,
-      to_close: manufacturingOrders.filter(
-        (order) => order.status === "to_close"
-      ).length,
-      done: manufacturingOrders.filter((order) => order.status === "done")
-        .length,
-      cancelled: manufacturingOrders.filter(
-        (order) => order.status === "cancelled"
-      ).length,
-    };
-    return counts;
-  };
-
-  const filterCounts = getFilterCounts();
-
   const filters = [
     { number: filterCounts.draft, title: "Draft", status: "draft" },
     { number: filterCounts.confirmed, title: "Confirmed", status: "confirmed" },
@@ -134,7 +109,6 @@ const Page = () => {
     // Status filter
     const statusMatch =
       selectedFilter !== null
-        ? order.status === filters[selectedFilter].status
         ? order.status === filters[selectedFilter].status
         : true;
     // Mode filter
@@ -184,8 +158,6 @@ const Page = () => {
         <Dropdown
           currentValue={mode}
           setValue={setMode}
-          width={240}
-          values={["All", "My Orders", "Assigned to me"]}
           width={240}
           values={["All", "My Orders", "Assigned to me"]}
         />

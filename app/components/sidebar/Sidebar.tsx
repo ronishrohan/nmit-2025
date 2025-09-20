@@ -67,7 +67,7 @@ function Sidebar() {
   const { loginId, name, isLoggedIn, email } = useUserStore();
   useEffect(() => {
     if (!isLoggedIn) {
-      router.push("/");
+      router.push("/login");
     }
   }, [isLoggedIn]);
   if (!isLoggedIn) return null;

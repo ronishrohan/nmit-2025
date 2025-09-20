@@ -15,16 +15,15 @@ export default function page() {
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
 
-  const { login, setUser,email, setToken, setName, setLoginId, setEmail } =
+  const { login, setUser, email, setToken, setName, setLoginId, setEmail } =
     useUserStore();
-  console.log("yea bro",email);
+  console.log("yea bro", email);
   const validateForm = () => {
     if (!loginId.trim()) {
       setError("Please enter your login ID");
       return false;
     }
     if (!password.trim()) {
-     
       setError("Please enter your password");
       return false;
     }
@@ -50,15 +49,14 @@ export default function page() {
       console.log(response.data.user.email);
       // console.log("token here", response.data.token);
       // Redirect to dashboard or home page on success
-      
-      
+
       setToken(response.data.message);
       login(loginId, password);
-      router.push("/dashboard");
       setUser(response.data.user);
       setName(response.data.user.name);
       setLoginId(response.data.user.loginId);
       setEmail(response.data.user.email);
+      router.push("/dashboard");
     } catch (err: any) {
       console.log("Login error:", err);
 
