@@ -58,37 +58,42 @@ const Page = () => {
       </div>
 
       {/* Content Area */}
-      <div className="w-full h-fit mt-2 bg-white rounded-xl border-2 border-border p-8">
-        {loading && <div className="text-center text-lg">Loading...</div>}
-        {error && <div className="text-center text-red-500">{error}</div>}
-        {!loading && !error && filteredStock.length === 0 && (
-          <div className="text-center">
-            <div className="text-6xl mb-4">📦</div>
-            <h2 className="text-2xl font-semibold text-zinc-800 mb-2">No Stock Entries Yet</h2>
-            <p className="text-zinc-600 mb-6">Start tracking your inventory by creating stock entries and managing material movements</p>
-            <Button className="px-8">
-              <Plus size={20} weight="regular" /> Create Stock Entry
-            </Button>
+      <div className="w-full h-fit mt-2 bg-white rounded-xl border-2 border-border ">{!loading && !error && filteredStock.length > 0 && (
+  <div className="divide-y divide-y-border">
+    {filteredStock.map((stock) => (
+      <div
+        key={stock.id}
+        className=" p-4 flex flex-col gap-3 md:flex-row md:items-center md:justify-between hover:bg-zinc-50 transition-colors"
+      >
+        {/* Left Side Details */}
+        <div className="flex flex-col gap-1">
+          <div className="text-xl font-bold text-zinc-800">Stock #{stock.id}</div>
+          <div className="text-zinc-700">
+            <span className="font-medium">Product:</span> {stock.productId}
           </div>
-        )}
-        {!loading && !error && filteredStock.length > 0 && (
-          <div className="space-y-4">
-            {filteredStock.map((stock) => (
-              <div key={stock.id} className="border rounded p-4 flex flex-col md:flex-row md:items-center md:justify-between">
-                <div>
-                  <div className="font-bold">Stock #{stock.id}</div>
-                  <div>Product: {stock.productId}</div>
-                  <div>Quantity: {stock.quantity}</div>
-                  <div>Updated: {stock.updatedAt ? String(stock.updatedAt) : 'N/A'}</div>
-                </div>
-                <Button className="mt-2 md:mt-0" onClick={() => router.push(`/stock-ledger/${stock.id}`)}>
-                  View Details
-                </Button>
-              </div>
-            ))}
+          <div className="text-zinc-700">
+            <span className="font-medium">Quantity:</span> {stock.quantity}
           </div>
-        )}
+          <div className="text-zinc-500 text-sm">
+            Updated:{" "}
+            {stock.updatedAt
+              ? new Date(stock.updatedAt).toLocaleString()
+              : "N/A"}
+          </div>
+        </div>
+
+        {/* Right Side Button */}
+        <Button
+          className="mt-2 md:mt-0 self-start md:self-auto"
+          onClick={() => router.push(`/stock-ledger/${stock.id}`)}
+        >
+          View Details
+        </Button>
       </div>
+    ))}
+  </div>
+)}
+</div>
     </div>
   );
 };

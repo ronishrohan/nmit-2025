@@ -10,6 +10,7 @@ import { Dropdown } from "@/app/components/ui/dropdown/Dropdown";
 import { useWorkOrderStore } from "@/app/store/workOrderStore";
 import { useMoStore } from "@/app/store/moStore";
 import { useProductStore } from "@/app/store/productStore";
+import Modal from "@/app/components/modal/Modal";
 
 type FilterCardProps = {
   number: number | string;
@@ -103,134 +104,142 @@ const Page = () => {
       (product && product.id.toString().includes(searchQuery));
     return statusMatch && modeMatch && searchMatch;
   });
+  const [modalOpen, setModalOpen] = useState(false);
 
   return (
-    <div className="h-fit w-full p-2 flex flex-col">
-      {/* Page Title */}
+    <>
+    <Modal open={modalOpen} setOpen={setModalOpen} />
+      <div className="h-fit w-full p-2 flex flex-col">
+        {/* Page Title */}
 
-      {/* Search & Buttons */}
-      <div className="w-full flex h-[66px] gap-2 items-center">
-        <Button className="px-6 shrink-0 h-[calc(100%-4px)]">
-          <Plus size={20} weight="regular" /> New Work Order
-        </Button>
-        <div className="h-full w-full bg-white rounded-xl group border-2 focus-within:border-accent transition-colors duration-150 border-border flex relative">
-          <MagnifyingGlass
-            weight="bold"
-            size={20}
-            className="text-zinc-500 group-focus-within:text-accent h-full mx-3 absolute aspect-square pointer-events-none shrink-0"
-          />
-          <input
-            type="text"
-            className="size-full outline-none pl-10 text-xl font-medium"
-            placeholder="Search work orders..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-          />
+        {/* Search & Buttons */}
+        <div className="w-full flex h-[66px] gap-2 items-center">
+          <Button
+            onClick={() => setModalOpen(true)}
+            className="px-6 shrink-0 h-[calc(100%-4px)]"
+          >
+            <Plus size={20} weight="regular" /> New Work Order
+          </Button>
+          <div className="h-full w-full bg-white rounded-xl group border-2 focus-within:border-accent transition-colors duration-150 border-border flex relative">
+            <MagnifyingGlass
+              weight="bold"
+              size={20}
+              className="text-zinc-500 group-focus-within:text-accent h-full mx-3 absolute aspect-square pointer-events-none shrink-0"
+            />
+            <input
+              type="text"
+              className="size-full outline-none pl-10 text-xl font-medium"
+              placeholder="Search work orders..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
+          </div>
+          <Button variant="secondary" className="px-6 h-full shrink-0">
+            <ArrowClockwise size={20} weight="regular" /> Reset
+          </Button>
         </div>
-        <Button variant="secondary" className="px-6 h-full shrink-0">
-          <ArrowClockwise size={20} weight="regular" /> Reset
-        </Button>
-      </div>
 
-      {/* Filter Cards */}
-      <div className="h-[66px] mt-2 w-full flex gap-2">
-        {/* <Dropdown
+        {/* Filter Cards */}
+        <div className="h-[66px] mt-2 w-full flex gap-2">
+          {/* <Dropdown
           currentValue={mode}
           setValue={setMode}
           values={["All", "My Work Orders", "By Work Center", "By Employee"]}
         /> */}
-        {filters.map((filter, index) => (
-          <FilterCard
-            key={index}
-            number={filter.number}
-            title={filter.title}
-            isSelected={selectedFilter === index}
-            onClick={() => {
-              if (selectedFilter == index) {
-                setSelectedFilter(null);
-              } else {
-                setSelectedFilter(index);
-              }
-            }}
-          />
-        ))}
-      </div>
-
-      {/* Content Area */}
-      <div className="w-full h-fit mt-4 bg-white rounded-xl overflow-hidden border-2 border-border ">
-        {/* Loading state */}
-        {loading && (
-          <div className="p-6 text-center text-lg text-zinc-600 animate-pulse">
-            Loading work orders...
-          </div>
-        )}
-
-        {/* Error state */}
-        {error && (
-          <div className="p-6 text-center text-red-600 font-medium">
-            {error}
-          </div>
-        )}
-
-        {/* Empty state */}
-        {!loading && !error && filteredWorkOrders.length === 0 && (
-          <div className="flex flex-col items-center justify-center p-8 text-center">
-            <div className="text-6xl mb-4">⚙️</div>
-            <h2 className="text-2xl font-semibold text-zinc-800 mb-2">
-              No Work Orders Yet
-            </h2>
-            <p className="text-zinc-600 mb-6 max-w-md">
-              Create work orders to assign specific operations to work centers
-              and employees.
-            </p>
-            <Button className="px-8 py-3 text-lg">
-              <Plus size={20} weight="regular" className="mr-2" /> Create Work
-              Order
-            </Button>
-          </div>
-        )}
-
-     
-        {!loading && !error && filteredWorkOrders.length > 0 && (
-  <div className="divide-y divide-border">
-    {filteredWorkOrders.map((order) => (
-      <div
-        key={order.id}
-        className="p-4 flex flex-col gap-3 md:flex-row md:items-center md:justify-between hover:bg-zinc-50 transition-colors"
-      >
-        {/* Left Side Details */}
-        <div className="space-y-1">
-          <div className="text-xl font-bold text-zinc-800">
-            Work Order #{order.id}
-          </div>
-          <div className="text-zinc-700">
-            <span className="font-medium">Status:</span> {order.status}
-          </div>
-          <div className="text-zinc-700">
-            <span className="font-medium">Operation:</span> {order.operation}
-          </div>
-          <div className="text-zinc-700">
-            <span className="font-medium">MO ID:</span> {order.moId}
-          </div>
-          <div className="text-zinc-500 text-sm">
-            Created: {order.createdAt ? String(order.createdAt) : "N/A"}
-          </div>
+          {filters.map((filter, index) => (
+            <FilterCard
+              key={index}
+              number={filter.number}
+              title={filter.title}
+              isSelected={selectedFilter === index}
+              onClick={() => {
+                if (selectedFilter == index) {
+                  setSelectedFilter(null);
+                } else {
+                  setSelectedFilter(index);
+                }
+              }}
+            />
+          ))}
         </div>
 
-        {/* Right Side Button */}
-        <Button
-          className="mt-auto"
-          onClick={() => router.push(`/work-orders/${order.id}`)}
-        >
-          View Details
-        </Button>
-      </div>
-    ))}
-  </div>
-)}
+        {/* Content Area */}
+        <div className="w-full h-fit mt-4 bg-white rounded-xl overflow-hidden border-2 border-border ">
+          {/* Loading state */}
+          {loading && (
+            <div className="p-6 text-center text-lg text-zinc-600 animate-pulse">
+              Loading work orders...
+            </div>
+          )}
 
+          {/* Error state */}
+          {error && (
+            <div className="p-6 text-center text-red-600 font-medium">
+              {error}
+            </div>
+          )}
+
+          {/* Empty state */}
+          {!loading && !error && filteredWorkOrders.length === 0 && (
+            <div className="flex flex-col items-center justify-center p-8 text-center">
+              <div className="text-6xl mb-4">⚙️</div>
+              <h2 className="text-2xl font-semibold text-zinc-800 mb-2">
+                No Work Orders Yet
+              </h2>
+              <p className="text-zinc-600 mb-6 max-w-md">
+                Create work orders to assign specific operations to work centers
+                and employees.
+              </p>
+              <Button className="px-8 py-3 text-lg">
+                <Plus size={20} weight="regular" className="mr-2" /> Create Work
+                Order
+              </Button>
+            </div>
+          )}
+
+          {!loading && !error && filteredWorkOrders.length > 0 && (
+            <div className="divide-y divide-border">
+              {filteredWorkOrders.map((order) => (
+                <div
+                  key={order.id}
+                  className="p-4 flex flex-col gap-3 md:flex-row md:items-center md:justify-between hover:bg-zinc-50 transition-colors"
+                >
+                  {/* Left Side Details */}
+                  <div className="space-y-1">
+                    <div className="text-xl font-bold text-zinc-800">
+                      Work Order #{order.id}
+                    </div>
+                    <div className="text-zinc-700">
+                      <span className="font-medium">Status:</span>{" "}
+                      {order.status}
+                    </div>
+                    <div className="text-zinc-700">
+                      <span className="font-medium">Operation:</span>{" "}
+                      {order.operation}
+                    </div>
+                    <div className="text-zinc-700">
+                      <span className="font-medium">MO ID:</span> {order.moId}
+                    </div>
+                    <div className="text-zinc-500 text-sm">
+                      Created:{" "}
+                      {order.createdAt ? String(order.createdAt) : "N/A"}
+                    </div>
+                  </div>
+
+                  {/* Right Side Button */}
+                  <Button
+                    className="mt-auto"
+                    onClick={() => router.push(`/work-orders/${order.id}`)}
+                  >
+                    View Details
+                  </Button>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
       </div>
-    </div>
+    </>
   );
 };
 
