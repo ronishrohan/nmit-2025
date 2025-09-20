@@ -13,7 +13,7 @@ export default function page() {
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
 
-  const { login, setName, setEmail, setRole, setLoginId } = useUserStore();
+  const { login, setUser } = useUserStore();
 
   const validateForm = () => {
     if (!loginId.trim()) {
@@ -44,11 +44,8 @@ export default function page() {
 
       console.log("Login successful", response.data);
       // Redirect to dashboard or home page on success
-      setEmail(response.data.user.email);
-      setRole("user");
-      setName(response.data.user.fullName);
-      setLoginId(response.data.user.loginId);
-      login();
+      setUser(response.data.user);
+      login(loginId, password);
       router.push("/dashboard");
     } catch (err: any) {
       console.log("Login error:", err);

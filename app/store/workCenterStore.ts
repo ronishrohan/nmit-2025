@@ -1,12 +1,11 @@
 import { create } from "zustand";
 import {
   WorkCenter,
-  CreateWorkCenterDto,
-  UpdateWorkCenterDto,
   WorkCenterFilters,
   ApiResponse,
   PaginatedResponse,
 } from "@/app/types";
+import { fetchApi } from "@/app/lib/api";
 
 interface WorkCenterStore {
   // State
@@ -37,15 +36,8 @@ interface WorkCenterStore {
   ) => void;
 
   // API Actions
-  fetchWorkCenters: (
-    filters?: WorkCenterFilters,
-    page?: number,
-    limit?: number,
-  ) => Promise<void>;
+  fetchWorkCenters: () => Promise<void>;
   fetchWorkCenterById: (id: number) => Promise<void>;
-  createWorkCenter: (data: CreateWorkCenterDto) => Promise<WorkCenter | null>;
-  updateWorkCenterById: (data: UpdateWorkCenterDto) => Promise<WorkCenter | null>;
-  deleteWorkCenter: (id: number) => Promise<boolean>;
 
   // Utility Actions
   getWorkCentersByLocation: (location: string) => WorkCenter[];
@@ -115,34 +107,14 @@ export const useWorkCenterStore = create<WorkCenterStore>((set, get) => ({
     })),
 
   // API Actions
-  fetchWorkCenters: async (filters, page = 1, limit = 10) => {
+  fetchWorkCenters: async () => {
     set({ loading: true, error: null });
     try {
-      const queryParams = new URLSearchParams();
-
-      if (filters?.location) queryParams.append("location", filters.location);
-      if (filters?.search) queryParams.append("search", filters.search);
-
-      queryParams.append("page", page.toString());
-      queryParams.append("limit", limit.toString());
-
-      const response = await fetch(`/api/work-centers?${queryParams}`);
-      const result: ApiResponse<PaginatedResponse<WorkCenter>> =
-        await response.json();
-
-      if (result.success && result.data) {
-        set({
-          workCenters: result.data.data,
-          pagination: {
-            page: result.data.page,
-            limit: result.data.limit,
-            total: result.data.total,
-            totalPages: result.data.totalPages,
-          },
-          filters: filters || {},
-        });
-      } else {
-        set({ error: result.error || "Failed to fetch work centers" });
+      const response = await fetchApi.getTable("workcenters");
+      const workCenters = Array.isArray(response.data) ? response.data : [];
+      set({ workCenters });
+      if (!workCenters.length) {
+        set({ error: response.message || "No work centers found" });
       }
     } catch (error) {
       set({ error: "Network error while fetching work centers" });
@@ -151,120 +123,20 @@ export const useWorkCenterStore = create<WorkCenterStore>((set, get) => ({
       set({ loading: false });
     }
   },
-
   fetchWorkCenterById: async (id) => {
     set({ loading: true, error: null });
     try {
-      const response = await fetch(`/api/work-centers/${id}`);
-      const result: ApiResponse<WorkCenter> = await response.json();
-
-      if (result.success && result.data) {
-        set({ currentWorkCenter: result.data });
-      } else {
-        set({ error: result.error || "Failed to fetch work center" });
+      let workCenters = get().workCenters;
+      if (!workCenters.length) {
+        const response = await fetchApi.getTable("workcenters");
+        workCenters = Array.isArray(response.data) ? response.data : [];
       }
+      const center = workCenters.find((c: any) => c.id === id) || null;
+      set({ currentWorkCenter: center });
+      if (!center) set({ error: "Work center not found" });
     } catch (error) {
       set({ error: "Network error while fetching work center" });
       console.error("Fetch work center error:", error);
-    } finally {
-      set({ loading: false });
-    }
-  },
-
-  createWorkCenter: async (data) => {
-    set({ loading: true, error: null });
-    try {
-      const response = await fetch("/api/work-centers", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(data),
-      });
-
-      const result: ApiResponse<WorkCenter> = await response.json();
-
-      if (result.success && result.data) {
-        const newCenter = result.data;
-        set((state) => ({
-          workCenters: [...state.workCenters, newCenter],
-        }));
-        return newCenter;
-      } else {
-        set({ error: result.error || "Failed to create work center" });
-        return null;
-      }
-    } catch (error) {
-      set({ error: "Network error while creating work center" });
-      console.error("Create work center error:", error);
-      return null;
-    } finally {
-      set({ loading: false });
-    }
-  },
-
-  updateWorkCenterById: async (data) => {
-    set({ loading: true, error: null });
-    try {
-      const response = await fetch(`/api/work-centers/${data.id}`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(data),
-      });
-
-      const result: ApiResponse<WorkCenter> = await response.json();
-
-      if (result.success && result.data) {
-        const updatedCenter = result.data;
-        set((state) => ({
-          workCenters: state.workCenters.map((wc) =>
-            wc.id === updatedCenter.id ? updatedCenter : wc,
-          ),
-          currentWorkCenter:
-            state.currentWorkCenter?.id === updatedCenter.id
-              ? updatedCenter
-              : state.currentWorkCenter,
-        }));
-        return updatedCenter;
-      } else {
-        set({ error: result.error || "Failed to update work center" });
-        return null;
-      }
-    } catch (error) {
-      set({ error: "Network error while updating work center" });
-      console.error("Update work center error:", error);
-      return null;
-    } finally {
-      set({ loading: false });
-    }
-  },
-
-  deleteWorkCenter: async (id) => {
-    set({ loading: true, error: null });
-    try {
-      const response = await fetch(`/api/work-centers/${id}`, {
-        method: "DELETE",
-      });
-
-      const result: ApiResponse<void> = await response.json();
-
-      if (result.success) {
-        set((state) => ({
-          workCenters: state.workCenters.filter((wc) => wc.id !== id),
-          currentWorkCenter:
-            state.currentWorkCenter?.id === id ? null : state.currentWorkCenter,
-        }));
-        return true;
-      } else {
-        set({ error: result.error || "Failed to delete work center" });
-        return false;
-      }
-    } catch (error) {
-      set({ error: "Network error while deleting work center" });
-      console.error("Delete work center error:", error);
-      return false;
     } finally {
       set({ loading: false });
     }

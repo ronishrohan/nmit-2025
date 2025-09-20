@@ -7,6 +7,7 @@ import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useUserStore } from "@/app/store/userStore";
 import { Dropdown } from "@/app/components/ui/dropdown/Dropdown";
+import { useWorkOrderStore } from "@/app/store/workOrderStore";
 
 type FilterCardProps = {
   number: number | string;
@@ -40,12 +41,15 @@ const Page = () => {
   const router = useRouter();
   const [selectedFilter, setSelectedFilter] = useState<number | null>(null);
   const { isLoggedIn } = useUserStore();
+  const { workOrders, fetchWorkOrders, loading, error } = useWorkOrderStore();
 
   useEffect(() => {
     if (!isLoggedIn) {
       router.push("/login");
+    } else {
+      fetchWorkOrders();
     }
-  }, [isLoggedIn, router]);
+  }, [isLoggedIn, router, fetchWorkOrders]);
 
   const filters = [
     { number: 4, title: "Pending" },
@@ -110,14 +114,36 @@ const Page = () => {
 
       {/* Content Area */}
       <div className="w-full h-fit mt-2 bg-white rounded-xl border-2 border-border p-8">
-        <div className="text-center">
-          <div className="text-6xl mb-4">⚙️</div>
-          <h2 className="text-2xl font-semibold text-zinc-800 mb-2">No Work Orders Yet</h2>
-          <p className="text-zinc-600 mb-6">Create work orders to assign specific operations to work centers and employees</p>
-          <Button className="px-8">
-            <Plus size={20} weight="regular" /> Create Work Order
-          </Button>
-        </div>
+        {loading && <div className="text-center text-lg">Loading...</div>}
+        {error && <div className="text-center text-red-500">{error}</div>}
+        {!loading && !error && workOrders.length === 0 && (
+          <div className="text-center">
+            <div className="text-6xl mb-4">⚙️</div>
+            <h2 className="text-2xl font-semibold text-zinc-800 mb-2">No Work Orders Yet</h2>
+            <p className="text-zinc-600 mb-6">Create work orders to assign specific operations to work centers and employees</p>
+            <Button className="px-8">
+              <Plus size={20} weight="regular" /> Create Work Order
+            </Button>
+          </div>
+        )}
+        {!loading && !error && workOrders.length > 0 && (
+          <div className="space-y-4">
+            {workOrders.map((order) => (
+              <div key={order.id} className="border rounded p-4 flex flex-col md:flex-row md:items-center md:justify-between">
+                <div>
+                  <div className="font-bold">Work Order #{order.id}</div>
+                  <div>Status: <span className="font-medium">{order.status}</span></div>
+                  <div>Operation: {order.operation}</div>
+                  <div>MO ID: {order.moId}</div>
+                  <div>Created: {order.createdAt ? String(order.createdAt) : 'N/A'}</div>
+                </div>
+                <Button className="mt-2 md:mt-0" onClick={() => router.push(`/work-orders/${order.id}`)}>
+                  View Details
+                </Button>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );

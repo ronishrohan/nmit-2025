@@ -12,6 +12,7 @@ import { Dropdown } from "@/app/components/ui/dropdown/Dropdown";
 import { useRouter } from "next/navigation";
 import { useUserStore } from "@/app/store/userStore";
 import { ArrowUpRight } from "@phosphor-icons/react/dist/ssr/ArrowUpRight";
+import { useMoStore } from "@/app/store/moStore";
 
 type FilterCardProps = {
   number: number | string;
@@ -45,89 +46,19 @@ const FilterCard = ({
   );
 };
 
-interface Item {
-  id: number;
-  reference: string;
-  startDate: string; // ISO date string like "2025-09-01"
-  finishedProduct: string;
-  status: "Pending" | "Processing" | "Completed" | "Cancelled"; // or string if you want flexibility
-  quantity: number;
-  unit: string; // e.g., "pcs", "kg"
-  state: string; // e.g., "NY", "CA"
-}
-
-const columns: Column[] = [
-  { key: "reference", label: "Reference" },
-  { key: "startDate", label: "Start Date" },
-  { key: "finishedProduct", label: "Finished Product" },
-  { key: "status", label: "Status" },
-  { key: "quantity", label: "Quantity" },
-  { key: "unit", label: "Unit" },
-  { key: "state", label: "State" },
-];
-
-const data: Item[] = [
-  {
-    id: 1,
-    reference: "REF001",
-    startDate: "2025-09-01",
-    finishedProduct: "Widget A",
-    status: "Completed",
-    quantity: 100,
-    unit: "pcs",
-    state: "NY",
-  },
-  {
-    id: 2,
-    reference: "REF002",
-    startDate: "2025-09-05",
-    finishedProduct: "Widget B",
-    status: "Processing",
-    quantity: 250,
-    unit: "pcs",
-    state: "CA",
-  },
-  {
-    id: 3,
-    reference: "REF003",
-    startDate: "2025-09-10",
-    finishedProduct: "Widget C",
-    status: "Pending",
-    quantity: 50,
-    unit: "pcs",
-    state: "TX",
-  },
-  {
-    id: 4,
-    reference: "REF004",
-    startDate: "2025-09-12",
-    finishedProduct: "Widget D",
-    status: "Cancelled",
-    quantity: 75,
-    unit: "pcs",
-    state: "FL",
-  },
-  {
-    id: 5,
-    reference: "REF005",
-    startDate: "2025-09-15",
-    finishedProduct: "Widget E",
-    status: "Completed",
-    quantity: 120,
-    unit: "pcs",
-    state: "WA",
-  },
-];
-
 const Page = () => {
   const router = useRouter();
   const [selectedFilter, setSelectedFilter] = useState<number | null>(null);
   const { isLoggedIn } = useUserStore();
+  const { manufacturingOrders, fetchManufacturingOrders, loading, error } =
+    useMoStore();
   useEffect(() => {
-    getOrders().then((data) => {
-      console.log(data);
-    });
-  }, []);
+    if (!isLoggedIn) {
+      router.push("/login");
+    } else {
+      fetchManufacturingOrders();
+    }
+  }, [isLoggedIn, router, fetchManufacturingOrders]);
 
   const filters = [
     { number: 2, title: "Draft" },
@@ -138,6 +69,24 @@ const Page = () => {
     { number: 6, title: "Late" },
   ];
   const [mode, setMode] = useState("Mine");
+
+  // Prepare columns for the table
+  const columns: Column[] = [
+    { key: "id", label: "Order ID" },
+    { key: "status", label: "Status" },
+    { key: "productId", label: "Product ID" },
+    { key: "quantity", label: "Quantity" },
+    { key: "createdAt", label: "Created At" },
+  ];
+
+  // Prepare data for the table
+  const data = manufacturingOrders.map((order) => ({
+    id: order.id,
+    status: order.status,
+    productId: order.productId ?? "N/A",
+    quantity: order.quantity ?? "N/A",
+    createdAt: order.createdAt ? String(order.createdAt) : "N/A",
+  }));
 
   return (
     <div className="h-fit w-full p-2 flex flex-col">
@@ -193,12 +142,22 @@ const Page = () => {
         <div className="text-3xl p-4 px-6 flex w-full justify-between h-[70px] items-center relative">
           <div>Orders</div>{" "}
           <div className="absolute p-2 right-0 top-0 h-full aspect-square shrink-0">
-            <button onClick={() => router.push("/manufacturing-orders")} className="size-full cursor-pointer  rounded-lg border-2 border-border/50  hover:bg-zinc-200 flex items-center justify-center transition-colors duration-100">
+            <button
+              onClick={() => router.push("/manufacturing-orders")}
+              className="size-full cursor-pointer  rounded-lg border-2 border-border/50  hover:bg-zinc-200 flex items-center justify-center transition-colors duration-100"
+            >
               <ArrowUpRight size={24} />
             </button>
           </div>
         </div>
-        <ProductionTable columns={columns} data={data} />
+        {loading && <div className="text-center text-lg">Loading...</div>}
+        {error && <div className="text-center text-red-500">{error}</div>}
+        {!loading && !error && data.length === 0 && (
+          <div className="text-center py-8">No Orders Yet</div>
+        )}
+        {!loading && !error && data.length > 0 && (
+          <ProductionTable columns={columns} data={data} />
+        )}
       </div>
     </div>
   );

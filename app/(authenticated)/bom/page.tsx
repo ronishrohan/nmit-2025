@@ -7,6 +7,7 @@ import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useUserStore } from "@/app/store/userStore";
 import { Dropdown } from "@/app/components/ui/dropdown/Dropdown";
+import { useBOMStore } from "@/app/store/bomStore";
 
 type FilterCardProps = {
   number: number | string;
@@ -26,7 +27,7 @@ const FilterCard = ({
   return (
     <button
       onClick={onClick}
-      className={`rounded-xl outline-none border-2 gap-2 px-6 h-full w-fit font-medium cursor-pointer duration-100 text-xl flex items-center justify-between transition-colors
+      className={`rounded-xl outline-none border-2 gap-2 px-6 h-full w-fit font-medium cursor-pointer duration-100 text-xl flex items-center justify-between
         ${isSelected ? "bg-accent-green/730 border-transparent text-black" : "bg-white hover:bg-zinc-200 border-border text-black/80"}
         ${className}`}
     >
@@ -40,12 +41,15 @@ const Page = () => {
   const router = useRouter();
   const [selectedFilter, setSelectedFilter] = useState<number | null>(null);
   const { isLoggedIn } = useUserStore();
+  const { billOfMaterials, fetchBillOfMaterials, loading, error } = useBOMStore();
 
   useEffect(() => {
     if (!isLoggedIn) {
       router.push("/login");
+    } else {
+      fetchBillOfMaterials();
     }
-  }, [isLoggedIn, router]);
+  }, [isLoggedIn, router, fetchBillOfMaterials]);
 
   const filters = [
     { number: 5, title: "Active" },
@@ -108,14 +112,36 @@ const Page = () => {
 
       {/* Content Area */}
       <div className="w-full h-fit mt-2 bg-white rounded-xl border-2 border-border p-8">
-        <div className="text-center">
-          <div className="text-6xl mb-4">📋</div>
-          <h2 className="text-2xl font-semibold text-zinc-800 mb-2">No Bill of Materials Yet</h2>
-          <p className="text-zinc-600 mb-6">Create your first BOM to define product structures and material requirements</p>
-          <Button className="px-8">
-            <Plus size={20} weight="regular" /> Create Bill of Materials
-          </Button>
-        </div>
+        {loading && <div className="text-center text-lg">Loading...</div>}
+        {error && <div className="text-center text-red-500">{error}</div>}
+        {!loading && !error && billOfMaterials.length === 0 && (
+          <div className="text-center">
+            <div className="text-6xl mb-4">📋</div>
+            <h2 className="text-2xl font-semibold text-zinc-800 mb-2">No Bill of Materials Yet</h2>
+            <p className="text-zinc-600 mb-6">Create your first BOM to define product structures and material requirements</p>
+            <Button className="px-8">
+              <Plus size={20} weight="regular" /> Create Bill of Materials
+            </Button>
+          </div>
+        )}
+        {!loading && !error && billOfMaterials.length > 0 && (
+          <div className="space-y-4">
+            {billOfMaterials.map((bom) => (
+              <div key={bom.id} className="border rounded p-4 flex flex-col md:flex-row md:items-center md:justify-between">
+                <div>
+                  <div className="font-bold">BOM #{bom.id}</div>
+                  <div>Product ID: {bom.productId}</div>
+                  <div>Component ID: {bom.componentId}</div>
+                  <div>Quantity: {bom.quantity}</div>
+                  <div>Created: {bom.createdAt ? String(bom.createdAt) : 'N/A'}</div>
+                </div>
+                <Button className="mt-2 md:mt-0" onClick={() => router.push(`/bom/${bom.id}`)}>
+                  View Details
+                </Button>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );

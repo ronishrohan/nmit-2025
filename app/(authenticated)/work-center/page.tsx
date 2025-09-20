@@ -7,6 +7,7 @@ import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useUserStore } from "@/app/store/userStore";
 import { Dropdown } from "@/app/components/ui/dropdown/Dropdown";
+import { useWorkCenterStore } from "@/app/store/workCenterStore";
 
 type FilterCardProps = {
   number: number | string;
@@ -40,12 +41,15 @@ const Page = () => {
   const router = useRouter();
   const [selectedFilter, setSelectedFilter] = useState<number | null>(null);
   const { isLoggedIn } = useUserStore();
+  const { workCenters, fetchWorkCenters, loading, error } = useWorkCenterStore();
 
   useEffect(() => {
     if (!isLoggedIn) {
       router.push("/login");
+    } else {
+      fetchWorkCenters();
     }
-  }, [isLoggedIn, router]);
+  }, [isLoggedIn, router, fetchWorkCenters]);
 
   const filters = [
     { number: 12, title: "Active" },
@@ -59,8 +63,6 @@ const Page = () => {
 
   return (
     <div className="h-fit w-full p-2 flex flex-col">
-      
-
       {/* Search & Buttons */}
       <div className="w-full flex h-[66px] gap-2 items-center">
         <Button className="px-6 shrink-0 h-[calc(100%-4px)]">
@@ -109,14 +111,36 @@ const Page = () => {
 
       {/* Content Area */}
       <div className="w-full h-fit mt-2 bg-white rounded-xl border-2 border-border p-8">
-        <div className="text-center">
-          <div className="text-6xl mb-4">🏢</div>
-          <h2 className="text-2xl font-semibold text-zinc-800 mb-2">No Work Centers Yet</h2>
-          <p className="text-zinc-600 mb-6">Set up work centers to organize your production facilities and resources</p>
-          <Button className="px-8">
-            <Plus size={20} weight="regular" /> Create Work Center
-          </Button>
-        </div>
+        {loading && <div className="text-center text-lg">Loading...</div>}
+        {error && <div className="text-center text-red-500">{error}</div>}
+        {!loading && !error && workCenters.length === 0 && (
+          <div className="text-center">
+            <div className="text-6xl mb-4">🏢</div>
+            <h2 className="text-2xl font-semibold text-zinc-800 mb-2">No Work Centers Yet</h2>
+            <p className="text-zinc-600 mb-6">Set up work centers to organize your production facilities and resources</p>
+            <Button className="px-8">
+              <Plus size={20} weight="regular" /> Create Work Center
+            </Button>
+          </div>
+        )}
+        {!loading && !error && workCenters.length > 0 && (
+          <div className="space-y-4">
+            {workCenters.map((center) => (
+              <div key={center.id} className="border rounded p-4 flex flex-col md:flex-row md:items-center md:justify-between">
+                <div>
+                  <div className="font-bold">Work Center #{center.id}</div>
+                  <div>Name: {center.name}</div>
+                  <div>Location: {center.location ?? 'N/A'}</div>
+                  <div>Capacity/hr: {center.capacityPerHour ?? 'N/A'}</div>
+                  <div>Created: {center.createdAt ? String(center.createdAt) : 'N/A'}</div>
+                </div>
+                <Button className="mt-2 md:mt-0" onClick={() => router.push(`/work-center/${center.id}`)}>
+                  View Details
+                </Button>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );
