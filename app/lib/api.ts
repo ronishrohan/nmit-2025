@@ -149,6 +149,3 @@ export const handleApiError = (error: any): string => {
   }
   return "An unexpected error occurred";
 };
-
-// Only export these once at the end, and remove any duplicate export statements above
-export { API_CONFIG, apiCall, setAuthToken, removeAuthToken, getAuthToken, handleApiError };
