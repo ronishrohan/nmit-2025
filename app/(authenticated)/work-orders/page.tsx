@@ -30,7 +30,11 @@ const FilterCard = ({
     <button
       onClick={onClick}
       className={`rounded-xl outline-none border-2 gap-2 px-6 h-full w-fit font-medium cursor-pointer duration-100 text-xl flex items-center justify-between transition-colors
-        ${isSelected ? "bg-accent-green/730 border-transparent text-black" : "bg-white hover:bg-zinc-200 border-border text-black/80"}
+        ${
+          isSelected
+            ? "bg-accent-green/730 border-transparent text-black"
+            : "bg-white hover:bg-zinc-200 border-border text-black/80"
+        }
         ${className}`}
     >
       <div>{number}</div>
@@ -56,7 +60,13 @@ const Page = () => {
       fetchManufacturingOrders();
       fetchProducts();
     }
-  }, [isLoggedIn, router, fetchWorkOrders, fetchManufacturingOrders, fetchProducts]);
+  }, [
+    isLoggedIn,
+    router,
+    fetchWorkOrders,
+    fetchManufacturingOrders,
+    fetchProducts,
+  ]);
 
   const filters = [
     { number: 4, title: "Pending" },
@@ -70,11 +80,14 @@ const Page = () => {
 
   const filteredWorkOrders = workOrders.filter((order) => {
     const mo = manufacturingOrders.find((mo: any) => mo.id === order.moId);
-    const product = mo ? products.find((p: any) => p.id === mo.productId) : undefined;
+    const product = mo
+      ? products.find((p: any) => p.id === mo.productId)
+      : undefined;
     // Status filter
     const statusMatch =
       selectedFilter !== null
-        ? order.status.toLowerCase() === filters[selectedFilter].title.toLowerCase().replace(/ /g, "_")
+        ? order.status.toLowerCase() ===
+          filters[selectedFilter].title.toLowerCase().replace(/ /g, "_")
         : true;
     // Mode filter
     let modeMatch = true;
@@ -85,7 +98,8 @@ const Page = () => {
     const searchMatch =
       order.operation.toLowerCase().includes(searchQuery.toLowerCase()) ||
       order.moId.toString().includes(searchQuery) ||
-      (product && product.name.toLowerCase().includes(searchQuery.toLowerCase())) ||
+      (product &&
+        product.name.toLowerCase().includes(searchQuery.toLowerCase())) ||
       (product && product.id.toString().includes(searchQuery));
     return statusMatch && modeMatch && searchMatch;
   });
@@ -93,7 +107,6 @@ const Page = () => {
   return (
     <div className="h-fit w-full p-2 flex flex-col">
       {/* Page Title */}
-      
 
       {/* Search & Buttons */}
       <div className="w-full flex h-[66px] gap-2 items-center">
@@ -144,31 +157,72 @@ const Page = () => {
       </div>
 
       {/* Content Area */}
-      <div className="w-full h-fit mt-2 bg-white rounded-xl border-2 border-border p-8">
-        {loading && <div className="text-center text-lg">Loading...</div>}
-        {error && <div className="text-center text-red-500">{error}</div>}
+      <div className="w-full h-fit mt-4 bg-white rounded-xl overflow-hidden border-2 border-border ">
+        {/* Loading state */}
+        {loading && (
+          <div className="p-6 text-center text-lg text-zinc-600 animate-pulse">
+            Loading work orders...
+          </div>
+        )}
+
+        {/* Error state */}
+        {error && (
+          <div className="p-6 text-center text-red-600 font-medium">
+            {error}
+          </div>
+        )}
+
+        {/* Empty state */}
         {!loading && !error && filteredWorkOrders.length === 0 && (
-          <div className="text-center">
+          <div className="flex flex-col items-center justify-center p-8 text-center">
             <div className="text-6xl mb-4">⚙️</div>
-            <h2 className="text-2xl font-semibold text-zinc-800 mb-2">No Work Orders Yet</h2>
-            <p className="text-zinc-600 mb-6">Create work orders to assign specific operations to work centers and employees</p>
-            <Button className="px-8">
-              <Plus size={20} weight="regular" /> Create Work Order
+            <h2 className="text-2xl font-semibold text-zinc-800 mb-2">
+              No Work Orders Yet
+            </h2>
+            <p className="text-zinc-600 mb-6 max-w-md">
+              Create work orders to assign specific operations to work centers
+              and employees.
+            </p>
+            <Button className="px-8 py-3 text-lg">
+              <Plus size={20} weight="regular" className="mr-2" /> Create Work
+              Order
             </Button>
           </div>
         )}
+
+        {/* Work orders list */}
         {!loading && !error && filteredWorkOrders.length > 0 && (
-          <div className="space-y-4">
+          <div className="divide-y divide-border">
             {filteredWorkOrders.map((order) => (
-              <div key={order.id} className="border rounded p-4 flex flex-col md:flex-row md:items-center md:justify-between">
-                <div>
-                  <div className="font-bold">Work Order #{order.id}</div>
-                  <div>Status: <span className="font-medium">{order.status}</span></div>
-                  <div>Operation: {order.operation}</div>
-                  <div>MO ID: {order.moId}</div>
-                  <div>Created: {order.createdAt ? String(order.createdAt) : 'N/A'}</div>
+              <div
+                key={order.id}
+                className="p-4 flex flex-col gap-3 md:flex-row md:items-center md:justify-between hover:bg-zinc-50 transition-colors"
+              >
+                {/* Left side details */}
+                <div className="space-y-1">
+                  <div className="text-xl font-bold text-zinc-800">
+                    Work Order #{order.id}
+                  </div>
+                  <div className="text-zinc-700">
+                    <span className="font-medium">Status:</span> {order.status}
+                  </div>
+                  <div className="text-zinc-700">
+                    <span className="font-medium">Operation:</span>{" "}
+                    {order.operation}
+                  </div>
+                  <div className="text-zinc-700">
+                    <span className="font-medium">MO ID:</span> {order.moId}
+                  </div>
+                  <div className="text-zinc-500 text-sm">
+                    Created: {order.createdAt ? String(order.createdAt) : "N/A"}
+                  </div>
                 </div>
-                <Button className="mt-2 md:mt-0" onClick={() => router.push(`/work-orders/${order.id}`)}>
+
+                {/* Right side action button */}
+                <Button
+                  className="mt-auto"
+                  onClick={() => router.push(`/work-orders/${order.id}`)}
+                >
                   View Details
                 </Button>
               </div>
