@@ -37,7 +37,7 @@ const SidebarButton = ({
   return (
     <button
       onClick={onClick}
-      className={`rounded-xl ${action && "bg-accent hover:!bg-accent hover:brightness-90 !text-white"} h-[66px] overflow-hidden w-full whitespace-nowrap cursor-pointer flex gap-4 items-center  text-xl outline-none  p-5 ${
+      className={`rounded-xl ${action && "!bg-accent hover:!bg-accent hover:brightness-90 !text-white"} h-[66px] overflow-hidden w-full whitespace-nowrap cursor-pointer flex gap-4 items-center  text-xl outline-none  p-5 ${
         active
           ? "text-zinc-900 bg-accent-green font-medium "
           : "text-inactive font-medium hover:bg-zinc-200 hover:text-zinc-900"
