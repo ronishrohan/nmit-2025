@@ -23,7 +23,7 @@ export const Dropdown: React.FC<DropdownProps> = ({
     <motion.div className="relative inline-block" style={{ width }}>
       <motion.button
         onClick={() => setIsOpen((v) => !v)}
-        className="h-full outline-none whitespace-nowrap px-6 rounded-xl bg-white hover:bg-zinc-100 transition-colors duration-100 flex items-center justify-between border-2 border-border font-medium text-xl w-full"
+        className="h-full shrink-0 outline-none whitespace-nowrap px-6 rounded-xl bg-white hover:bg-zinc-100 transition-colors duration-100 flex items-center justify-between border-2 border-border font-medium text-xl w-full"
       >
         <div className="overflow-hidden" >{currentValue}</div>
         <motion.div
