@@ -14,7 +14,6 @@ const geist_mono = Geist_Mono({
   variable: "--font-geist-mono"
 })
 
-
 export const metadata: Metadata = {
   title: "OutWorks",
   description: "OutWorks",
