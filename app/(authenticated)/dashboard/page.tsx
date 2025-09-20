@@ -66,10 +66,10 @@ const KanbanCard = ({ order }: { order: ManufacturingOrder }) => {
       className="bg-white border-2 w-full items-start text-left cursor-pointer border-border rounded-lg p-4 mb-3 hover:shadow-md transition-shadow"
     >
       <div className="font-medium text-lg mb-2">
-        MO-{order.id?.toString().padStart(6, "0")}
+        {order.product?.name || "Unknown Product"}
       </div>
       <div className="text-sm text-gray-600 mb-1">
-        {order.product?.name || "Unknown Product"}
+        MO-{order.id?.toString().padStart(6, "0")}
       </div>
       <div className="text-sm text-gray-500 mb-2">
         Start: {formatDate(order.scheduleStartDate)}
