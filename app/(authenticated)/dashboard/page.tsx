@@ -42,8 +42,8 @@ const Page = () => {
   return (
     <div className='h-fit w-full p-4 flex flex-col'>
       {/* Search & Buttons */}
-      <div className='w-full flex h-[60px] gap-2'>
-        <Button className='px-6 shrink-0'>
+      <div className='w-full flex h-[60px] gap-2 items-center'>
+        <Button className='px-6 shrink-0 h-[calc(100%-4px)]'>
           <Plus size={20} weight='regular' /> Create Order
         </Button>
         <div className='h-full w-full bg-white rounded-xl group border-2 focus-within:border-accent transition-colors duration-150 border-border flex relative'>
@@ -58,7 +58,7 @@ const Page = () => {
             placeholder='Search'
           />
         </div>
-        <Button variant='secondary' className='px-6 shrink-0'>
+        <Button variant='secondary' className='px-6 h-full shrink-0'>
           <ArrowClockwise size={20} weight='regular' /> Reset
         </Button>
         
