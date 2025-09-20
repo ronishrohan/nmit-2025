@@ -114,11 +114,7 @@ const Page = () => {
 
       {/* Filter Cards */}
       <div className="h-[66px] mt-2 w-full flex gap-2">
-        <Dropdown
-          currentValue={mode}
-          setValue={setMode}
-          values={["All", "My Orders", "Assigned to Me"]}
-        />
+        {/* <Droz */}
         {filters.map((filter, index) => (
           <FilterCard
             key={index}
@@ -137,7 +133,7 @@ const Page = () => {
       </div>
 
       {/* Content Area */}
-      <div className="w-full h-fit mt-2 bg-white rounded-xl border-2 border-border p-8">
+      <div className="w-full h-fit mt-2 bg-white rounded-xl border-2 border-border">
         {loading && <div className="text-center text-lg">Loading...</div>}
         {error && <div className="text-center text-red-500">{error}</div>}
         {!loading && !error && filteredOrders.length === 0 && (
@@ -155,40 +151,49 @@ const Page = () => {
           </div>
         )}
         {!loading && !error && filteredOrders.length > 0 && (
-          <div className="space-y-4">
-            {filteredOrders.map((order) => {
-              const product = products.find((p) => p.id === order.productId);
-              return (
-                <div
-                  key={order.id}
-                  className="border rounded p-4 flex flex-col md:flex-row md:items-center md:justify-between"
-                >
-                  <div>
-                    <div className="font-bold">MO #{order.id}</div>
-                    <div>
-                      Product:{""}
-                      {product
-                        ? `${product.name} (ID: ${product.id})`
-                        : `ID: ${order.productId}`}
-                    </div>
-                    <div>Quantity: {order.quantity}</div>
-                    <div>Status: {order.status}</div>
-                    <div>
-                      Created:{" "}
-                      {order.createdAt ? String(order.createdAt) : "N/A"}
-                    </div>
-                  </div>
-                  <Button
-                    className="mt-2 md:mt-0"
-                    onClick={() => router.push(`/order/${order.id}`)}
-                  >
-                    View Details
-                  </Button>
-                </div>
-              );
-            })}
+  <div className="divide-y divide-border">
+    {filteredOrders.map((order) => {
+      const product = products.find((p) => p.id === order.productId);
+      return (
+        <div
+          key={order.id}
+          className="p-4 flex flex-col gap-3 md:flex-row md:items-center md:justify-between hover:bg-zinc-50 transition-colors"
+        >
+          {/* Left Side Details */}
+          <div className="space-y-1">
+            <div className="text-xl font-bold text-zinc-800">
+              MO #{order.id}
+            </div>
+            <div className="text-zinc-700">
+              <span className="font-medium">Product:</span>{" "}
+              {product
+                ? `${product.name} (ID: ${product.id})`
+                : `ID: ${order.productId}`}
+            </div>
+            <div className="text-zinc-700">
+              <span className="font-medium">Quantity:</span> {order.quantity}
+            </div>
+            <div className="text-zinc-700">
+              <span className="font-medium">Status:</span> {order.status}
+            </div>
+            <div className="text-zinc-500 text-sm">
+              Created: {order.createdAt ? String(order.createdAt) : "N/A"}
+            </div>
           </div>
-        )}
+
+          {/* Right Side Button */}
+          <Button
+            className="mt-auto"
+            onClick={() => router.push(`/order/${order.id}`)}
+          >
+            View Details
+          </Button>
+        </div>
+      );
+    })}
+  </div>
+)}
+
       </div>
     </div>
   );

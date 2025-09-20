@@ -63,7 +63,7 @@ const Page = () => {
       </div>
 
       {/* Content Area */}
-      <div className="w-full h-fit mt-2 bg-white rounded-xl border-2 border-border p-8">
+      <div className="w-full h-fit mt-2 bg-white rounded-xl border-2 border-border ">
         {loading && <div className="text-center text-lg">Loading...</div>}
         {error && <div className="text-center text-red-500">{error}</div>}
         {!loading && !error && filteredBOMs.length === 0 && (
@@ -77,26 +77,49 @@ const Page = () => {
           </div>
         )}
         {!loading && !error && filteredBOMs.length > 0 && (
-          <div className="space-y-4">
-            {filteredBOMs.map((bom) => {
-              const product = products.find((p) => p.id === bom.productId);
-              return (
-                <div key={bom.id} className="border rounded p-4 flex flex-col md:flex-row md:items-center md:justify-between">
-                  <div>
-                    <div className="font-bold">BOM #{bom.id}</div>
-                    <div>Product: {product ? `${product.name} (ID: ${product.id})` : `ID: ${bom.productId}`}</div>
-                    <div>Component ID: {bom.componentId}</div>
-                    <div>Quantity: {bom.quantity}</div>
-                    <div>Created: {bom.createdAt ? String(bom.createdAt) : 'N/A'}</div>
-                  </div>
-                  <Button className="mt-2 md:mt-0" onClick={() => router.push(`/bom/${bom.id}`)}>
-                    View Details
-                  </Button>
-                </div>
-              );
-            })}
+  <div className="divide-y divide-border">
+    {filteredBOMs.map((bom) => {
+      const product = products.find((p) => p.id === bom.productId);
+      return (
+        <div
+          key={bom.id}
+          className="p-4 flex flex-col gap-3 md:flex-row md:items-center md:justify-between hover:bg-zinc-50 transition-colors"
+        >
+          {/* Left Side Details */}
+          <div className="space-y-1">
+            <div className="text-xl font-bold text-zinc-800">
+              BOM #{bom.id}
+            </div>
+            <div className="text-zinc-700">
+              <span className="font-medium">Product:</span>{" "}
+              {product
+                ? `${product.name} (ID: ${product.id})`
+                : `ID: ${bom.productId}`}
+            </div>
+            <div className="text-zinc-700">
+              <span className="font-medium">Component ID:</span> {bom.componentId}
+            </div>
+            <div className="text-zinc-700">
+              <span className="font-medium">Quantity:</span> {bom.quantity}
+            </div>
+            <div className="text-zinc-500 text-sm">
+              Created: {bom.createdAt ? String(bom.createdAt) : "N/A"}
+            </div>
           </div>
-        )}
+
+          {/* Right Side Button */}
+          <Button
+            className="mt-auto"
+            onClick={() => router.push(`/bom/${bom.id}`)}
+          >
+            View Details
+          </Button>
+        </div>
+      );
+    })}
+  </div>
+)}
+
       </div>
     </div>
   );

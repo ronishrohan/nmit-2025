@@ -134,11 +134,11 @@ const Page = () => {
 
       {/* Filter Cards */}
       <div className="h-[66px] mt-2 w-full flex gap-2">
-        <Dropdown
+        {/* <Dropdown
           currentValue={mode}
           setValue={setMode}
           values={["All", "My Work Orders", "By Work Center", "By Employee"]}
-        />
+        /> */}
         {filters.map((filter, index) => (
           <FilterCard
             key={index}
@@ -190,45 +190,45 @@ const Page = () => {
           </div>
         )}
 
-        {/* Work orders list */}
+     
         {!loading && !error && filteredWorkOrders.length > 0 && (
-          <div className="divide-y divide-border">
-            {filteredWorkOrders.map((order) => (
-              <div
-                key={order.id}
-                className="p-4 flex flex-col gap-3 md:flex-row md:items-center md:justify-between hover:bg-zinc-50 transition-colors"
-              >
-                {/* Left side details */}
-                <div className="space-y-1">
-                  <div className="text-xl font-bold text-zinc-800">
-                    Work Order #{order.id}
-                  </div>
-                  <div className="text-zinc-700">
-                    <span className="font-medium">Status:</span> {order.status}
-                  </div>
-                  <div className="text-zinc-700">
-                    <span className="font-medium">Operation:</span>{" "}
-                    {order.operation}
-                  </div>
-                  <div className="text-zinc-700">
-                    <span className="font-medium">MO ID:</span> {order.moId}
-                  </div>
-                  <div className="text-zinc-500 text-sm">
-                    Created: {order.createdAt ? String(order.createdAt) : "N/A"}
-                  </div>
-                </div>
-
-                {/* Right side action button */}
-                <Button
-                  className="mt-auto"
-                  onClick={() => router.push(`/work-orders/${order.id}`)}
-                >
-                  View Details
-                </Button>
-              </div>
-            ))}
+  <div className="divide-y divide-border">
+    {filteredWorkOrders.map((order) => (
+      <div
+        key={order.id}
+        className="p-4 flex flex-col gap-3 md:flex-row md:items-center md:justify-between hover:bg-zinc-50 transition-colors"
+      >
+        {/* Left Side Details */}
+        <div className="space-y-1">
+          <div className="text-xl font-bold text-zinc-800">
+            Work Order #{order.id}
           </div>
-        )}
+          <div className="text-zinc-700">
+            <span className="font-medium">Status:</span> {order.status}
+          </div>
+          <div className="text-zinc-700">
+            <span className="font-medium">Operation:</span> {order.operation}
+          </div>
+          <div className="text-zinc-700">
+            <span className="font-medium">MO ID:</span> {order.moId}
+          </div>
+          <div className="text-zinc-500 text-sm">
+            Created: {order.createdAt ? String(order.createdAt) : "N/A"}
+          </div>
+        </div>
+
+        {/* Right Side Button */}
+        <Button
+          className="mt-auto"
+          onClick={() => router.push(`/work-orders/${order.id}`)}
+        >
+          View Details
+        </Button>
+      </div>
+    ))}
+  </div>
+)}
+
       </div>
     </div>
   );

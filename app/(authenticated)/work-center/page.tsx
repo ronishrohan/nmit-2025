@@ -54,7 +54,7 @@ const Page = () => {
       </div>
 
       {/* Content Area */}
-      <div className="w-full h-fit mt-2 bg-white rounded-xl border-2 border-border p-8">
+      <div className="w-full h-fit mt-2 bg-white rounded-xl border-2 border-border">
         {loading && <div className="text-center text-lg">Loading...</div>}
         {error && <div className="text-center text-red-500">{error}</div>}
         {!loading && !error && filteredWorkCenters.length === 0 && (
@@ -68,23 +68,45 @@ const Page = () => {
           </div>
         )}
         {!loading && !error && filteredWorkCenters.length > 0 && (
-          <div className="space-y-4">
-            {filteredWorkCenters.map((center) => (
-              <div key={center.id} className="border rounded p-4 flex flex-col md:flex-row md:items-center md:justify-between">
-                <div>
-                  <div className="font-bold">Work Center #{center.id}</div>
-                  <div>Name: {center.name}</div>
-                  <div>Location: {center.location ?? 'N/A'}</div>
-                  <div>Capacity/hr: {center.capacityPerHour ?? 'N/A'}</div>
-                  <div>Created: {center.createdAt ? String(center.createdAt) : 'N/A'}</div>
-                </div>
-                <Button className="mt-2 md:mt-0" onClick={() => router.push(`/work-center/${center.id}`)}>
-                  View Details
-                </Button>
-              </div>
-            ))}
+  <div className="divide-y divide-border">
+    {filteredWorkCenters.map((center) => (
+      <div
+        key={center.id}
+        className="p-4 flex flex-col gap-3 md:flex-row md:items-center md:justify-between hover:bg-zinc-50 transition-colors"
+      >
+        {/* Left Side Details */}
+        <div className="space-y-1">
+          <div className="text-xl font-bold text-zinc-800">
+            Work Center #{center.id}
           </div>
-        )}
+          <div className="text-zinc-700">
+            <span className="font-medium">Name:</span> {center.name}
+          </div>
+          <div className="text-zinc-700">
+            <span className="font-medium">Location:</span>{" "}
+            {center.location ?? "N/A"}
+          </div>
+          <div className="text-zinc-700">
+            <span className="font-medium">Capacity/hr:</span>{" "}
+            {center.capacityPerHour ?? "N/A"}
+          </div>
+          <div className="text-zinc-500 text-sm">
+            Created: {center.createdAt ? String(center.createdAt) : "N/A"}
+          </div>
+        </div>
+
+        {/* Right Side Button */}
+        <Button
+          className="mt-auto"
+          onClick={() => router.push(`/work-center/${center.id}`)}
+        >
+          View Details
+        </Button>
+      </div>
+    ))}
+  </div>
+)}
+
       </div>
     </div>
   );
