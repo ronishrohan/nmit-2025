@@ -1,27 +1,63 @@
+"use client";
+
 import React from "react";
+import axios from "axios";
+import { useState } from "react";
+import TextInputField from "../../components/ui/TextInputField";
 
 export default function page() {
+  const [loginId, setLoginId] = useState("");
+  const [password, setPassword] = useState("");
+
+  const handleLogin = async () => {
+    try {
+      const response = await axios.post("/api/login", {
+        loginId: loginId,
+        password: password,
+      });
+
+      console.log("Login successful", response.data);
+    } catch (err: any) {
+      console.log("Login error:", err.message);
+    }
+  };
+
+  const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Enter") {
+      handleLogin();
+    }
+  };
+
   return (
     <>
       <div className="flex flex-col w-full items-center justify-center min-h-screen py-2">
-        <form className="flex flex-col items-center w-full px-8">
-          <input
-            type="email"
+        <div className="flex flex-col items-center w-full px-8">
+          <TextInputField
+            type="text"
             placeholder="Login ID"
-            className="p-3 font-medium bg-card rounded-xl w-full mb-4 lg:w-1/4"
+            value={loginId}
+            onChange={(e) => setLoginId(e.target.value)}
+            onKeyPress={handleKeyPress}
           />
-          <input
+          <TextInputField
             type="password"
             placeholder="Password"
-            className=" p-3 font-medium bg-card rounded-xl w-full mb-1 lg:w-1/4 "
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            onKeyPress={handleKeyPress}
+            className="mb-1"
           />
           <div className="w-full lg:w-1/4 flex justify-end mb-4">
-            <button className="font-medium text-xs text-black/60 cursor-pointer">
+            <button
+              type="button"
+              className="font-medium text-xs text-black/60 cursor-pointer"
+            >
               Forgot Password?
             </button>
           </div>
           <button
-            type="submit"
+            type="button"
+            onClick={handleLogin}
             className="bg-accent font-medium text-white p-3 rounded-xl lg:w-1/4 w-full cursor-pointer"
           >
             Login
@@ -39,7 +75,7 @@ export default function page() {
           >
             Create Account
           </button>
-        </form>
+        </div>
       </div>
     </>
   );

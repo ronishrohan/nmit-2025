@@ -1,30 +1,21 @@
 import React from "react";
+import TextInputField from "../../components/ui/TextInputField";
 
 export default function page() {
   return (
     <>
       <div className="flex flex-col w-full items-center justify-center min-h-screen py-2">
         <form className="flex flex-col items-center w-full px-8">
-          <input
-            type="email"
-            placeholder="Login ID"
-            className="p-3 font-medium bg-card rounded-xl w-full mb-4 lg:w-1/4"
-          />
-          <input
-            type="password"
-            placeholder="Password"
-            className=" p-3 font-medium bg-card rounded-xl w-full mb-1 lg:w-1/4 "
-          />
-          <div className="w-full lg:w-1/4 flex justify-end mb-4">
-            <button className="font-medium text-xs text-black/60 cursor-pointer">
-              Forgot Password?
-            </button>
-          </div>
+          <TextInputField type="email" placeholder="Enter login id" />
+          <TextInputField type="email" placeholder="Enter email id" />
+          <TextInputField type="password" placeholder="Password" />
+          <TextInputField type="password" placeholder="Re-enter password" />
+
           <button
             type="submit"
             className="bg-accent font-medium text-white p-3 rounded-xl lg:w-1/4 w-full cursor-pointer"
           >
-            Login
+            Sign Up
           </button>
 
           <div className="flex items-center w-full lg:w-1/4 my-6">
@@ -37,7 +28,7 @@ export default function page() {
             type="button"
             className="border border-accent font-medium text-black p-3 rounded-xl lg:w-1/4 w-full cursor-pointer hover:bg-gray-50"
           >
-            Create Account
+            Login
           </button>
         </form>
       </div>
