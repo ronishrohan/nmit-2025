@@ -1,17 +1,23 @@
-"use  client"
+"use client"
 import { MagnifyingGlass } from '@phosphor-icons/react/dist/ssr/MagnifyingGlass'
+import { usePathname } from 'next/navigation'
 import React from 'react'
 
-const Topbar = () => {
-  return (
-    <div className='h-[86px] shrink-0 border-b-2  border-b-border  p-4 flex' >
-        {/* <div className='' ></div> */}
-        <div className='h-full w-[350px] bg-white rounded-lg group border-2 focus-within:border-accent transition-colors duration-150 border-border flex relative' >
-            <MagnifyingGlass weight="bold" size={20} className='text-zinc-500 group-focus-within:text-accent h-full mx-3 absolute aspect-square pointer-events-none shrink-0' />
-            <input type="text" className='size-full outline-none pl-10 text-xl font-medium' placeholder='Search' />
-        </div>
-    </div>
-  )
-}
+const titles = {
+  "/dashboard": "Dashboard",
+} as const;
 
-export default Topbar
+const Topbar = () => {
+  const pathname = usePathname();
+  const title = (titles as Record<string, string>)[pathname as string] ?? "";
+
+  return (
+    <div className='h-[86px] shrink-0 border-b-2 border-b-border p-4 flex'>
+      <div className='h-full flex items-center text-2xl font-bold px-4'>
+        {title}
+      </div>
+    </div>
+  );
+};
+
+export default Topbar;
