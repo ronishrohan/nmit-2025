@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import { fetchApi } from "@/app/lib/api";
+import { bomApi } from "@/app/lib/api";
 import {
   BillOfMaterial,
   CreateBillOfMaterialDto,
@@ -57,7 +57,7 @@ interface BOMStore {
   getBOMByProduct: (productId: number) => BillOfMaterial[];
   getBOMByComponent: (componentId: number) => BillOfMaterial[];
   getBOMByOperation: (operation: string) => BillOfMaterial[];
-  searchBOM: (query: string) => BillOfMaterial[];
+  searchBOM: (query: string) => Promise<BillOfMaterial[]>;
   getBOMCount: () => number;
   getUniqueProducts: () => Product[];
   getUniqueComponents: () => Product[];
@@ -125,7 +125,7 @@ export const useBOMStore = create<BOMStore>((set, get) => ({
   fetchBillOfMaterials: async () => {
     set({ loading: true, error: null });
     try {
-      const response = await fetchApi.getTable("billofmaterials");
+      const response = await bomApi.getAll();
       const billOfMaterials = Array.isArray(response.data) ? response.data : [];
       set({ billOfMaterials });
       if (!billOfMaterials.length) {
@@ -143,7 +143,7 @@ export const useBOMStore = create<BOMStore>((set, get) => ({
     try {
       let billOfMaterials = get().billOfMaterials;
       if (!billOfMaterials.length) {
-        const response = await fetchApi.getTable("billofmaterials");
+        const response = await bomApi.getAll();
         billOfMaterials = Array.isArray(response.data) ? response.data : [];
       }
       const bom = billOfMaterials.find((b: any) => b.id === id) || null;
@@ -161,7 +161,7 @@ export const useBOMStore = create<BOMStore>((set, get) => ({
     try {
       let billOfMaterials = get().billOfMaterials;
       if (!billOfMaterials.length) {
-        const response = await fetchApi.getTable("billofmaterials");
+        const response = await bomApi.getAll();
         billOfMaterials = Array.isArray(response.data) ? response.data : [];
       }
       const filtered = billOfMaterials.filter((b: any) => b.productId === productId);
@@ -193,15 +193,23 @@ export const useBOMStore = create<BOMStore>((set, get) => ({
     return get().billOfMaterials.filter((bom) => bom.operation === operation);
   },
 
-  searchBOM: (query) => {
-    const boms = get().billOfMaterials;
-    const lowerQuery = query.toLowerCase();
-    return boms.filter(
-      (bom) =>
-        bom.product.name.toLowerCase().includes(lowerQuery) ||
-        bom.component.name.toLowerCase().includes(lowerQuery) ||
-        bom.operation?.toLowerCase().includes(lowerQuery),
-    );
+  searchBOM: async (query) => {
+    set({ loading: true, error: null });
+    try {
+      const response = await bomApi.search(query);
+      const billOfMaterials = Array.isArray(response.data) ? response.data : [];
+      set({ billOfMaterials });
+      if (!billOfMaterials.length) {
+        set({ error: response.message || "No bill of materials found" });
+      }
+      return billOfMaterials;
+    } catch (error) {
+      set({ error: "Network error while searching bill of materials" });
+      console.error("Search BOM error:", error);
+      return [];
+    } finally {
+      set({ loading: false });
+    }
   },
 
   getBOMCount: () => {

@@ -7,6 +7,7 @@ import {
   PaginatedResponse,
 } from "@/app/types";
 import { fetchApi } from "@/app/lib/api";
+import { woApi } from "@/app/lib/api";
 
 interface WorkOrderStore {
   // State
@@ -46,7 +47,7 @@ interface WorkOrderStore {
   getOrdersByMO: (moId: number) => WorkOrder[];
   getOrdersByWorkCenter: (workCenterId: number) => WorkOrder[];
   getOrdersByAssignee: (assigneeId: number) => WorkOrder[];
-  searchOrders: (query: string) => WorkOrder[];
+  searchOrders: (query: string) => Promise<WorkOrder[]>;
   getOrdersCount: () => number;
   getOrdersCountByStatus: (status: WorkStatus) => number;
   getActiveOrders: () => WorkOrder[];
@@ -112,7 +113,7 @@ export const useWorkOrderStore = create<WorkOrderStore>((set, get) => ({
   fetchWorkOrders: async () => {
     set({ loading: true, error: null });
     try {
-      const response = await fetchApi.getTable("workorders");
+      const response = await woApi.getAll();
       const workOrders = Array.isArray(response.data) ? response.data : [];
       set({ workOrders });
       if (!workOrders.length) {
@@ -130,7 +131,7 @@ export const useWorkOrderStore = create<WorkOrderStore>((set, get) => ({
     try {
       let workOrders = get().workOrders;
       if (!workOrders.length) {
-        const response = await fetchApi.getTable("workorders");
+        const response = await woApi.getAll();
         workOrders = Array.isArray(response.data) ? response.data : [];
       }
       const order = workOrders.find((o: any) => o.id === id) || null;
@@ -148,7 +149,7 @@ export const useWorkOrderStore = create<WorkOrderStore>((set, get) => ({
     try {
       let workOrders = get().workOrders;
       if (!workOrders.length) {
-        const response = await fetchApi.getTable("workorders");
+        const response = await woApi.getAll();
         workOrders = Array.isArray(response.data) ? response.data : [];
       }
       const filtered = workOrders.filter((wo: any) => wo.moId === moId);
@@ -157,6 +158,24 @@ export const useWorkOrderStore = create<WorkOrderStore>((set, get) => ({
     } catch (error) {
       set({ error: "Network error while fetching work orders" });
       console.error("Fetch work orders by MO error:", error);
+    } finally {
+      set({ loading: false });
+    }
+  },
+  searchOrders: async (query) => {
+    set({ loading: true, error: null });
+    try {
+      const response = await woApi.search(query);
+      const workOrders = Array.isArray(response.data) ? response.data : [];
+      set({ workOrders });
+      if (!workOrders.length) {
+        set({ error: response.message || "No work orders found" });
+      }
+      return workOrders;
+    } catch (error) {
+      set({ error: "Network error while searching work orders" });
+      console.error("Search work orders error:", error);
+      return [];
     } finally {
       set({ loading: false });
     }
@@ -185,19 +204,6 @@ export const useWorkOrderStore = create<WorkOrderStore>((set, get) => ({
 
   getOrdersByAssignee: (assigneeId) => {
     return get().workOrders.filter((order) => order.assignedToId === assigneeId);
-  },
-
-  searchOrders: (query) => {
-    const orders = get().workOrders;
-    const lowerQuery = query.toLowerCase();
-    return orders.filter(
-      (order) =>
-        order.operation.toLowerCase().includes(lowerQuery) ||
-        order.comments?.toLowerCase().includes(lowerQuery) ||
-        order.workCenter?.name.toLowerCase().includes(lowerQuery) ||
-        order.assignedTo?.fullName?.toLowerCase().includes(lowerQuery) ||
-        order.status.toLowerCase().includes(lowerQuery),
-    );
   },
 
   getOrdersCount: () => {

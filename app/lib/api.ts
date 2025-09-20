@@ -39,6 +39,24 @@ export const API_CONFIG = {
       ALL: '/fetch/all',
       TABLE: '/fetch',
     },
+    // Products
+    PRODUCTS: {
+      GET_ALL: '/products',
+      GET_BY_ID: '/products',
+      SEARCH: '/products/search',
+      GET_LOW_STOCK: '/products/low-stock',
+      CREATE: '/products',
+      UPDATE: '/products',
+      DELETE: '/products',
+    },
+    // Stock
+    STOCK: {
+      GET_ALL: '/stock',
+      GET_BY_ID: '/stock',
+      LEDGER: '/stock/ledger',
+      LOW_STOCK: '/stock/low-stock',
+      MOVEMENT: '/stock/movement',
+    },
   },
 };
 
@@ -137,66 +155,27 @@ export const profileApi = {
 
 // Manufacturing Order API calls
 export const moApi = {
-  createNew: async (data: { userId: number }) => {
-    return apiCall(API_CONFIG.ENDPOINTS.MO.NEW, {
-      method: 'POST',
-      body: JSON.stringify(data),
-    });
-  },
-
-  saveDraft: async (data: {
-    id?: number;
-    userId: number;
-    productId?: number;
-    quantity?: number;
-    scheduleStartDate?: string;
-    deadline?: string;
-    assignedToId?: number;
-    components?: Array<{ componentId: number; quantity: number }>;
-    workOrders?: Array<{
-      operation: string;
-      assignedToId?: number;
-      workCenterId?: number;
-    }>;
-    status: string;
-  }) => {
-    return apiCall(API_CONFIG.ENDPOINTS.MO.SAVE_DRAFT, {
-      method: 'POST',
-      body: JSON.stringify(data),
-    });
-  },
+  getAll: async () => apiCall('/fetch/manufacturingorders'),
+  getById: async (id: number) => apiCall(`/fetch/manufacturingorders/${id}`),
+  search: async (q: string) => apiCall(`/fetch/manufacturingorders?q=${encodeURIComponent(q)}`),
+  create: async (data: any) => apiCall('/mo/new', { method: 'POST', body: JSON.stringify(data) }),
+  saveDraft: async (data: any) => apiCall('/mo/save-draft', { method: 'POST', body: JSON.stringify(data) }),
 };
 
 // Work Order API calls
 export const woApi = {
-  create: async (data: {
-    moId: number;
-    operation: string;
-    durationMins: number;
-    comments?: string;
-    workCenterId?: number;
-  }) => {
-    return apiCall(API_CONFIG.ENDPOINTS.WO.NEW, {
-      method: 'POST',
-      body: JSON.stringify(data),
-    });
-  },
+  getAll: async () => apiCall('/fetch/workorders'),
+  getById: async (id: number) => apiCall(`/fetch/workorders/${id}`),
+  search: async (q: string) => apiCall(`/fetch/workorders?q=${encodeURIComponent(q)}`),
+  create: async (data: any) => apiCall('/wo/new', { method: 'POST', body: JSON.stringify(data) }),
 };
 
 // Work Center API calls
 export const workCenterApi = {
-  create: async (data: {
-    name: string;
-    location?: string;
-    capacityPerHour?: number;
-    costPerHour?: number;
-    userId: number;
-  }) => {
-    return apiCall(API_CONFIG.ENDPOINTS.WORK_CENTERS.NEW, {
-      method: 'POST',
-      body: JSON.stringify(data),
-    });
-  },
+  getAll: async () => apiCall('/fetch/workcenters'),
+  getById: async (id: number) => apiCall(`/fetch/workcenters/${id}`),
+  search: async (q: string) => apiCall(`/fetch/workcenters?q=${encodeURIComponent(q)}`),
+  create: async (data: any) => apiCall('/workCenters/new', { method: 'POST', body: JSON.stringify(data) }),
 };
 
 // MO Presets API calls
@@ -253,6 +232,39 @@ export const fetchApi = {
   getTable: async (tableName: string) => {
     return apiCall(`${API_CONFIG.ENDPOINTS.FETCH.TABLE}/${tableName}`);
   },
+};
+
+// Product API calls
+export const productApi = {
+  getAll: async () => apiCall('/products'),
+  getById: async (id: number) => apiCall(`/products/${id}`),
+  search: async (q: string, limit = 20) => apiCall(`/products/search?q=${encodeURIComponent(q)}&limit=${limit}`),
+  getLowStock: async (threshold = 10) => apiCall(`/products/low-stock?threshold=${threshold}`),
+  create: async (data: any) => apiCall('/products', { method: 'POST', body: JSON.stringify(data) }),
+  update: async (id: number, data: any) => apiCall(`/products/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
+  delete: async (id: number) => apiCall(`/products/${id}`, { method: 'DELETE' }),
+};
+
+// Stock API calls
+export const stockApi = {
+  getAll: async () => apiCall('/stock'),
+  getById: async (id: number) => apiCall(`/stock/${id}`),
+  getLedger: async () => apiCall('/stock/ledger'),
+  getLedgerByProduct: async (id: number) => apiCall(`/stock/${id}/ledger`),
+  getLowStock: async (threshold = 10) => apiCall(`/stock/low-stock?threshold=${threshold}`),
+  update: async (id: number, data: any) => apiCall(`/stock/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
+  delete: async (id: number) => apiCall(`/stock/${id}`, { method: 'DELETE' }),
+  recordMovement: async (data: any) => apiCall('/stock/movement', { method: 'POST', body: JSON.stringify(data) }),
+};
+
+// BOM API calls
+export const bomApi = {
+  getAll: async () => apiCall('/fetch/billofmaterials'),
+  getById: async (id: number) => apiCall(`/fetch/billofmaterials/${id}`),
+  search: async (q: string) => apiCall(`/fetch/billofmaterials?q=${encodeURIComponent(q)}`),
+  create: async (data: any) => apiCall('/bom/new', { method: 'POST', body: JSON.stringify(data) }),
+  update: async (id: number, data: any) => apiCall(`/bom/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
+  delete: async (id: number) => apiCall(`/bom/${id}`, { method: 'DELETE' }),
 };
 
 // Utility function to set auth token

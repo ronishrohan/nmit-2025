@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import { fetchApi } from "@/app/lib/api";
+import { productApi } from "@/app/lib/api";
 import {
   Product,
   ProductFilters,
@@ -41,7 +41,7 @@ interface ProductStore {
 
   // Utility Actions
   getProductsByUnit: (unit: string) => Product[];
-  searchProducts: (query: string) => Product[];
+  searchProducts: (query: string) => Promise<Product[]>;
   getProductsWithStock: () => Product[];
   getProductsWithBOM: () => Product[];
   getProductsCount: () => number;
@@ -104,7 +104,7 @@ export const useProductStore = create<ProductStore>((set, get) => ({
   fetchProducts: async () => {
     set({ loading: true, error: null });
     try {
-      const response = await fetchApi.getTable("products");
+      const response = await productApi.getAll();
       const products = Array.isArray(response.data) ? response.data : [];
       set({ products });
       if (!products.length) {
@@ -122,7 +122,7 @@ export const useProductStore = create<ProductStore>((set, get) => ({
     try {
       let products = get().products;
       if (!products.length) {
-        const response = await fetchApi.getTable("products");
+        const response = await productApi.getAll();
         products = Array.isArray(response.data) ? response.data : [];
       }
       const product = (products as Product[]).find((p) => p.id === id) || null;
@@ -146,15 +146,20 @@ export const useProductStore = create<ProductStore>((set, get) => ({
     return get().products.filter((product) => product.unit === unit);
   },
 
-  searchProducts: (query) => {
-    const products = get().products;
-    const lowerQuery = query.toLowerCase();
-    return products.filter(
-      (product) =>
-        product.name.toLowerCase().includes(lowerQuery) ||
-        product.description?.toLowerCase().includes(lowerQuery) ||
-        product.unit.toLowerCase().includes(lowerQuery),
-    );
+  searchProducts: async (query) => {
+    set({ loading: true, error: null });
+    try {
+      const response = await productApi.search(query);
+      const products = Array.isArray(response.data) ? response.data : [];
+      set({ products });
+      return products;
+    } catch (error) {
+      set({ error: "Network error while searching products" });
+      console.error("Search products error:", error);
+      return [];
+    } finally {
+      set({ loading: false });
+    }
   },
 
   getProductsWithStock: () => {

@@ -9,7 +9,7 @@ import {
   ApiResponse,
   PaginatedResponse,
 } from "@/app/types";
-import { fetchApi } from "@/app/lib/api";
+import { stockApi } from "@/app/lib/api";
 
 interface StockFilters {
   productId?: number;
@@ -205,7 +205,7 @@ export const useInventoryStore = create<InventoryStore>((set, get) => ({
   fetchProductLedger: async () => {
     set({ loading: true, error: null });
     try {
-      const response = await fetchApi.getTable("productledgers");
+      const response = await stockApi.getLedger();
       const productLedger = Array.isArray(response.data) ? response.data : [];
       set({ productLedger });
       if (!productLedger.length) {
@@ -223,7 +223,7 @@ export const useInventoryStore = create<InventoryStore>((set, get) => ({
     try {
       let productLedger = get().productLedger;
       if (!productLedger.length) {
-        const response = await fetchApi.getTable("productledgers");
+        const response = await stockApi.getLedger();
         productLedger = Array.isArray(response.data) ? response.data : [];
       }
       const filtered = productLedger.filter((entry: any) => entry.productId === productId);
@@ -241,7 +241,7 @@ export const useInventoryStore = create<InventoryStore>((set, get) => ({
   fetchProductStock: async () => {
     set({ loading: true, error: null });
     try {
-      const response = await fetchApi.getTable("productstocks");
+      const response = await stockApi.getAll();
       const productStock = Array.isArray(response.data) ? response.data : [];
       set({ productStock });
       if (!productStock.length) {
@@ -259,7 +259,7 @@ export const useInventoryStore = create<InventoryStore>((set, get) => ({
     try {
       let productStock = get().productStock;
       if (!productStock.length) {
-        const response = await fetchApi.getTable("productstocks");
+        const response = await stockApi.getAll();
         productStock = Array.isArray(response.data) ? response.data : [];
       }
       const stock = productStock.find((s: any) => s.productId === productId) || null;

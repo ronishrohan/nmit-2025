@@ -6,6 +6,7 @@ import {
   PaginatedResponse,
 } from "@/app/types";
 import { fetchApi } from "@/app/lib/api";
+import { workCenterApi } from "@/app/lib/api";
 
 interface WorkCenterStore {
   // State
@@ -41,7 +42,7 @@ interface WorkCenterStore {
 
   // Utility Actions
   getWorkCentersByLocation: (location: string) => WorkCenter[];
-  searchWorkCenters: (query: string) => WorkCenter[];
+  searchWorkCenters: (query: string) => Promise<WorkCenter[]>;
   getActiveWorkCenters: () => WorkCenter[];
   getWorkCentersWithCapacity: () => WorkCenter[];
   getWorkCentersCount: () => number;
@@ -110,7 +111,7 @@ export const useWorkCenterStore = create<WorkCenterStore>((set, get) => ({
   fetchWorkCenters: async () => {
     set({ loading: true, error: null });
     try {
-      const response = await fetchApi.getTable("workcenters");
+      const response = await workCenterApi.getAll();
       const workCenters = Array.isArray(response.data) ? response.data : [];
       set({ workCenters });
       if (!workCenters.length) {
@@ -128,7 +129,7 @@ export const useWorkCenterStore = create<WorkCenterStore>((set, get) => ({
     try {
       let workCenters = get().workCenters;
       if (!workCenters.length) {
-        const response = await fetchApi.getTable("workcenters");
+        const response = await workCenterApi.getAll();
         workCenters = Array.isArray(response.data) ? response.data : [];
       }
       const center = workCenters.find((c: any) => c.id === id) || null;
@@ -149,14 +150,20 @@ export const useWorkCenterStore = create<WorkCenterStore>((set, get) => ({
     );
   },
 
-  searchWorkCenters: (query) => {
-    const centers = get().workCenters;
-    const lowerQuery = query.toLowerCase();
-    return centers.filter(
-      (center) =>
-        center.name.toLowerCase().includes(lowerQuery) ||
-        center.location?.toLowerCase().includes(lowerQuery),
-    );
+  searchWorkCenters: async (query) => {
+    set({ loading: true, error: null });
+    try {
+      const response = await workCenterApi.search(query);
+      const workCenters = Array.isArray(response.data) ? response.data : [];
+      set({ workCenters });
+      return workCenters;
+    } catch (error) {
+      set({ error: "Network error while searching work centers" });
+      console.error("Search work centers error:", error);
+      return [];
+    } finally {
+      set({ loading: false });
+    }
   },
 
   getActiveWorkCenters: () => {

@@ -6,7 +6,7 @@ import {
   ApiResponse,
   PaginatedResponse,
 } from "@/app/types";
-import { fetchApi } from "@/app/lib/api";
+import { moApi } from "@/app/lib/api";
 
 interface ManufacturingOrderStore {
   // State
@@ -45,7 +45,7 @@ interface ManufacturingOrderStore {
   getOrdersByAssignee: (assigneeId: number) => ManufacturingOrder[];
   getOrdersByCreator: (creatorId: number) => ManufacturingOrder[];
   getOrdersByProduct: (productId: number) => ManufacturingOrder[];
-  searchOrders: (query: string) => ManufacturingOrder[];
+  searchOrders: (query: string) => Promise<ManufacturingOrder[]>;
   getOrdersCount: () => number;
   getOrdersCountByStatus: (status: OrderStatus) => number;
 
@@ -108,7 +108,7 @@ export const useMoStore = create<ManufacturingOrderStore>((set, get) => ({
   fetchManufacturingOrders: async () => {
     set({ loading: true, error: null });
     try {
-      const response = await fetchApi.getTable("manufacturingorders");
+      const response = await moApi.getAll();
       const manufacturingOrders = Array.isArray(response.data) ? response.data : [];
       set({ manufacturingOrders });
       if (!manufacturingOrders.length) {
@@ -126,7 +126,7 @@ export const useMoStore = create<ManufacturingOrderStore>((set, get) => ({
     try {
       let manufacturingOrders = get().manufacturingOrders;
       if (!manufacturingOrders.length) {
-        const response = await fetchApi.getTable("manufacturingorders");
+        const response = await moApi.getAll();
         manufacturingOrders = Array.isArray(response.data) ? response.data : [];
       }
       const order = manufacturingOrders.find((o: any) => o.id === id) || null;
@@ -168,16 +168,20 @@ export const useMoStore = create<ManufacturingOrderStore>((set, get) => ({
     );
   },
 
-  searchOrders: (query) => {
-    const orders = get().manufacturingOrders;
-    const lowerQuery = query.toLowerCase();
-    return orders.filter(
-      (order) =>
-        order.product?.name.toLowerCase().includes(lowerQuery) ||
-        order.createdBy.fullName?.toLowerCase().includes(lowerQuery) ||
-        order.assignedTo?.fullName?.toLowerCase().includes(lowerQuery) ||
-        order.status.toLowerCase().includes(lowerQuery),
-    );
+  searchOrders: async (query) => {
+    set({ loading: true, error: null });
+    try {
+      const response = await moApi.search(query);
+      const manufacturingOrders = Array.isArray(response.data) ? response.data : [];
+      set({ manufacturingOrders });
+      return manufacturingOrders;
+    } catch (error) {
+      set({ error: "Network error while searching manufacturing orders" });
+      console.error("Search manufacturing orders error:", error);
+      return [];
+    } finally {
+      set({ loading: false });
+    }
   },
 
   getOrdersCount: () => {
