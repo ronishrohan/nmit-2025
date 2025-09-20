@@ -218,15 +218,15 @@ const Page = () => {
     }
   }, [isLoggedIn, router, fetchManufacturingOrders]);
 
-  const [ordersHidden, setOrdersHidden] = useState(false)
+  const [ordersHidden, setOrdersHidden] = useState(false);
 
   const filters = [
-    { number: 2, title: "Draft" },
-    { number: 5, title: "Confirmed" },
-    { number: 3, title: "In-Progress" },
-    { number: 1, title: "To Close" },
-    { number: 4, title: "Not Assigned" },
-    { number: 6, title: "Late" },
+    { number: 2, title: "draft" },
+    { number: 5, title: "confirmed" },
+    { number: 3, title: "in_progress" },
+    { number: 1, title: "to_close" },
+    { number: 4, title: "not_assigned" },
+    { number: 6, title: "late" },
   ];
   const [mode, setMode] = useState("All");
 
@@ -305,7 +305,9 @@ const Page = () => {
           setValue={setMode}
           values={["All", "My"]}
         />
-        {filters.map((filter, index) => (
+        {viewMode === "list" && <>
+        <div className="flex gap-2">
+          {filters.map((filter, index) => (
           <FilterCard
             key={index}
             number={filter.number}
@@ -320,6 +322,7 @@ const Page = () => {
             }}
           />
         ))}
+        </div></>}
       </div>
       <motion.div
         initial={{ height: "auto" }}
@@ -339,11 +342,14 @@ const Page = () => {
             </div>
             <div className="right-0 top-0 h-full aspect-square shrink-0">
               <button
-                onClick={() => setOrdersHidden(v => !v)}
+                onClick={() => setOrdersHidden((v) => !v)}
                 className="size-full cursor-pointer  rounded-lg border-2 border-border/50  hover:bg-zinc-200 flex items-center justify-center transition-colors duration-100"
               >
-                <motion.div animate={{rotateZ: ordersHidden ? "180deg" : "0deg"}} transition={{duration: 0.2, ease: 'circInOut'}}>
-                  <CaretDoubleUp  size={24} />
+                <motion.div
+                  animate={{ rotateZ: ordersHidden ? "180deg" : "0deg" }}
+                  transition={{ duration: 0.2, ease: "circInOut" }}
+                >
+                  <CaretDoubleUp size={24} />
                 </motion.div>
               </button>
             </div>
@@ -355,17 +361,16 @@ const Page = () => {
           <div className="text-center py-8">No Orders Yet</div>
         )}
         {!loading && !error && filteredData.length > 0 ? (
-  viewMode === "list" ? (
-    <ProductionTable columns={columns} data={filteredData} />
-  ) : (
-    <KanbanView data={data} />
-  )
-) : (
-  <KanbanView data={data} />
-)}
-
+          viewMode === "list" ? (
+            <ProductionTable columns={columns} data={filteredData} />
+          ) : (
+            <KanbanView data={data} />
+          )
+        ) : (
+          <KanbanView data={data} />
+        )}
       </motion.div>
-      <div className="h-[100dvh]" ></div>
+      <div className="h-[100dvh]"></div>
     </div>
   );
 };
