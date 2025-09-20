@@ -5,9 +5,31 @@ import React from "react";
 import { useUserStore } from "@/app/store/userStore";
 const titles: Record<string, string[]> = {
   "/dashboard": ["Dashboard", "See all your important data in one place"],
-  "/order" : ["Order", "Overview of a order"],
-  "/create-order" : ["Create Order", "Create a manufacturing order" ]
+  "/order": ["Order", "Overview of a order"],
+  "/create-order": ["Create Order", "Create a manufacturing order"],
+
+  "/manufacturing-orders": [
+    "Manufacturing Orders",
+    "Manage your manufacturing orders and production planning"
+  ],
+  "/work-orders": [
+    "Work Orders",
+    "Track and manage individual work orders and their operations"
+  ],
+  "/bom": [
+    "Bill of Materials",
+    "Manage product structures, components, and material requirements"
+  ],
+  "/work-center": [
+    "Work Centers",
+    "Manage work centers, machines, and production resources"
+  ],
+  "/stock-ledger": [
+    "Stock Ledger",
+    "Track inventory levels, stock movements, and material transactions"
+  ]
 } as const;
+
 
 const Topbar = () => {
   const pathname = usePathname();

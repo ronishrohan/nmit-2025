@@ -59,11 +59,7 @@ const Page = () => {
 
   return (
     <div className="h-fit w-full p-2 flex flex-col">
-      {/* Page Title */}
-      <div className="mb-4">
-        <h1 className="text-3xl font-bold text-zinc-900">Stock Ledger</h1>
-        <p className="text-zinc-600 mt-1">Track inventory levels, stock movements, and material transactions</p>
-      </div>
+      
 
       {/* Search & Buttons */}
       <div className="w-full flex h-[66px] gap-2 items-center">
