@@ -13,27 +13,27 @@ export async function POST(request: Request) {
       );
     }
 
-    // const res = await axios.post(`${BASE_URL}/auth/login`, {
-    //   loginId,
-    //   password,
-    // });
+    const res = await axios.post(`${BASE_URL}/auth/login`, {
+      loginId,
+      pwd: password,
+    });
 
     // console.log(res.data);
 
-    // return NextResponse.json({
-    //   message: res.data.message,
-    //   user: res.data.user,
-    // });
     return NextResponse.json({
-      message: "message",
-      user: {
-        data: {
-          fullName: "my goat nigga",
-          email: "yoooy@gmail.com",
-          loginId: "halla",
-        },
-      },
+      message: res.data.message,
+      user: res.data.user,
     });
+    // return NextResponse.json({
+    //   message: "message",
+    //   user: {
+    //     data: {
+    //       fullName: "my goat nigga",
+    //       email: "yoooy@gmail.com",
+    //       loginId: "halla",
+    //     },
+    //   },
+    // });
   } catch (error: any) {
     console.log("Login API error:", error.response?.data || error.message);
 

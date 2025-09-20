@@ -80,7 +80,7 @@ export async function POST(request: Request) {
 
     const res = await axios.post(`${BASE_URL}/auth/signup`, {
       loginId,
-      password,
+      pwd: password,
       email,
     });
 
