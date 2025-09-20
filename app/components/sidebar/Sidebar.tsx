@@ -64,12 +64,12 @@ function Sidebar() {
   const router = useRouter();
   const [open, setOpen] = useState(true);
   const pathname = usePathname();
-  const { loginId, name, isLoggedIn,email } = useUserStore();
-  useEffect(()=>{
-    if(!isLoggedIn){
+  const { loginId, name, isLoggedIn, email } = useUserStore();
+  useEffect(() => {
+    if (!isLoggedIn) {
       router.push("/");
     }
-  },[isLoggedIn]);
+  }, [isLoggedIn]);
   if (!isLoggedIn) return null;
   return (
     <motion.div
@@ -81,7 +81,6 @@ function Sidebar() {
         className="h-[84px] shrink-0 overflow-hidden
          text-3xl font-bold border-b-2 flex items-center  relative pl-6 border-border "
       >
-        {/* <div className="size-full z-40 rounded-full border-[20px]   border-white mix-blend-difference absolute  " ></div> */}
         <AnimatePresence>
           {open && (
             <motion.div
