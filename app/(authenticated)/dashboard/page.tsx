@@ -357,11 +357,7 @@ const StockLevelsChart = () => {
                   return null;
                 }}
               />
-              <Bar
-                dataKey="stock"
-                fill="var(--color-stock)"
-                radius={4}
-              />
+              <Bar dataKey="stock" fill="var(--color-stock)" radius={4} />
             </BarChart>
           </ChartContainer>
         ) : (
