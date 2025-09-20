@@ -8,6 +8,7 @@ import { useRouter } from "next/navigation";
 import { useUserStore } from "@/app/store/userStore";
 import { Dropdown } from "@/app/components/ui/dropdown/Dropdown";
 import { Download, FileText } from "@phosphor-icons/react";
+import { useInventoryStore } from "@/app/store/inventoryStore";
 
 type FilterCardProps = {
   number: number | string;
@@ -82,12 +83,16 @@ const Page = () => {
   const router = useRouter();
   const [selectedFilter, setSelectedFilter] = useState<number | null>(null);
   const { isLoggedIn } = useUserStore();
+  const { productLedger, fetchProductLedger, loading, error } = useInventoryStore();
+  const [searchQuery, setSearchQuery] = useState("");
 
   useEffect(() => {
     if (!isLoggedIn) {
       router.push("/login");
+    } else {
+      fetchProductLedger();
     }
-  }, [isLoggedIn, router]);
+  }, [isLoggedIn, router, fetchProductLedger]);
 
   const filters = [
     { number: 15, title: "Production" },
@@ -247,6 +252,38 @@ const Page = () => {
               </Button>
             </div>
           </div>
+        </div>
+      </div>
+
+      {/* Product Ledger Section */}
+      <div className="w-full mt-6">
+        <h2 className="text-xl font-semibold text-zinc-900 mb-3">
+          Product Ledger
+        </h2>
+        <div className="bg-white rounded-xl border-2 border-border p-8">
+          {loading && <div>Loading...</div>}
+          {error && <div className="text-red-500">{error}</div>}
+          {!loading && !error && productLedger.length === 0 && (
+            <div>No Ledger Entries Yet</div>
+          )}
+          {!loading && !error && productLedger.length > 0 && (
+            <div className="space-y-4">
+              {productLedger.filter(entry => {
+                const entryString = `${entry.id} ${entry.productId} ${entry.movementType} ${entry.quantity} ${entry.createdAt ? String(entry.createdAt) : 'N/A'}`;
+                return entryString.toLowerCase().includes(searchQuery.toLowerCase());
+              }).map((entry) => (
+                <div key={entry.id} className="border rounded p-4 flex flex-col md:flex-row md:items-center md:justify-between">
+                  <div>
+                    <div className="font-bold">Entry #{entry.id}</div>
+                    <div>Product ID: {entry.productId}</div>
+                    <div>Movement: {entry.movementType}</div>
+                    <div>Quantity: {entry.quantity}</div>
+                    <div>Date: {entry.createdAt ? String(entry.createdAt) : 'N/A'}</div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       </div>
     </div>

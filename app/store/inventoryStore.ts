@@ -9,6 +9,7 @@ import {
   ApiResponse,
   PaginatedResponse,
 } from "@/app/types";
+import { stockApi } from "@/app/lib/api";
 
 interface StockFilters {
   productId?: number;
@@ -61,51 +62,12 @@ interface InventoryStore {
   ) => void;
 
   // API Actions - Ledger
-  fetchProductLedger: (
-    filters?: ProductLedgerFilters,
-    page?: number,
-    limit?: number,
-  ) => Promise<void>;
+  fetchProductLedger: () => Promise<void>;
   fetchLedgerByProduct: (productId: number) => Promise<void>;
-  createLedgerEntry: (
-    data: CreateProductLedgerDto,
-  ) => Promise<ProductLedger | null>;
 
   // API Actions - Stock
-  fetchProductStock: (
-    filters?: StockFilters,
-    page?: number,
-    limit?: number,
-  ) => Promise<void>;
+  fetchProductStock: () => Promise<void>;
   fetchStockByProduct: (productId: number) => Promise<void>;
-  updateProductStock: (
-    productId: number,
-    quantity: number,
-  ) => Promise<ProductStock | null>;
-  adjustStock: (
-    productId: number,
-    adjustment: number,
-    reason: string,
-  ) => Promise<boolean>;
-
-  // Inventory Movement Actions
-  recordStockIn: (
-    productId: number,
-    quantity: number,
-    referenceType?: string,
-    referenceId?: number,
-  ) => Promise<boolean>;
-  recordStockOut: (
-    productId: number,
-    quantity: number,
-    referenceType?: string,
-    referenceId?: number,
-  ) => Promise<boolean>;
-  transferStock: (
-    fromProductId: number,
-    toProductId: number,
-    quantity: number,
-  ) => Promise<boolean>;
 
   // Utility Actions - Ledger
   getLedgerByMovementType: (type: MovementType) => ProductLedger[];
@@ -240,42 +202,14 @@ export const useInventoryStore = create<InventoryStore>((set, get) => ({
     })),
 
   // API Actions - Ledger
-  fetchProductLedger: async (filters, page = 1, limit = 10) => {
+  fetchProductLedger: async () => {
     set({ loading: true, error: null });
     try {
-      const queryParams = new URLSearchParams();
-
-      if (filters?.movementType)
-        queryParams.append("movementType", filters.movementType);
-      if (filters?.productId)
-        queryParams.append("productId", filters.productId.toString());
-      if (filters?.referenceType)
-        queryParams.append("referenceType", filters.referenceType);
-      if (filters?.dateFrom)
-        queryParams.append("dateFrom", filters.dateFrom.toISOString());
-      if (filters?.dateTo)
-        queryParams.append("dateTo", filters.dateTo.toISOString());
-
-      queryParams.append("page", page.toString());
-      queryParams.append("limit", limit.toString());
-
-      const response = await fetch(`/api/product-ledger?${queryParams}`);
-      const result: ApiResponse<PaginatedResponse<ProductLedger>> =
-        await response.json();
-
-      if (result.success && result.data) {
-        set({
-          productLedger: result.data.data,
-          ledgerPagination: {
-            page: result.data.page,
-            limit: result.data.limit,
-            total: result.data.total,
-            totalPages: result.data.totalPages,
-          },
-          ledgerFilters: filters || {},
-        });
-      } else {
-        set({ error: result.error || "Failed to fetch product ledger" });
+      const response = await stockApi.getLedger();
+      const productLedger = Array.isArray(response.data) ? response.data : [];
+      set({ productLedger });
+      if (!productLedger.length) {
+        set({ error: response.message || "No product ledger found" });
       }
     } catch (error) {
       set({ error: "Network error while fetching product ledger" });
@@ -284,20 +218,17 @@ export const useInventoryStore = create<InventoryStore>((set, get) => ({
       set({ loading: false });
     }
   },
-
   fetchLedgerByProduct: async (productId) => {
     set({ loading: true, error: null });
     try {
-      const response = await fetch(
-        `/api/product-ledger?productId=${productId}`,
-      );
-      const result: ApiResponse<ProductLedger[]> = await response.json();
-
-      if (result.success && result.data) {
-        set({ productLedger: result.data });
-      } else {
-        set({ error: result.error || "Failed to fetch product ledger" });
+      let productLedger = get().productLedger;
+      if (!productLedger.length) {
+        const response = await stockApi.getLedger();
+        productLedger = Array.isArray(response.data) ? response.data : [];
       }
+      const filtered = productLedger.filter((entry: any) => entry.productId === productId);
+      set({ productLedger: filtered });
+      if (!filtered.length) set({ error: "No ledger entries for this product" });
     } catch (error) {
       set({ error: "Network error while fetching product ledger" });
       console.error("Fetch ledger by product error:", error);
@@ -306,70 +237,15 @@ export const useInventoryStore = create<InventoryStore>((set, get) => ({
     }
   },
 
-  createLedgerEntry: async (data) => {
-    set({ loading: true, error: null });
-    try {
-      const response = await fetch("/api/product-ledger", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(data),
-      });
-
-      const result: ApiResponse<ProductLedger> = await response.json();
-
-      if (result.success && result.data) {
-        const newEntry = result.data;
-        set((state) => ({
-          productLedger: [newEntry, ...state.productLedger],
-        }));
-        return newEntry;
-      } else {
-        set({ error: result.error || "Failed to create ledger entry" });
-        return null;
-      }
-    } catch (error) {
-      set({ error: "Network error while creating ledger entry" });
-      console.error("Create ledger entry error:", error);
-      return null;
-    } finally {
-      set({ loading: false });
-    }
-  },
-
   // API Actions - Stock
-  fetchProductStock: async (filters, page = 1, limit = 10) => {
+  fetchProductStock: async () => {
     set({ loading: true, error: null });
     try {
-      const queryParams = new URLSearchParams();
-
-      if (filters?.productId)
-        queryParams.append("productId", filters.productId.toString());
-      if (filters?.lowStock) queryParams.append("lowStock", "true");
-      if (filters?.outOfStock) queryParams.append("outOfStock", "true");
-      if (filters?.search) queryParams.append("search", filters.search);
-
-      queryParams.append("page", page.toString());
-      queryParams.append("limit", limit.toString());
-
-      const response = await fetch(`/api/product-stock?${queryParams}`);
-      const result: ApiResponse<PaginatedResponse<ProductStock>> =
-        await response.json();
-
-      if (result.success && result.data) {
-        set({
-          productStock: result.data.data,
-          stockPagination: {
-            page: result.data.page,
-            limit: result.data.limit,
-            total: result.data.total,
-            totalPages: result.data.totalPages,
-          },
-          stockFilters: filters || {},
-        });
-      } else {
-        set({ error: result.error || "Failed to fetch product stock" });
+      const response = await stockApi.getAll();
+      const productStock = Array.isArray(response.data) ? response.data : [];
+      set({ productStock });
+      if (!productStock.length) {
+        set({ error: response.message || "No product stock found" });
       }
     } catch (error) {
       set({ error: "Network error while fetching product stock" });
@@ -378,18 +254,17 @@ export const useInventoryStore = create<InventoryStore>((set, get) => ({
       set({ loading: false });
     }
   },
-
   fetchStockByProduct: async (productId) => {
     set({ loading: true, error: null });
     try {
-      const response = await fetch(`/api/product-stock/${productId}`);
-      const result: ApiResponse<ProductStock> = await response.json();
-
-      if (result.success && result.data) {
-        set({ currentStock: result.data });
-      } else {
-        set({ error: result.error || "Failed to fetch product stock" });
+      let productStock = get().productStock;
+      if (!productStock.length) {
+        const response = await stockApi.getAll();
+        productStock = Array.isArray(response.data) ? response.data : [];
       }
+      const stock = productStock.find((s: any) => s.productId === productId) || null;
+      set({ currentStock: stock });
+      if (!stock) set({ error: "No stock for this product" });
     } catch (error) {
       set({ error: "Network error while fetching product stock" });
       console.error("Fetch stock by product error:", error);
@@ -398,152 +273,13 @@ export const useInventoryStore = create<InventoryStore>((set, get) => ({
     }
   },
 
-  updateProductStock: async (productId, quantity) => {
-    set({ loading: true, error: null });
-    try {
-      const response = await fetch(`/api/product-stock/${productId}`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ quantity }),
-      });
-
-      const result: ApiResponse<ProductStock> = await response.json();
-
-      if (result.success && result.data) {
-        const updatedStock = result.data;
-        set((state) => ({
-          productStock: state.productStock.map((s) =>
-            s.productId === updatedStock.productId ? updatedStock : s,
-          ),
-          currentStock:
-            state.currentStock?.productId === updatedStock.productId
-              ? updatedStock
-              : state.currentStock,
-        }));
-        return updatedStock;
-      } else {
-        set({ error: result.error || "Failed to update product stock" });
-        return null;
-      }
-    } catch (error) {
-      set({ error: "Network error while updating product stock" });
-      console.error("Update product stock error:", error);
-      return null;
-    } finally {
-      set({ loading: false });
-    }
-  },
-
-  adjustStock: async (productId, adjustment, reason) => {
-    try {
-      const movementType = adjustment > 0 ? MovementType.IN : MovementType.OUT;
-      const quantity = Math.abs(adjustment);
-
-      const ledgerEntry = await get().createLedgerEntry({
-        movementType,
-        quantity,
-        productId,
-        referenceType: "adjustment",
-        referenceId: undefined,
-      });
-
-      if (ledgerEntry) {
-        // Update stock level
-        const currentStock = get().getStockByProduct(productId);
-        const newQuantity = (currentStock?.quantity || 0) + adjustment;
-        await get().updateProductStock(productId, newQuantity);
-        return true;
-      }
-      return false;
-    } catch (error) {
-      console.error("Adjust stock error:", error);
-      return false;
-    }
-  },
-
-  // Inventory Movement Actions
-  recordStockIn: async (productId, quantity, referenceType, referenceId) => {
-    const ledgerEntry = await get().createLedgerEntry({
-      movementType: MovementType.IN,
-      quantity,
-      productId,
-      referenceType,
-      referenceId,
-    });
-
-    if (ledgerEntry) {
-      const currentStock = get().getStockByProduct(productId);
-      const newQuantity = (currentStock?.quantity || 0) + quantity;
-      const updatedStock = await get().updateProductStock(
-        productId,
-        newQuantity,
-      );
-      return !!updatedStock;
-    }
-    return false;
-  },
-
-  recordStockOut: async (productId, quantity, referenceType, referenceId) => {
-    const validation = get().validateStockMovement(
-      productId,
-      quantity,
-      MovementType.OUT,
-    );
-    if (!validation.valid) {
-      set({ error: validation.error });
-      return false;
-    }
-
-    const ledgerEntry = await get().createLedgerEntry({
-      movementType: MovementType.OUT,
-      quantity,
-      productId,
-      referenceType,
-      referenceId,
-    });
-
-    if (ledgerEntry) {
-      const currentStock = get().getStockByProduct(productId);
-      const newQuantity = (currentStock?.quantity || 0) - quantity;
-      const updatedStock = await get().updateProductStock(
-        productId,
-        newQuantity,
-      );
-      return !!updatedStock;
-    }
-    return false;
-  },
-
-  transferStock: async (fromProductId, toProductId, quantity) => {
-    const validation = get().validateStockMovement(
-      fromProductId,
-      quantity,
-      MovementType.OUT,
-    );
-    if (!validation.valid) {
-      set({ error: validation.error });
-      return false;
-    }
-
-    const outSuccess = await get().recordStockOut(
-      fromProductId,
-      quantity,
-      "transfer",
-      toProductId,
-    );
-    if (outSuccess) {
-      const inSuccess = await get().recordStockIn(
-        toProductId,
-        quantity,
-        "transfer",
-        fromProductId,
-      );
-      return inSuccess;
-    }
-    return false;
-  },
+  // Remove all create/update/delete/adjust/record/transfer actions (not supported by backend)
+  createLedgerEntry: async () => null,
+  updateProductStock: async () => null,
+  adjustStock: async () => false,
+  recordStockIn: async () => false,
+  recordStockOut: async () => false,
+  transferStock: async () => false,
 
   // Utility functions - Ledger
   getLedgerByMovementType: (type) => {

@@ -7,6 +7,7 @@ import TextInputField from "../../components/ui/TextInputField";
 import { useRouter } from "next/navigation";
 import { useUserStore } from "@/app/store/userStore";
 import { GearSix } from "@phosphor-icons/react/dist/ssr/GearSix";
+import { backend } from "@/app/util/axios";
 export default function page() {
   const [loginId, setUserLoginId] = useState("");
   const [password, setPassword] = useState("");
@@ -14,7 +15,7 @@ export default function page() {
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
 
-  const { login, setName, setEmail, setRole, setLoginId } = useUserStore();
+  const { login, setUser } = useUserStore();
 
   const validateForm = () => {
     if (!loginId.trim()) {
@@ -38,18 +39,15 @@ export default function page() {
     setIsLoading(true);
 
     try {
-      const response = await axios.post("/api/login", {
+      const response = await backend.post("/auth/login", {
         loginId: loginId,
-        password: password,
+        pwd: password,
       });
 
       console.log("Login successful", response.data);
       // Redirect to dashboard or home page on success
-      setEmail(response.data.user.email);
-      setRole("user");
-      setName(response.data.user.fullName);
-      setLoginId(response.data.user.loginId);
-      login();
+      setUser(response.data.user);
+      login(loginId, password);
       router.push("/dashboard");
     } catch (err: any) {
       console.log("Login error:", err);

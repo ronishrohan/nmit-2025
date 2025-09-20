@@ -1,8 +1,7 @@
 import { create } from "zustand";
+import { productApi } from "@/app/lib/api";
 import {
   Product,
-  CreateProductDto,
-  UpdateProductDto,
   ProductFilters,
   ApiResponse,
   PaginatedResponse,
@@ -37,19 +36,12 @@ interface ProductStore {
   ) => void;
 
   // API Actions
-  fetchProducts: (
-    filters?: ProductFilters,
-    page?: number,
-    limit?: number,
-  ) => Promise<void>;
+  fetchProducts: () => Promise<void>;
   fetchProductById: (id: number) => Promise<void>;
-  createProduct: (data: CreateProductDto) => Promise<Product | null>;
-  updateProductById: (data: UpdateProductDto) => Promise<Product | null>;
-  deleteProduct: (id: number) => Promise<boolean>;
 
   // Utility Actions
   getProductsByUnit: (unit: string) => Product[];
-  searchProducts: (query: string) => Product[];
+  searchProducts: (query: string) => Promise<Product[]>;
   getProductsWithStock: () => Product[];
   getProductsWithBOM: () => Product[];
   getProductsCount: () => number;
@@ -109,34 +101,14 @@ export const useProductStore = create<ProductStore>((set, get) => ({
     })),
 
   // API Actions
-  fetchProducts: async (filters, page = 1, limit = 10) => {
+  fetchProducts: async () => {
     set({ loading: true, error: null });
     try {
-      const queryParams = new URLSearchParams();
-
-      if (filters?.unit) queryParams.append("unit", filters.unit);
-      if (filters?.search) queryParams.append("search", filters.search);
-
-      queryParams.append("page", page.toString());
-      queryParams.append("limit", limit.toString());
-
-      const response = await fetch(`/api/products?${queryParams}`);
-      const result: ApiResponse<PaginatedResponse<Product>> =
-        await response.json();
-
-      if (result.success && result.data) {
-        set({
-          products: result.data.data,
-          pagination: {
-            page: result.data.page,
-            limit: result.data.limit,
-            total: result.data.total,
-            totalPages: result.data.totalPages,
-          },
-          filters: filters || {},
-        });
-      } else {
-        set({ error: result.error || "Failed to fetch products" });
+      const response = await productApi.getAll();
+      const products = Array.isArray(response.data) ? response.data : [];
+      set({ products });
+      if (!products.length) {
+        set({ error: response.message || "No products found" });
       }
     } catch (error) {
       set({ error: "Network error while fetching products" });
@@ -145,18 +117,17 @@ export const useProductStore = create<ProductStore>((set, get) => ({
       set({ loading: false });
     }
   },
-
   fetchProductById: async (id) => {
     set({ loading: true, error: null });
     try {
-      const response = await fetch(`/api/products/${id}`);
-      const result: ApiResponse<Product> = await response.json();
-
-      if (result.success && result.data) {
-        set({ currentProduct: result.data });
-      } else {
-        set({ error: result.error || "Failed to fetch product" });
+      let products = get().products;
+      if (!products.length) {
+        const response = await productApi.getAll();
+        products = Array.isArray(response.data) ? response.data : [];
       }
+      const product = (products as Product[]).find((p) => p.id === id) || null;
+      set({ currentProduct: product });
+      if (!product) set({ error: "Product not found" });
     } catch (error) {
       set({ error: "Network error while fetching product" });
       console.error("Fetch product error:", error);
@@ -165,119 +136,30 @@ export const useProductStore = create<ProductStore>((set, get) => ({
     }
   },
 
-  createProduct: async (data) => {
-    set({ loading: true, error: null });
-    try {
-      const response = await fetch("/api/products", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(data),
-      });
-
-      const result: ApiResponse<Product> = await response.json();
-
-      if (result.success && result.data) {
-        const newProduct = result.data;
-        set((state) => ({
-          products: [...state.products, newProduct],
-        }));
-        return newProduct;
-      } else {
-        set({ error: result.error || "Failed to create product" });
-        return null;
-      }
-    } catch (error) {
-      set({ error: "Network error while creating product" });
-      console.error("Create product error:", error);
-      return null;
-    } finally {
-      set({ loading: false });
-    }
-  },
-
-  updateProductById: async (data) => {
-    set({ loading: true, error: null });
-    try {
-      const response = await fetch(`/api/products/${data.id}`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(data),
-      });
-
-      const result: ApiResponse<Product> = await response.json();
-
-      if (result.success && result.data) {
-        const updatedProduct = result.data;
-        set((state) => ({
-          products: state.products.map((p) =>
-            p.id === updatedProduct.id ? updatedProduct : p,
-          ),
-          currentProduct:
-            state.currentProduct?.id === updatedProduct.id
-              ? updatedProduct
-              : state.currentProduct,
-        }));
-        return updatedProduct;
-      } else {
-        set({ error: result.error || "Failed to update product" });
-        return null;
-      }
-    } catch (error) {
-      set({ error: "Network error while updating product" });
-      console.error("Update product error:", error);
-      return null;
-    } finally {
-      set({ loading: false });
-    }
-  },
-
-  deleteProduct: async (id) => {
-    set({ loading: true, error: null });
-    try {
-      const response = await fetch(`/api/products/${id}`, {
-        method: "DELETE",
-      });
-
-      const result: ApiResponse<void> = await response.json();
-
-      if (result.success) {
-        set((state) => ({
-          products: state.products.filter((p) => p.id !== id),
-          currentProduct:
-            state.currentProduct?.id === id ? null : state.currentProduct,
-        }));
-        return true;
-      } else {
-        set({ error: result.error || "Failed to delete product" });
-        return false;
-      }
-    } catch (error) {
-      set({ error: "Network error while deleting product" });
-      console.error("Delete product error:", error);
-      return false;
-    } finally {
-      set({ loading: false });
-    }
-  },
+  // Remove createProduct, updateProductById, deleteProduct (not supported by backend)
+  createProduct: async () => null,
+  updateProductById: async () => null,
+  deleteProduct: async () => false,
 
   // Utility functions
   getProductsByUnit: (unit) => {
     return get().products.filter((product) => product.unit === unit);
   },
 
-  searchProducts: (query) => {
-    const products = get().products;
-    const lowerQuery = query.toLowerCase();
-    return products.filter(
-      (product) =>
-        product.name.toLowerCase().includes(lowerQuery) ||
-        product.description?.toLowerCase().includes(lowerQuery) ||
-        product.unit.toLowerCase().includes(lowerQuery),
-    );
+  searchProducts: async (query) => {
+    set({ loading: true, error: null });
+    try {
+      const response = await productApi.search(query);
+      const products = Array.isArray(response.data) ? response.data : [];
+      set({ products });
+      return products;
+    } catch (error) {
+      set({ error: "Network error while searching products" });
+      console.error("Search products error:", error);
+      return [];
+    } finally {
+      set({ loading: false });
+    }
   },
 
   getProductsWithStock: () => {

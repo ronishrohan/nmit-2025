@@ -1,13 +1,13 @@
 import { create } from "zustand";
 import {
   WorkOrder,
-  CreateWorkOrderDto,
-  UpdateWorkOrderDto,
   WorkOrderFilters,
   WorkStatus,
   ApiResponse,
   PaginatedResponse,
 } from "@/app/types";
+import { fetchApi } from "@/app/lib/api";
+import { woApi } from "@/app/lib/api";
 
 interface WorkOrderStore {
   // State
@@ -38,26 +38,16 @@ interface WorkOrderStore {
   ) => void;
 
   // API Actions
-  fetchWorkOrders: (
-    filters?: WorkOrderFilters,
-    page?: number,
-    limit?: number,
-  ) => Promise<void>;
+  fetchWorkOrders: () => Promise<void>;
   fetchWorkOrderById: (id: number) => Promise<void>;
   fetchWorkOrdersByMO: (moId: number) => Promise<void>;
-  createWorkOrder: (data: CreateWorkOrderDto) => Promise<WorkOrder | null>;
-  updateWorkOrderById: (data: UpdateWorkOrderDto) => Promise<WorkOrder | null>;
-  deleteWorkOrder: (id: number) => Promise<boolean>;
-  startWorkOrder: (id: number) => Promise<WorkOrder | null>;
-  pauseWorkOrder: (id: number) => Promise<WorkOrder | null>;
-  completeWorkOrder: (id: number) => Promise<WorkOrder | null>;
 
   // Utility Actions
   getOrdersByStatus: (status: WorkStatus) => WorkOrder[];
   getOrdersByMO: (moId: number) => WorkOrder[];
   getOrdersByWorkCenter: (workCenterId: number) => WorkOrder[];
   getOrdersByAssignee: (assigneeId: number) => WorkOrder[];
-  searchOrders: (query: string) => WorkOrder[];
+  searchOrders: (query: string) => Promise<WorkOrder[]>;
   getOrdersCount: () => number;
   getOrdersCountByStatus: (status: WorkStatus) => number;
   getActiveOrders: () => WorkOrder[];
@@ -120,43 +110,14 @@ export const useWorkOrderStore = create<WorkOrderStore>((set, get) => ({
     })),
 
   // API Actions
-  fetchWorkOrders: async (filters, page = 1, limit = 10) => {
+  fetchWorkOrders: async () => {
     set({ loading: true, error: null });
     try {
-      const queryParams = new URLSearchParams();
-
-      if (filters?.status) queryParams.append("status", filters.status);
-      if (filters?.moId) queryParams.append("moId", filters.moId.toString());
-      if (filters?.workCenterId)
-        queryParams.append("workCenterId", filters.workCenterId.toString());
-      if (filters?.assignedToId)
-        queryParams.append("assignedToId", filters.assignedToId.toString());
-      if (filters?.dateFrom)
-        queryParams.append("dateFrom", filters.dateFrom.toISOString());
-      if (filters?.dateTo)
-        queryParams.append("dateTo", filters.dateTo.toISOString());
-      if (filters?.search) queryParams.append("search", filters.search);
-
-      queryParams.append("page", page.toString());
-      queryParams.append("limit", limit.toString());
-
-      const response = await fetch(`/api/work-orders?${queryParams}`);
-      const result: ApiResponse<PaginatedResponse<WorkOrder>> =
-        await response.json();
-
-      if (result.success && result.data) {
-        set({
-          workOrders: result.data.data,
-          pagination: {
-            page: result.data.page,
-            limit: result.data.limit,
-            total: result.data.total,
-            totalPages: result.data.totalPages,
-          },
-          filters: filters || {},
-        });
-      } else {
-        set({ error: result.error || "Failed to fetch work orders" });
+      const response = await woApi.getAll();
+      const workOrders = Array.isArray(response.data) ? response.data : [];
+      set({ workOrders });
+      if (!workOrders.length) {
+        set({ error: response.message || "No work orders found" });
       }
     } catch (error) {
       set({ error: "Network error while fetching work orders" });
@@ -165,18 +126,17 @@ export const useWorkOrderStore = create<WorkOrderStore>((set, get) => ({
       set({ loading: false });
     }
   },
-
   fetchWorkOrderById: async (id) => {
     set({ loading: true, error: null });
     try {
-      const response = await fetch(`/api/work-orders/${id}`);
-      const result: ApiResponse<WorkOrder> = await response.json();
-
-      if (result.success && result.data) {
-        set({ currentWorkOrder: result.data });
-      } else {
-        set({ error: result.error || "Failed to fetch work order" });
+      let workOrders = get().workOrders;
+      if (!workOrders.length) {
+        const response = await woApi.getAll();
+        workOrders = Array.isArray(response.data) ? response.data : [];
       }
+      const order = workOrders.find((o: any) => o.id === id) || null;
+      set({ currentWorkOrder: order });
+      if (!order) set({ error: "Work order not found" });
     } catch (error) {
       set({ error: "Network error while fetching work order" });
       console.error("Fetch work order error:", error);
@@ -184,18 +144,17 @@ export const useWorkOrderStore = create<WorkOrderStore>((set, get) => ({
       set({ loading: false });
     }
   },
-
   fetchWorkOrdersByMO: async (moId) => {
     set({ loading: true, error: null });
     try {
-      const response = await fetch(`/api/work-orders?moId=${moId}`);
-      const result: ApiResponse<WorkOrder[]> = await response.json();
-
-      if (result.success && result.data) {
-        set({ workOrders: result.data });
-      } else {
-        set({ error: result.error || "Failed to fetch work orders for MO" });
+      let workOrders = get().workOrders;
+      if (!workOrders.length) {
+        const response = await woApi.getAll();
+        workOrders = Array.isArray(response.data) ? response.data : [];
       }
+      const filtered = workOrders.filter((wo: any) => wo.moId === moId);
+      set({ workOrders: filtered });
+      if (!filtered.length) set({ error: "No work orders for this MO" });
     } catch (error) {
       set({ error: "Network error while fetching work orders" });
       console.error("Fetch work orders by MO error:", error);
@@ -203,128 +162,32 @@ export const useWorkOrderStore = create<WorkOrderStore>((set, get) => ({
       set({ loading: false });
     }
   },
-
-  createWorkOrder: async (data) => {
+  searchOrders: async (query) => {
     set({ loading: true, error: null });
     try {
-      const response = await fetch("/api/work-orders", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(data),
-      });
-
-      const result: ApiResponse<WorkOrder> = await response.json();
-
-      if (result.success && result.data) {
-        const newOrder = result.data;
-        set((state) => ({
-          workOrders: [...state.workOrders, newOrder],
-        }));
-        return newOrder;
-      } else {
-        set({ error: result.error || "Failed to create work order" });
-        return null;
+      const response = await woApi.search(query);
+      const workOrders = Array.isArray(response.data) ? response.data : [];
+      set({ workOrders });
+      if (!workOrders.length) {
+        set({ error: response.message || "No work orders found" });
       }
+      return workOrders;
     } catch (error) {
-      set({ error: "Network error while creating work order" });
-      console.error("Create work order error:", error);
-      return null;
+      set({ error: "Network error while searching work orders" });
+      console.error("Search work orders error:", error);
+      return [];
     } finally {
       set({ loading: false });
     }
   },
 
-  updateWorkOrderById: async (data) => {
-    set({ loading: true, error: null });
-    try {
-      const response = await fetch(`/api/work-orders/${data.id}`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(data),
-      });
-
-      const result: ApiResponse<WorkOrder> = await response.json();
-
-      if (result.success && result.data) {
-        const updatedOrder = result.data;
-        set((state) => ({
-          workOrders: state.workOrders.map((wo) =>
-            wo.id === updatedOrder.id ? updatedOrder : wo,
-          ),
-          currentWorkOrder:
-            state.currentWorkOrder?.id === updatedOrder.id
-              ? updatedOrder
-              : state.currentWorkOrder,
-        }));
-        return updatedOrder;
-      } else {
-        set({ error: result.error || "Failed to update work order" });
-        return null;
-      }
-    } catch (error) {
-      set({ error: "Network error while updating work order" });
-      console.error("Update work order error:", error);
-      return null;
-    } finally {
-      set({ loading: false });
-    }
-  },
-
-  deleteWorkOrder: async (id) => {
-    set({ loading: true, error: null });
-    try {
-      const response = await fetch(`/api/work-orders/${id}`, {
-        method: "DELETE",
-      });
-
-      const result: ApiResponse<void> = await response.json();
-
-      if (result.success) {
-        set((state) => ({
-          workOrders: state.workOrders.filter((wo) => wo.id !== id),
-          currentWorkOrder:
-            state.currentWorkOrder?.id === id ? null : state.currentWorkOrder,
-        }));
-        return true;
-      } else {
-        set({ error: result.error || "Failed to delete work order" });
-        return false;
-      }
-    } catch (error) {
-      set({ error: "Network error while deleting work order" });
-      console.error("Delete work order error:", error);
-      return false;
-    } finally {
-      set({ loading: false });
-    }
-  },
-
-  startWorkOrder: async (id) => {
-    return get().updateWorkOrderById({
-      id,
-      status: WorkStatus.STARTED,
-      startedAt: new Date(),
-    });
-  },
-
-  pauseWorkOrder: async (id) => {
-    return get().updateWorkOrderById({
-      id,
-      status: WorkStatus.PAUSED,
-    });
-  },
-
-  completeWorkOrder: async (id) => {
-    return get().updateWorkOrderById({
-      id,
-      status: WorkStatus.COMPLETED,
-      completedAt: new Date(),
-    });
-  },
+  // Remove create/update/delete/start/pause/complete actions (not supported by backend)
+  createWorkOrder: async () => null,
+  updateWorkOrderById: async () => null,
+  deleteWorkOrder: async () => false,
+  startWorkOrder: async () => null,
+  pauseWorkOrder: async () => null,
+  completeWorkOrder: async () => null,
 
   // Utility functions
   getOrdersByStatus: (status) => {
@@ -341,19 +204,6 @@ export const useWorkOrderStore = create<WorkOrderStore>((set, get) => ({
 
   getOrdersByAssignee: (assigneeId) => {
     return get().workOrders.filter((order) => order.assignedToId === assigneeId);
-  },
-
-  searchOrders: (query) => {
-    const orders = get().workOrders;
-    const lowerQuery = query.toLowerCase();
-    return orders.filter(
-      (order) =>
-        order.operation.toLowerCase().includes(lowerQuery) ||
-        order.comments?.toLowerCase().includes(lowerQuery) ||
-        order.workCenter?.name.toLowerCase().includes(lowerQuery) ||
-        order.assignedTo?.fullName?.toLowerCase().includes(lowerQuery) ||
-        order.status.toLowerCase().includes(lowerQuery),
-    );
   },
 
   getOrdersCount: () => {

@@ -1,4 +1,5 @@
 import { create } from "zustand";
+import { bomApi } from "@/app/lib/api";
 import {
   BillOfMaterial,
   CreateBillOfMaterialDto,
@@ -44,11 +45,7 @@ interface BOMStore {
   ) => void;
 
   // API Actions
-  fetchBillOfMaterials: (
-    filters?: BOMFilters,
-    page?: number,
-    limit?: number,
-  ) => Promise<void>;
+  fetchBillOfMaterials: () => Promise<void>;
   fetchBOMById: (id: number) => Promise<void>;
   fetchBOMByProduct: (productId: number) => Promise<void>;
   createBOM: (data: CreateBillOfMaterialDto) => Promise<BillOfMaterial | null>;
@@ -60,7 +57,7 @@ interface BOMStore {
   getBOMByProduct: (productId: number) => BillOfMaterial[];
   getBOMByComponent: (componentId: number) => BillOfMaterial[];
   getBOMByOperation: (operation: string) => BillOfMaterial[];
-  searchBOM: (query: string) => BillOfMaterial[];
+  searchBOM: (query: string) => Promise<BillOfMaterial[]>;
   getBOMCount: () => number;
   getUniqueProducts: () => Product[];
   getUniqueComponents: () => Product[];
@@ -125,38 +122,14 @@ export const useBOMStore = create<BOMStore>((set, get) => ({
     })),
 
   // API Actions
-  fetchBillOfMaterials: async (filters, page = 1, limit = 10) => {
+  fetchBillOfMaterials: async () => {
     set({ loading: true, error: null });
     try {
-      const queryParams = new URLSearchParams();
-
-      if (filters?.productId)
-        queryParams.append("productId", filters.productId.toString());
-      if (filters?.componentId)
-        queryParams.append("componentId", filters.componentId.toString());
-      if (filters?.operation) queryParams.append("operation", filters.operation);
-      if (filters?.search) queryParams.append("search", filters.search);
-
-      queryParams.append("page", page.toString());
-      queryParams.append("limit", limit.toString());
-
-      const response = await fetch(`/api/bill-of-materials?${queryParams}`);
-      const result: ApiResponse<PaginatedResponse<BillOfMaterial>> =
-        await response.json();
-
-      if (result.success && result.data) {
-        set({
-          billOfMaterials: result.data.data,
-          pagination: {
-            page: result.data.page,
-            limit: result.data.limit,
-            total: result.data.total,
-            totalPages: result.data.totalPages,
-          },
-          filters: filters || {},
-        });
-      } else {
-        set({ error: result.error || "Failed to fetch bill of materials" });
+      const response = await bomApi.getAll();
+      const billOfMaterials = Array.isArray(response.data) ? response.data : [];
+      set({ billOfMaterials });
+      if (!billOfMaterials.length) {
+        set({ error: response.message || "No bill of materials found" });
       }
     } catch (error) {
       set({ error: "Network error while fetching bill of materials" });
@@ -165,18 +138,17 @@ export const useBOMStore = create<BOMStore>((set, get) => ({
       set({ loading: false });
     }
   },
-
   fetchBOMById: async (id) => {
     set({ loading: true, error: null });
     try {
-      const response = await fetch(`/api/bill-of-materials/${id}`);
-      const result: ApiResponse<BillOfMaterial> = await response.json();
-
-      if (result.success && result.data) {
-        set({ currentBOM: result.data });
-      } else {
-        set({ error: result.error || "Failed to fetch BOM" });
+      let billOfMaterials = get().billOfMaterials;
+      if (!billOfMaterials.length) {
+        const response = await bomApi.getAll();
+        billOfMaterials = Array.isArray(response.data) ? response.data : [];
       }
+      const bom = billOfMaterials.find((b: any) => b.id === id) || null;
+      set({ currentBOM: bom });
+      if (!bom) set({ error: "BOM not found" });
     } catch (error) {
       set({ error: "Network error while fetching BOM" });
       console.error("Fetch BOM error:", error);
@@ -184,18 +156,17 @@ export const useBOMStore = create<BOMStore>((set, get) => ({
       set({ loading: false });
     }
   },
-
   fetchBOMByProduct: async (productId) => {
     set({ loading: true, error: null });
     try {
-      const response = await fetch(`/api/bill-of-materials?productId=${productId}`);
-      const result: ApiResponse<BillOfMaterial[]> = await response.json();
-
-      if (result.success && result.data) {
-        set({ billOfMaterials: result.data });
-      } else {
-        set({ error: result.error || "Failed to fetch BOM for product" });
+      let billOfMaterials = get().billOfMaterials;
+      if (!billOfMaterials.length) {
+        const response = await bomApi.getAll();
+        billOfMaterials = Array.isArray(response.data) ? response.data : [];
       }
+      const filtered = billOfMaterials.filter((b: any) => b.productId === productId);
+      set({ billOfMaterials: filtered });
+      if (!filtered.length) set({ error: "No BOM for this product" });
     } catch (error) {
       set({ error: "Network error while fetching BOM" });
       console.error("Fetch BOM by product error:", error);
@@ -203,137 +174,11 @@ export const useBOMStore = create<BOMStore>((set, get) => ({
       set({ loading: false });
     }
   },
-
-  createBOM: async (data) => {
-    set({ loading: true, error: null });
-    try {
-      const response = await fetch("/api/bill-of-materials", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(data),
-      });
-
-      const result: ApiResponse<BillOfMaterial> = await response.json();
-
-      if (result.success && result.data) {
-        const newBOM = result.data;
-        set((state) => ({
-          billOfMaterials: [...state.billOfMaterials, newBOM],
-        }));
-        return newBOM;
-      } else {
-        set({ error: result.error || "Failed to create BOM" });
-        return null;
-      }
-    } catch (error) {
-      set({ error: "Network error while creating BOM" });
-      console.error("Create BOM error:", error);
-      return null;
-    } finally {
-      set({ loading: false });
-    }
-  },
-
-  updateBOMById: async (data) => {
-    set({ loading: true, error: null });
-    try {
-      const response = await fetch(`/api/bill-of-materials/${data.id}`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(data),
-      });
-
-      const result: ApiResponse<BillOfMaterial> = await response.json();
-
-      if (result.success && result.data) {
-        const updatedBOM = result.data;
-        set((state) => ({
-          billOfMaterials: state.billOfMaterials.map((b) =>
-            b.id === updatedBOM.id ? updatedBOM : b,
-          ),
-          currentBOM:
-            state.currentBOM?.id === updatedBOM.id
-              ? updatedBOM
-              : state.currentBOM,
-        }));
-        return updatedBOM;
-      } else {
-        set({ error: result.error || "Failed to update BOM" });
-        return null;
-      }
-    } catch (error) {
-      set({ error: "Network error while updating BOM" });
-      console.error("Update BOM error:", error);
-      return null;
-    } finally {
-      set({ loading: false });
-    }
-  },
-
-  deleteBOM: async (id) => {
-    set({ loading: true, error: null });
-    try {
-      const response = await fetch(`/api/bill-of-materials/${id}`, {
-        method: "DELETE",
-      });
-
-      const result: ApiResponse<void> = await response.json();
-
-      if (result.success) {
-        set((state) => ({
-          billOfMaterials: state.billOfMaterials.filter((b) => b.id !== id),
-          currentBOM:
-            state.currentBOM?.id === id ? null : state.currentBOM,
-        }));
-        return true;
-      } else {
-        set({ error: result.error || "Failed to delete BOM" });
-        return false;
-      }
-    } catch (error) {
-      set({ error: "Network error while deleting BOM" });
-      console.error("Delete BOM error:", error);
-      return false;
-    } finally {
-      set({ loading: false });
-    }
-  },
-
-  createBulkBOM: async (data) => {
-    set({ loading: true, error: null });
-    try {
-      const response = await fetch("/api/bill-of-materials/bulk", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ items: data }),
-      });
-
-      const result: ApiResponse<BillOfMaterial[]> = await response.json();
-
-      if (result.success && result.data) {
-        const newBOMs = result.data;
-        set((state) => ({
-          billOfMaterials: [...state.billOfMaterials, ...newBOMs],
-        }));
-        return newBOMs;
-      } else {
-        set({ error: result.error || "Failed to create bulk BOM" });
-        return null;
-      }
-    } catch (error) {
-      set({ error: "Network error while creating bulk BOM" });
-      console.error("Create bulk BOM error:", error);
-      return null;
-    } finally {
-      set({ loading: false });
-    }
-  },
+  // Remove create/update/delete/bulk actions (not supported by backend)
+  createBOM: async () => null,
+  updateBOMById: async () => null,
+  deleteBOM: async () => false,
+  createBulkBOM: async () => null,
 
   // Utility functions
   getBOMByProduct: (productId) => {
@@ -348,15 +193,23 @@ export const useBOMStore = create<BOMStore>((set, get) => ({
     return get().billOfMaterials.filter((bom) => bom.operation === operation);
   },
 
-  searchBOM: (query) => {
-    const boms = get().billOfMaterials;
-    const lowerQuery = query.toLowerCase();
-    return boms.filter(
-      (bom) =>
-        bom.product.name.toLowerCase().includes(lowerQuery) ||
-        bom.component.name.toLowerCase().includes(lowerQuery) ||
-        bom.operation?.toLowerCase().includes(lowerQuery),
-    );
+  searchBOM: async (query) => {
+    set({ loading: true, error: null });
+    try {
+      const response = await bomApi.search(query);
+      const billOfMaterials = Array.isArray(response.data) ? response.data : [];
+      set({ billOfMaterials });
+      if (!billOfMaterials.length) {
+        set({ error: response.message || "No bill of materials found" });
+      }
+      return billOfMaterials;
+    } catch (error) {
+      set({ error: "Network error while searching bill of materials" });
+      console.error("Search BOM error:", error);
+      return [];
+    } finally {
+      set({ loading: false });
+    }
   },
 
   getBOMCount: () => {

@@ -14,6 +14,7 @@ import { Dropdown } from "@/app/components/ui/dropdown/Dropdown";
 import { useRouter } from "next/navigation";
 import { useUserStore } from "@/app/store/userStore";
 import { ArrowUpRight } from "@phosphor-icons/react/dist/ssr/ArrowUpRight";
+import { useMoStore } from "@/app/store/moStore";
 import { CaretDoubleUp } from "@phosphor-icons/react/dist/ssr/CaretDoubleUp";
 
 type FilterCardProps = {
@@ -204,13 +205,18 @@ const KanbanView = ({ data }: { data: Item[] }) => {
 const Page = () => {
   const router = useRouter();
   const [selectedFilter, setSelectedFilter] = useState<number | null>(null);
-  const [viewMode, setViewMode] = useState<"list" | "kanban">("list");
+  const [searchQuery, setSearchQuery] = useState("");
+  const [viewMode, setViewMode] = useState("list");
   const { isLoggedIn } = useUserStore();
+  const { manufacturingOrders, fetchManufacturingOrders, loading, error } =
+    useMoStore();
   useEffect(() => {
-    getOrders().then((data) => {
-      console.log(data);
-    });
-  }, []);
+    if (!isLoggedIn) {
+      router.push("/login");
+    } else {
+      fetchManufacturingOrders();
+    }
+  }, [isLoggedIn, router, fetchManufacturingOrders]);
 
   const [ordersHidden, setOrdersHidden] = useState(false)
 
@@ -223,6 +229,30 @@ const Page = () => {
     { number: 6, title: "Late" },
   ];
   const [mode, setMode] = useState("All");
+
+  // Prepare columns for the table
+  const columns: Column[] = [
+    { key: "id", label: "Order ID" },
+    { key: "status", label: "Status" },
+    { key: "productId", label: "Product ID" },
+    { key: "quantity", label: "Quantity" },
+    { key: "createdAt", label: "Created At" },
+  ];
+
+  // Prepare data for the table
+  const filteredData = manufacturingOrders
+    .filter((order) => {
+      if (selectedFilter === null) return true;
+      return order.status === filters[selectedFilter].title;
+    })
+    .filter((order) => {
+      return (
+        order.id?.toString().includes(searchQuery) ||
+        order.productId?.toString().includes(searchQuery) ||
+        order.status?.toString().includes(searchQuery) ||
+        order.createdAt?.toString().includes(searchQuery)
+      );
+    });
 
   return (
     <div className="h-fit w-full p-2 flex flex-col">
@@ -244,6 +274,8 @@ const Page = () => {
             type="text"
             className="size-full outline-none pl-10 text-xl font-medium"
             placeholder="Search"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
           />
         </div>
         <Button variant="secondary" className="px-6 h-full shrink-0">
@@ -317,11 +349,21 @@ const Page = () => {
             </div>
           </div>
         </div>
-        {viewMode === "list" ? (
-          <ProductionTable columns={columns} data={data} />
-        ) : (
-          <KanbanView data={data} />
+        {loading && <div className="text-center text-lg">Loading...</div>}
+        {error && <div className="text-center text-red-500">{error}</div>}
+        {!loading && !error && filteredData.length === 0 && (
+          <div className="text-center py-8">No Orders Yet</div>
         )}
+        {!loading && !error && filteredData.length > 0 ? (
+  viewMode === "list" ? (
+    <ProductionTable columns={columns} data={filteredData} />
+  ) : (
+    <KanbanView data={data} />
+  )
+) : (
+  <KanbanView data={data} />
+)}
+
       </motion.div>
       <div className="h-[100dvh]" ></div>
     </div>

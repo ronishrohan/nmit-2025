@@ -7,6 +7,8 @@ import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useUserStore } from "@/app/store/userStore";
 import { Dropdown } from "@/app/components/ui/dropdown/Dropdown";
+import { useMoStore } from "@/app/store/moStore";
+import { useProductStore } from "@/app/store/productStore";
 
 type FilterCardProps = {
   number: number | string;
@@ -26,11 +28,11 @@ const FilterCard = ({
   return (
     <button
       onClick={onClick}
-      className={`rounded-xl outline-none border-2 gap-2 px-6 h-full w-fit font-medium cursor-pointer duration-100 text-xl flex items-center justify-between transition-colors
+      className={`rounded-xl outline-none border-2 gap-2 px-6 h-full w-fit font-medium cursor-pointer duration-100 text-xl flex items-center justify-between
         ${isSelected ? "bg-accent-green/730 border-transparent text-black" : "bg-white hover:bg-zinc-200 border-border text-black/80"}
         ${className}`}
     >
-      <div>{number} ok ho</div>
+      <div>{number}</div>
       <div>{title}</div>
     </button>
   );
@@ -39,13 +41,20 @@ const FilterCard = ({
 const Page = () => {
   const router = useRouter();
   const [selectedFilter, setSelectedFilter] = useState<number | null>(null);
+  const [searchQuery, setSearchQuery] = useState("");
   const { isLoggedIn } = useUserStore();
+  const { manufacturingOrders, fetchManufacturingOrders, loading, error } =
+    useMoStore();
+  const { products, fetchProducts } = useProductStore();
 
   useEffect(() => {
     if (!isLoggedIn) {
       router.push("/login");
+    } else {
+      fetchManufacturingOrders();
+      fetchProducts(); // Fetch products for name lookup
     }
-  }, [isLoggedIn, router]);
+  }, [isLoggedIn, router, fetchManufacturingOrders, fetchProducts]);
 
   const filters = [
     { number: 3, title: "Draft" },
@@ -57,10 +66,23 @@ const Page = () => {
   ];
   const [mode, setMode] = useState("All");
 
+  const filteredOrders = manufacturingOrders.filter((order) => {
+    const product = products.find((p) => p.id === order.productId);
+    const statusMatch =
+      selectedFilter !== null
+        ? order.status === filters[selectedFilter].title
+        : true;
+    const searchMatch =
+      order.id.toString().includes(searchQuery) ||
+      order.productId?.toString().includes(searchQuery) ||
+      (product &&
+        product.name.toLowerCase().includes(searchQuery.toLowerCase())) ||
+      order.quantity?.toString().includes(searchQuery);
+    return statusMatch && searchMatch;
+  });
+
   return (
     <div className="h-fit w-full p-2 flex flex-col">
-
-
       {/* Search & Buttons */}
       <div className="w-full flex h-[66px] gap-2 items-center">
         <Button className="px-6 shrink-0 h-[calc(100%-4px)]">
@@ -76,6 +98,8 @@ const Page = () => {
             type="text"
             className="size-full outline-none pl-10 text-xl font-medium"
             placeholder="Search manufacturing orders..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
           />
         </div>
         <Button variant="secondary" className="px-6 h-full shrink-0">
@@ -109,19 +133,57 @@ const Page = () => {
 
       {/* Content Area */}
       <div className="w-full h-fit mt-2 bg-white rounded-xl border-2 border-border p-8">
-        <div className="text-center">
-          <div className="text-6xl mb-4">🏭</div>
-          <h2 className="text-2xl font-semibold text-zinc-800 mb-2">
-            No Manufacturing Orders Yet
-          </h2>
-          <p className="text-zinc-600 mb-6">
-            Start by creating your first manufacturing order to track production
-            processes
-          </p>
-          <Button className="px-8">
-            <Plus size={20} weight="regular" /> Create Manufacturing Order
-          </Button>
-        </div>
+        {loading && <div className="text-center text-lg">Loading...</div>}
+        {error && <div className="text-center text-red-500">{error}</div>}
+        {!loading && !error && filteredOrders.length === 0 && (
+          <div className="text-center">
+            <div className="text-6xl mb-4">📦</div>
+            <h2 className="text-2xl font-semibold text-zinc-800 mb-2">
+              No Manufacturing Orders Yet
+            </h2>
+            <p className="text-zinc-600 mb-6">
+              Create your first manufacturing order to get started
+            </p>
+            <Button className="px-8">
+              <Plus size={20} weight="regular" /> Create Manufacturing Order
+            </Button>
+          </div>
+        )}
+        {!loading && !error && filteredOrders.length > 0 && (
+          <div className="space-y-4">
+            {filteredOrders.map((order) => {
+              const product = products.find((p) => p.id === order.productId);
+              return (
+                <div
+                  key={order.id}
+                  className="border rounded p-4 flex flex-col md:flex-row md:items-center md:justify-between"
+                >
+                  <div>
+                    <div className="font-bold">MO #{order.id}</div>
+                    <div>
+                      Product:{" "}
+                      {product
+                        ? `${product.name} (ID: ${product.id})`
+                        : `ID: ${order.productId}`}
+                    </div>
+                    <div>Quantity: {order.quantity}</div>
+                    <div>Status: {order.status}</div>
+                    <div>
+                      Created:{" "}
+                      {order.createdAt ? String(order.createdAt) : "N/A"}
+                    </div>
+                  </div>
+                  <Button
+                    className="mt-2 md:mt-0"
+                    onClick={() => router.push(`/order/${order.id}`)}
+                  >
+                    View Details
+                  </Button>
+                </div>
+              );
+            })}
+          </div>
+        )}
       </div>
     </div>
   );
