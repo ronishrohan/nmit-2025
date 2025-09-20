@@ -342,8 +342,8 @@ const Page = () => {
         animate={{ height: ordersHidden ? "72px" : "auto" }}
         className="w-full max-h-[50vh] border-2 border-border mt-2 bg-white flex flex-col rounded-xl overflow-hidden"
       >
-        <div className="text-3xl p-4 px-6 flex w-full justify-between h-[70px] items-center relative">
-          <div>Manufacturing Orders</div>{" "}
+        <div className="text-2xl p-4 px-6 flex w-full justify-between h-[70px] items-center relative">
+          <div className="font-medium">Manufacturing Orders</div>{" "}
           <div className="flex h-[70px] w-fit absolute right-0 p-2 gap-2">
             <div className="right-0 top-0 h-full aspect-square shrink-0">
               <button
