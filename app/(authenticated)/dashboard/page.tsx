@@ -49,6 +49,7 @@ const FilterCard = ({
 const Page = () => {
   const router = useRouter();
   const [selectedFilter, setSelectedFilter] = useState<number | null>(null);
+  const [searchQuery, setSearchQuery] = useState("");
   const { isLoggedIn } = useUserStore();
   const { manufacturingOrders, fetchManufacturingOrders, loading, error } =
     useMoStore();
@@ -80,13 +81,19 @@ const Page = () => {
   ];
 
   // Prepare data for the table
-  const data = manufacturingOrders.map((order) => ({
-    id: order.id,
-    status: order.status,
-    productId: order.productId ?? "N/A",
-    quantity: order.quantity ?? "N/A",
-    createdAt: order.createdAt ? String(order.createdAt) : "N/A",
-  }));
+  const filteredData = manufacturingOrders
+    .filter((order) => {
+      if (selectedFilter === null) return true;
+      return order.status === filters[selectedFilter].title;
+    })
+    .filter((order) => {
+      return (
+        order.id?.toString().includes(searchQuery) ||
+        order.productId?.toString().includes(searchQuery) ||
+        order.status?.toString().includes(searchQuery) ||
+        order.createdAt?.toString().includes(searchQuery)
+      );
+    });
 
   return (
     <div className="h-fit w-full p-2 flex flex-col">
@@ -108,6 +115,8 @@ const Page = () => {
             type="text"
             className="size-full outline-none pl-10 text-xl font-medium"
             placeholder="Search"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
           />
         </div>
         <Button variant="secondary" className="px-6 h-full shrink-0">
@@ -152,11 +161,11 @@ const Page = () => {
         </div>
         {loading && <div className="text-center text-lg">Loading...</div>}
         {error && <div className="text-center text-red-500">{error}</div>}
-        {!loading && !error && data.length === 0 && (
+        {!loading && !error && filteredData.length === 0 && (
           <div className="text-center py-8">No Orders Yet</div>
         )}
-        {!loading && !error && data.length > 0 && (
-          <ProductionTable columns={columns} data={data} />
+        {!loading && !error && filteredData.length > 0 && (
+          <ProductionTable columns={columns} data={filteredData} />
         )}
       </div>
     </div>

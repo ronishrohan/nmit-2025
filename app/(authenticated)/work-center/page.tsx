@@ -9,37 +9,9 @@ import { useUserStore } from "@/app/store/userStore";
 import { Dropdown } from "@/app/components/ui/dropdown/Dropdown";
 import { useWorkCenterStore } from "@/app/store/workCenterStore";
 
-type FilterCardProps = {
-  number: number | string;
-  title: string;
-  isSelected?: boolean;
-  onClick?: () => void;
-  className?: string;
-};
-
-const FilterCard = ({
-  number,
-  title,
-  isSelected,
-  onClick,
-  className,
-}: FilterCardProps) => {
-  return (
-    <button
-      onClick={onClick}
-      className={`rounded-xl outline-none border-2 gap-2 px-6 h-full w-fit font-medium cursor-pointer duration-100 text-xl flex items-center justify-between transition-colors
-        ${isSelected ? "bg-accent-green/730 border-transparent text-black" : "bg-white hover:bg-zinc-200 border-border text-black/80"}
-        ${className}`}
-    >
-      <div>{number}</div>
-      <div>{title}</div>
-    </button>
-  );
-};
-
 const Page = () => {
   const router = useRouter();
-  const [selectedFilter, setSelectedFilter] = useState<number | null>(null);
+  const [searchTerm, setSearchTerm] = useState("");
   const { isLoggedIn } = useUserStore();
   const { workCenters, fetchWorkCenters, loading, error } = useWorkCenterStore();
 
@@ -51,15 +23,9 @@ const Page = () => {
     }
   }, [isLoggedIn, router, fetchWorkCenters]);
 
-  const filters = [
-    { number: 12, title: "Active" },
-    { number: 3, title: "Inactive" },
-    { number: 2, title: "Maintenance" },
-    { number: 7, title: "Available" },
-    { number: 4, title: "Busy" },
-    { number: 1, title: "Out of Service" },
-  ];
-  const [mode, setMode] = useState("All");
+  const filteredWorkCenters = workCenters.filter(center =>
+    center.name.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
   return (
     <div className="h-fit w-full p-2 flex flex-col">
@@ -78,6 +44,8 @@ const Page = () => {
             type="text"
             className="size-full outline-none pl-10 text-xl font-medium"
             placeholder="Search work centers..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
           />
         </div>
         <Button variant="secondary" className="px-6 h-full shrink-0">
@@ -85,47 +53,23 @@ const Page = () => {
         </Button>
       </div>
 
-      {/* Filter Cards */}
-      <div className="h-[66px] mt-2 w-full flex gap-2">
-        <Dropdown
-          currentValue={mode}
-          setValue={setMode}
-          values={["All", "By Department", "By Type", "By Location"]}
-        />
-        {filters.map((filter, index) => (
-          <FilterCard
-            key={index}
-            number={filter.number}
-            title={filter.title}
-            isSelected={selectedFilter === index}
-            onClick={() => {
-              if (selectedFilter == index) {
-                setSelectedFilter(null);
-              } else {
-                setSelectedFilter(index);
-              }
-            }}
-          />
-        ))}
-      </div>
-
       {/* Content Area */}
       <div className="w-full h-fit mt-2 bg-white rounded-xl border-2 border-border p-8">
         {loading && <div className="text-center text-lg">Loading...</div>}
         {error && <div className="text-center text-red-500">{error}</div>}
-        {!loading && !error && workCenters.length === 0 && (
+        {!loading && !error && filteredWorkCenters.length === 0 && (
           <div className="text-center">
             <div className="text-6xl mb-4">🏢</div>
-            <h2 className="text-2xl font-semibold text-zinc-800 mb-2">No Work Centers Yet</h2>
-            <p className="text-zinc-600 mb-6">Set up work centers to organize your production facilities and resources</p>
-            <Button className="px-8">
+            <h2 className="text-2xl font-semibold text-zinc-800 mb-2">No Work Centers Found</h2>
+            <p className="text-zinc-600 mb-6">Try adjusting your search term or create a new work center</p>
+            <Button className="px-8" onClick={() => router.push('/work-center/new')}>
               <Plus size={20} weight="regular" /> Create Work Center
             </Button>
           </div>
         )}
-        {!loading && !error && workCenters.length > 0 && (
+        {!loading && !error && filteredWorkCenters.length > 0 && (
           <div className="space-y-4">
-            {workCenters.map((center) => (
+            {filteredWorkCenters.map((center) => (
               <div key={center.id} className="border rounded p-4 flex flex-col md:flex-row md:items-center md:justify-between">
                 <div>
                   <div className="font-bold">Work Center #{center.id}</div>

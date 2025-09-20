@@ -40,6 +40,7 @@ const FilterCard = ({
 const Page = () => {
   const router = useRouter();
   const [selectedFilter, setSelectedFilter] = useState<number | null>(null);
+  const [searchQuery, setSearchQuery] = useState("");
   const { isLoggedIn } = useUserStore();
   const { manufacturingOrders, fetchManufacturingOrders, loading, error } = useMoStore();
 
@@ -61,6 +62,12 @@ const Page = () => {
   ];
   const [mode, setMode] = useState("All");
 
+  const filteredOrders = manufacturingOrders.filter(order => {
+    const statusMatch = selectedFilter !== null ? order.status === filters[selectedFilter].title : true;
+    const searchMatch = order.id.toString().includes(searchQuery) || order.productId?.toString().includes(searchQuery) || order.quantity?.toString().includes(searchQuery);
+    return statusMatch && searchMatch;
+  });
+
   return (
     <div className="h-fit w-full p-2 flex flex-col">
       {/* Search & Buttons */}
@@ -78,6 +85,8 @@ const Page = () => {
             type="text"
             className="size-full outline-none pl-10 text-xl font-medium"
             placeholder="Search manufacturing orders..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
           />
         </div>
         <Button variant="secondary" className="px-6 h-full shrink-0">
@@ -113,7 +122,7 @@ const Page = () => {
       <div className="w-full h-fit mt-2 bg-white rounded-xl border-2 border-border p-8">
         {loading && <div className="text-center text-lg">Loading...</div>}
         {error && <div className="text-center text-red-500">{error}</div>}
-        {!loading && !error && manufacturingOrders.length === 0 && (
+        {!loading && !error && filteredOrders.length === 0 && (
           <div className="text-center">
             <div className="text-6xl mb-4">🏭</div>
             <h2 className="text-2xl font-semibold text-zinc-800 mb-2">
@@ -127,9 +136,9 @@ const Page = () => {
             </Button>
           </div>
         )}
-        {!loading && !error && manufacturingOrders.length > 0 && (
+        {!loading && !error && filteredOrders.length > 0 && (
           <div className="space-y-4">
-            {manufacturingOrders.map((order) => (
+            {filteredOrders.map((order) => (
               <div key={order.id} className="border rounded p-4 flex flex-col md:flex-row md:items-center md:justify-between">
                 <div>
                   <div className="font-bold">Order #{order.id}</div>

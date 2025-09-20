@@ -40,6 +40,7 @@ const FilterCard = ({
 const Page = () => {
   const router = useRouter();
   const [selectedFilter, setSelectedFilter] = useState<number | null>(null);
+  const [searchQuery, setSearchQuery] = useState("");
   const { isLoggedIn } = useUserStore();
   const { workOrders, fetchWorkOrders, loading, error } = useWorkOrderStore();
 
@@ -61,6 +62,12 @@ const Page = () => {
   ];
   const [mode, setMode] = useState("All");
 
+  const filteredWorkOrders = workOrders.filter((order) => {
+    const statusMatch = selectedFilter !== null ? order.status === filters[selectedFilter].title : true;
+    const searchMatch = order.operation.toLowerCase().includes(searchQuery.toLowerCase()) || order.moId.toString().includes(searchQuery);
+    return statusMatch && searchMatch;
+  });
+
   return (
     <div className="h-fit w-full p-2 flex flex-col">
       {/* Page Title */}
@@ -81,6 +88,8 @@ const Page = () => {
             type="text"
             className="size-full outline-none pl-10 text-xl font-medium"
             placeholder="Search work orders..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
           />
         </div>
         <Button variant="secondary" className="px-6 h-full shrink-0">
@@ -116,7 +125,7 @@ const Page = () => {
       <div className="w-full h-fit mt-2 bg-white rounded-xl border-2 border-border p-8">
         {loading && <div className="text-center text-lg">Loading...</div>}
         {error && <div className="text-center text-red-500">{error}</div>}
-        {!loading && !error && workOrders.length === 0 && (
+        {!loading && !error && filteredWorkOrders.length === 0 && (
           <div className="text-center">
             <div className="text-6xl mb-4">⚙️</div>
             <h2 className="text-2xl font-semibold text-zinc-800 mb-2">No Work Orders Yet</h2>
@@ -126,9 +135,9 @@ const Page = () => {
             </Button>
           </div>
         )}
-        {!loading && !error && workOrders.length > 0 && (
+        {!loading && !error && filteredWorkOrders.length > 0 && (
           <div className="space-y-4">
-            {workOrders.map((order) => (
+            {filteredWorkOrders.map((order) => (
               <div key={order.id} className="border rounded p-4 flex flex-col md:flex-row md:items-center md:justify-between">
                 <div>
                   <div className="font-bold">Work Order #{order.id}</div>

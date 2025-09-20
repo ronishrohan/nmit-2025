@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useMoStore } from '@/app/store/moStore';
 import { useUserStore } from '@/app/store/userStore';
 import { useRouter } from 'next/navigation';
@@ -7,6 +7,9 @@ function Page() {
   const { manufacturingOrders, fetchManufacturingOrders, loading, error } = useMoStore();
   const { isLoggedIn } = useUserStore();
   const router = useRouter();
+  const [searchQuery, setSearchQuery] = useState('');
+  const [statusFilter, setStatusFilter] = useState('');
+  const [filteredOrders, setFilteredOrders] = useState(manufacturingOrders);
 
   useEffect(() => {
     if (!isLoggedIn) {
@@ -16,17 +19,45 @@ function Page() {
     }
   }, [isLoggedIn, router, fetchManufacturingOrders]);
 
+  useEffect(() => {
+    setFilteredOrders(
+      manufacturingOrders.filter((order) =>
+        order.id.toString().includes(searchQuery) &&
+        (statusFilter === '' || order.status === statusFilter)
+      )
+    );
+  }, [searchQuery, statusFilter, manufacturingOrders]);
+
   return (
     <div className="p-4">
       <h1 className="text-2xl font-bold mb-4">Orders</h1>
+      <div className="mb-4">
+        <input
+          type="text"
+          placeholder="Search by Order ID"
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          className="border rounded p-2 mr-2"
+        />
+        <select
+          value={statusFilter}
+          onChange={(e) => setStatusFilter(e.target.value)}
+          className="border rounded p-2"
+        >
+          <option value="">All Statuses</option>
+          <option value="pending">Pending</option>
+          <option value="in_progress">In Progress</option>
+          <option value="completed">Completed</option>
+        </select>
+      </div>
       {loading && <div>Loading...</div>}
       {error && <div className="text-red-500">{error}</div>}
-      {!loading && !error && manufacturingOrders.length === 0 && (
-        <div>No Orders Yet</div>
+      {!loading && !error && filteredOrders.length === 0 && (
+        <div>No Orders Found</div>
       )}
-      {!loading && !error && manufacturingOrders.length > 0 && (
+      {!loading && !error && filteredOrders.length > 0 && (
         <div className="space-y-4">
-          {manufacturingOrders.map((order) => (
+          {filteredOrders.map((order) => (
             <div key={order.id} className="border rounded p-4 flex flex-col md:flex-row md:items-center md:justify-between">
               <div>
                 <div className="font-bold">Order #{order.id}</div>

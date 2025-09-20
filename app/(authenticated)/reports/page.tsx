@@ -84,6 +84,7 @@ const Page = () => {
   const [selectedFilter, setSelectedFilter] = useState<number | null>(null);
   const { isLoggedIn } = useUserStore();
   const { productLedger, fetchProductLedger, loading, error } = useInventoryStore();
+  const [searchQuery, setSearchQuery] = useState("");
 
   useEffect(() => {
     if (!isLoggedIn) {
@@ -267,7 +268,10 @@ const Page = () => {
           )}
           {!loading && !error && productLedger.length > 0 && (
             <div className="space-y-4">
-              {productLedger.map((entry) => (
+              {productLedger.filter(entry => {
+                const entryString = `${entry.id} ${entry.productId} ${entry.movementType} ${entry.quantity} ${entry.createdAt ? String(entry.createdAt) : 'N/A'}`;
+                return entryString.toLowerCase().includes(searchQuery.toLowerCase());
+              }).map((entry) => (
                 <div key={entry.id} className="border rounded p-4 flex flex-col md:flex-row md:items-center md:justify-between">
                   <div>
                     <div className="font-bold">Entry #{entry.id}</div>

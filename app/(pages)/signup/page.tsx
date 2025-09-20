@@ -100,7 +100,7 @@ export default function page() {
       console.log("Signup successful", response.data);
       // Redirect to login page on success
       setUser(response.data.user);
-      login();
+      login(response.data.user.loginId,"hardcoded for now");
       router.push("/");
     } catch (err: any) {
       console.log("Signup error:", err);

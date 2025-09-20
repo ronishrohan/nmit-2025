@@ -9,39 +9,12 @@ import { useUserStore } from "@/app/store/userStore";
 import { Dropdown } from "@/app/components/ui/dropdown/Dropdown";
 import { useInventoryStore } from "@/app/store/inventoryStore";
 
-type FilterCardProps = {
-  number: number | string;
-  title: string;
-  isSelected?: boolean;
-  onClick?: () => void;
-  className?: string;
-};
-
-const FilterCard = ({
-  number,
-  title,
-  isSelected,
-  onClick,
-  className,
-}: FilterCardProps) => {
-  return (
-    <button
-      onClick={onClick}
-      className={`rounded-xl outline-none border-2 gap-2 px-6 h-full w-fit font-medium cursor-pointer duration-100 text-xl flex items-center justify-between transition-colors
-        ${isSelected ? "bg-accent-green/730 border-transparent text-black" : "bg-white hover:bg-zinc-200 border-border text-black/80"}
-        ${className}`}
-    >
-      <div>{number}</div>
-      <div>{title}</div>
-    </button>
-  );
-};
-
 const Page = () => {
   const router = useRouter();
   const [selectedFilter, setSelectedFilter] = useState<number | null>(null);
   const { isLoggedIn } = useUserStore();
   const { productStock, fetchProductStock, loading, error } = useInventoryStore();
+  const [searchTerm, setSearchTerm] = useState("");
 
   useEffect(() => {
     if (!isLoggedIn) {
@@ -51,15 +24,12 @@ const Page = () => {
     }
   }, [isLoggedIn, router, fetchProductStock]);
 
-  const filters = [
-    { number: 45, title: "In Stock" },
-    { number: 8, title: "Low Stock" },
-    { number: 3, title: "Out of Stock" },
-    { number: 12, title: "Reserved" },
-    { number: 6, title: "On Order" },
-    { number: 2, title: "Expired" },
-  ];
-  const [mode, setMode] = useState("All");
+  const filteredStock = productStock.filter(stock => {
+    return (
+      stock.productId.toString().includes(searchTerm) ||
+      stock.id.toString().includes(searchTerm)
+    );
+  });
 
   return (
     <div className="h-fit w-full p-2 flex flex-col">
@@ -78,6 +48,8 @@ const Page = () => {
             type="text"
             className="size-full outline-none pl-10 text-xl font-medium"
             placeholder="Search stock items..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
           />
         </div>
         <Button variant="secondary" className="px-6 h-full shrink-0">
@@ -85,35 +57,11 @@ const Page = () => {
         </Button>
       </div>
 
-      {/* Filter Cards */}
-      <div className="h-[66px] mt-2 w-full flex gap-2">
-        <Dropdown
-          currentValue={mode}
-          setValue={setMode}
-          values={["All", "By Item", "By Warehouse", "By Category", "Recent Movements"]}
-        />
-        {filters.map((filter, index) => (
-          <FilterCard
-            key={index}
-            number={filter.number}
-            title={filter.title}
-            isSelected={selectedFilter === index}
-            onClick={() => {
-              if (selectedFilter == index) {
-                setSelectedFilter(null);
-              } else {
-                setSelectedFilter(index);
-              }
-            }}
-          />
-        ))}
-      </div>
-
       {/* Content Area */}
       <div className="w-full h-fit mt-2 bg-white rounded-xl border-2 border-border p-8">
         {loading && <div className="text-center text-lg">Loading...</div>}
         {error && <div className="text-center text-red-500">{error}</div>}
-        {!loading && !error && productStock.length === 0 && (
+        {!loading && !error && filteredStock.length === 0 && (
           <div className="text-center">
             <div className="text-6xl mb-4">📦</div>
             <h2 className="text-2xl font-semibold text-zinc-800 mb-2">No Stock Entries Yet</h2>
@@ -123,9 +71,9 @@ const Page = () => {
             </Button>
           </div>
         )}
-        {!loading && !error && productStock.length > 0 && (
+        {!loading && !error && filteredStock.length > 0 && (
           <div className="space-y-4">
-            {productStock.map((stock) => (
+            {filteredStock.map((stock) => (
               <div key={stock.id} className="border rounded p-4 flex flex-col md:flex-row md:items-center md:justify-between">
                 <div>
                   <div className="font-bold">Stock #{stock.id}</div>
