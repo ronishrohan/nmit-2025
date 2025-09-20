@@ -4,6 +4,7 @@ import { useUserStore } from "../store/userStore";
 import { useRouter } from "next/navigation";
 import Sidebar from "../components/sidebar/Sidebar";
 import Topbar from "../components/topbar/Topbar";
+import { useEffect } from "react";
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -11,17 +12,17 @@ export default function RootLayout({
 }>) {
   const { isLoggedIn } = useUserStore();
   const router = useRouter();
-  if (!isLoggedIn) {
-    router.push("/login");
-  }
-  if (!isLoggedIn) return null;
+  useEffect(() => {
+    if (!isLoggedIn) {
+      router.push("/login");
+    }
+
+  }, [isLoggedIn])
   return (
-    <html lang="en">
-      <body
-        className={` antialiased p-2 pr-0 font-primary text-foreground bg-background flex`}
-      >
-        <div className="flex flex-col size-full ">{children}</div>
-      </body>
-    </html>
+
+
+    <div >{children}</div>
+
+
   );
 }

@@ -9,6 +9,11 @@ const fontPrimary = Instrument_Sans({
   variable: "--font-instrument-sans",
 });
 
+const geist_mono = Geist_Mono({
+  weight: ["100", "200", "300", "400", "500", "600"],
+  variable: "--font-geist-mono"
+})
+
 export const metadata: Metadata = {
   title: "Manufacturing CRM",
   description: "A manufacturing crm",
@@ -22,7 +27,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${fontPrimary.className} antialiased p-2 pr-0 font-primary text-foreground bg-background flex`}
+        className={`${fontPrimary.className} ${geist_mono.variable} antialiased p-2 pr-0 font-primary text-foreground bg-background flex`}
       >
         <Sidebar />
         <div className="flex flex-col size-full ">

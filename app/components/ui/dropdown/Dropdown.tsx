@@ -29,6 +29,7 @@ export const Dropdown: React.FC<DropdownProps> = ({
         <motion.div
           transition={{ duration: 0.2, ease: "circInOut" }}
           animate={{ rotateZ: isOpen ? 180 : 0 }}
+          initial={{rotateZ: 0}}
         >
           <CaretDown size={20} fill="bold" />
         </motion.div>
@@ -41,6 +42,7 @@ export const Dropdown: React.FC<DropdownProps> = ({
           opacity: isOpen ? 1 : 0,
           marginTop: isOpen ? 4 : 0,
         }}
+        initial={{height: 0, opacity: 0}}
         className="absolute bg-white top-full left-0 rounded-xl overflow-hidden border-2 border-border w-full flex flex-col font-medium text-xl"
       >
         {values.map((value) => (

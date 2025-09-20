@@ -5,7 +5,8 @@ import React from "react";
 import { useUserStore } from "@/app/store/userStore";
 const titles: Record<string, string[]> = {
   "/dashboard": ["Dashboard", "See all your important data in one place"],
-  "/order": ["Order", "Overview of a order"],
+  "/order" : ["Order", "Overview of a order"],
+  "/create-order" : ["Create Order", "Create a manufacturing order" ]
 } as const;
 
 const Topbar = () => {
