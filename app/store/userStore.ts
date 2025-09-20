@@ -1,9 +1,11 @@
 import { create } from "zustand";
 
 type UserState = {
-  name: string;
   email: string;
   password: string;
+  fullName: string;
+  loginId?: number;
+  role: "admin" | "user" | "manager" | "unauthenticated";
   isLoggedIn: boolean;
 
   setName: (name: string) => void;
@@ -14,20 +16,24 @@ type UserState = {
 };
 
 export const useUserStore = create<UserState>((set) => ({
-  name: "",
   email: "",
   password: "",
   isLoggedIn: false,
-
-  setName: (name) => set({ name }),
+  role: "unauthenticated",
+  fullName: "",
+  setName: (fullName) => set({ fullName }),
   setEmail: (email) => set({ email }),
   setPassword: (password) => set({ password }),
+  setRole: (role: "admin" | "user" | "manager" | "unauthenticated") =>
+    set({ role }),
+
   login: () => set({ isLoggedIn: true }),
   logout: () =>
     set({
-      name: "",
+      fullName: "",
       email: "",
       password: "",
       isLoggedIn: false,
+      role: "unauthenticated",
     }),
 }));
