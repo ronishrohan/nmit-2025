@@ -77,7 +77,7 @@ const Page = () => {
               <div key={stock.id} className="border rounded p-4 flex flex-col md:flex-row md:items-center md:justify-between">
                 <div>
                   <div className="font-bold">Stock #{stock.id}</div>
-                  <div>Product ID: {stock.productId}</div>
+                  <div>Product: {stock.productId}</div>
                   <div>Quantity: {stock.quantity}</div>
                   <div>Updated: {stock.updatedAt ? String(stock.updatedAt) : 'N/A'}</div>
                 </div>

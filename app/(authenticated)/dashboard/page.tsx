@@ -163,7 +163,10 @@ const Page = () => {
     } else {
       fetchManufacturingOrders();
     }
+    console.log(manufacturingOrders);
   }, [isLoggedIn, router, fetchManufacturingOrders]);
+
+  
 
   const [ordersHidden, setOrdersHidden] = useState(false);
 

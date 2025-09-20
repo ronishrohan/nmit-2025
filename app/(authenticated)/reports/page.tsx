@@ -275,7 +275,7 @@ const Page = () => {
                 <div key={entry.id} className="border rounded p-4 flex flex-col md:flex-row md:items-center md:justify-between">
                   <div>
                     <div className="font-bold">Entry #{entry.id}</div>
-                    <div>Product ID: {entry.productId}</div>
+                    <div>Product: {entry.productId}</div>
                     <div>Movement: {entry.movementType}</div>
                     <div>Quantity: {entry.quantity}</div>
                     <div>Date: {entry.createdAt ? String(entry.createdAt) : 'N/A'}</div>

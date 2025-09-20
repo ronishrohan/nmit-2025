@@ -110,6 +110,7 @@ export const useMoStore = create<ManufacturingOrderStore>((set, get) => ({
     try {
       const response = await moApi.getAll();
       const manufacturingOrders = Array.isArray(response.data) ? response.data : [];
+      console.log(manufacturingOrders[0].product, "fetched MOs");
       set({ manufacturingOrders });
       if (!manufacturingOrders.length) {
         set({ error: response.message || "No manufacturing orders found" });
