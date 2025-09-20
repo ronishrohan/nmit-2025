@@ -1,5 +1,31 @@
 @import "tailwindcss";
 
+@font-face {
+  font-family: "Aeonik Pro";
+  src: url("/fonts/aeonik_regular.ttf");
+}
+
+@font-face {
+  font-family: "Aeonik Pro";
+  src: url("/fonts/aeonik_bold.ttf");
+  font-weight: 700;
+}
+
+
+@font-face {
+  font-family: "Aeonik Pro";
+  src: url("/fonts/aeonik_black.ttf");
+  font-weight: 900;
+}
+
+
+@font-face {
+  font-family: "Aeonik Pro";
+  src: url("/fonts/aeonik_light.ttf");
+  font-weight: 300;
+}
+
+
 @theme inline {
   --color-background: #F2F3F0;
   --color-foreground: #000000;
@@ -14,8 +40,9 @@
   --color-accent-pink: #FDD7FB;
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
-  --font-primary: var(--font-instrument-sans)
+  --font-primary: "Aeonik Pro"
 }
+
 
 
 body {
