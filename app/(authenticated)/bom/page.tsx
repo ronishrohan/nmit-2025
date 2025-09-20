@@ -94,13 +94,10 @@ const Page = () => {
                   {/* Left Side Details */}
                   <div className="space-y-1">
                     <div className="text-xl font-bold text-zinc-800">
-                      BOM #{bom.id}
+                      {product ? product.name : `Product ID: ${bom.productId}`}
                     </div>
                     <div className="text-zinc-700">
-                      <span className="font-medium">Product:</span>{" "}
-                      {product
-                        ? `${product.name} (ID: ${product.id})`
-                        : `ID: ${bom.productId}`}
+                      <span className="font-medium">BOM:</span> #{bom.id}
                     </div>
                     <div className="text-zinc-700">
                       <span className="font-medium">Component ID:</span>{" "}

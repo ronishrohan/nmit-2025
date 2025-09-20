@@ -204,13 +204,12 @@ const Page = () => {
                   {/* Left Side Details */}
                   <div className="space-y-1">
                     <div className="text-xl font-bold text-zinc-800">
-                      MO #{order.id}
+                      {product
+                        ? product.name
+                        : `Product ID: ${order.productId}`}
                     </div>
                     <div className="text-zinc-700">
-                      <span className="font-medium">Product:</span>{" "}
-                      {product
-                        ? `${product.name} (ID: ${product.id})`
-                        : `ID: ${order.productId}`}
+                      <span className="font-medium">MO:</span> #{order.id}
                     </div>
                     <div className="text-zinc-700">
                       <span className="font-medium">Quantity:</span>{" "}
@@ -241,7 +240,9 @@ const Page = () => {
                   {/* Right Side Button */}
                   <Button
                     className="mt-auto"
-                    onClick={() => router.push(`/order/${order.id}`)}
+                    onClick={() =>
+                      router.push(`/manufacturing-orders/${order.id}`)
+                    }
                   >
                     View Details
                   </Button>

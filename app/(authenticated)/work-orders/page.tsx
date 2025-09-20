@@ -195,44 +195,41 @@ const Page = () => {
             </div>
           )}
 
-          {/* Work Orders List */}
-          {!loading && !error && filteredWorkOrders.length > 0 && (
-            <div className="divide-y divide-border">
-              {filteredWorkOrders.map((order) => (
-                <div
-                  key={order.id}
-                  className="p-4 flex flex-col gap-3 md:flex-row md:items-center md:justify-between hover:bg-zinc-50 transition-colors"
-                >
-                  {/* Left Side Details */}
-                  <div className="space-y-1">
-                    <div className="text-xl font-bold text-zinc-800">
-                      Work Order #{order.id}
-                    </div>
-                    <div className="text-zinc-700">
-                      <span className="font-medium">Status:</span>{" "}
-                      {order.status.replace("_", " ").charAt(0).toUpperCase() +
-                        order.status.replace("_", " ").slice(1)}
-                    </div>
-                    <div className="text-zinc-700">
-                      <span className="font-medium">Operation:</span>{" "}
-                      {order.operation}
-                    </div>
-                    <div className="text-zinc-700">
-                      <span className="font-medium">MO ID:</span> {order.moId}
-                    </div>
-                    <div className="text-zinc-500 text-sm">
-                      Created:{" "}
-                      {order.createdAt
-                        ? new Date(order.createdAt).toLocaleDateString("en-US", {
-                            year: "numeric",
-                            month: "short",
-                            day: "numeric",
-                            hour: "2-digit",
-                            minute: "2-digit",
-                          })
-                        : "N/A"}
-                    </div>
+        {!loading && !error && filteredWorkOrders.length > 0 && (
+          <div className="divide-y divide-border">
+            {filteredWorkOrders.map((order) => (
+              <div
+                key={order.id}
+                className="p-4 flex flex-col gap-3 md:flex-row md:items-center md:justify-between hover:bg-zinc-50 transition-colors"
+              >
+                <div className="space-y-1">
+                  <div className="text-xl font-bold text-zinc-800">
+                    {order.operation}
                   </div>
+                  <div className="text-zinc-700">
+                    <span className="font-medium">WO:</span> #{order.id}
+                  </div>
+                  <div className="text-zinc-700">
+                    <span className="font-medium">Status:</span>{" "}
+                    {order.status.replace("_", " ").charAt(0).toUpperCase() +
+                      order.status.replace("_", " ").slice(1)}
+                  </div>
+                  <div className="text-zinc-700">
+                    <span className="font-medium">MO ID:</span> {order.moId}
+                  </div>
+                  <div className="text-zinc-500 text-sm">
+                    Created:{" "}
+                    {order.createdAt
+                      ? new Date(order.createdAt).toLocaleDateString("en-US", {
+                          year: "numeric",
+                          month: "short",
+                          day: "numeric",
+                          hour: "2-digit",
+                          minute: "2-digit",
+                        })
+                      : "N/A"}
+                  </div>
+                </div>
 
                   {/* Right Side Button */}
                   <Button

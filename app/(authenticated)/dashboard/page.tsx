@@ -50,6 +50,161 @@ const FilterCard = ({
   );
 };
 
+interface Item {
+  id: number;
+  reference: string;
+  startDate: string; // ISO date string like "2025-09-01"
+  finishedProduct: string;
+  status: "Draft" | "Confirmed" | "In-Progress" | "To Close" | "Done"; // Updated to match kanban columns
+  quantity: number;
+  unit: string; // e.g., "pcs", "kg"
+  state: string; // e.g., "NY", "CA"
+}
+
+const columns: Column[] = [
+  { key: "reference", label: "Reference" },
+  { key: "startDate", label: "Start Date" },
+  { key: "finishedProduct", label: "Finished Product" },
+  { key: "status", label: "Status" },
+  { key: "quantity", label: "Quantity" },
+  { key: "unit", label: "Unit" },
+  { key: "state", label: "State" },
+];
+
+const data: Item[] = [
+  {
+    id: 1,
+    reference: "REF001",
+    startDate: "2025-09-01",
+    finishedProduct: "Widget A",
+    status: "Done",
+    quantity: 100,
+    unit: "pcs",
+    state: "NY",
+  },
+  {
+    id: 2,
+    reference: "REF002",
+    startDate: "2025-09-05",
+    finishedProduct: "Widget B",
+    status: "In-Progress",
+    quantity: 250,
+    unit: "pcs",
+    state: "CA",
+  },
+  {
+    id: 3,
+    reference: "REF003",
+    startDate: "2025-09-10",
+    finishedProduct: "Widget C",
+    status: "Draft",
+    quantity: 50,
+    unit: "pcs",
+    state: "TX",
+  },
+  {
+    id: 4,
+    reference: "REF007",
+    startDate: "2025-09-10",
+    finishedProduct: "Widget C",
+    status: "To Close",
+    quantity: 50,
+    unit: "pcs",
+    state: "TX",
+  },
+  {
+    id: 5,
+    reference: "REF004",
+    startDate: "2025-09-12",
+    finishedProduct: "Widget D",
+    status: "To Close",
+    quantity: 75,
+    unit: "pcs",
+    state: "FL",
+  },
+  {
+    id: 6,
+    reference: "REF004",
+    startDate: "2025-09-12",
+    finishedProduct: "Widget D",
+    status: "To Close",
+    quantity: 75,
+    unit: "pcs",
+    state: "FL",
+  },
+  {
+    id: 7,
+    reference: "REF004",
+    startDate: "2025-09-12",
+    finishedProduct: "Widget D",
+    status: "To Close",
+    quantity: 75,
+    unit: "pcs",
+    state: "FL",
+  },
+  {
+    id: 8,
+    reference: "REF004",
+    startDate: "2025-09-12",
+    finishedProduct: "Widget D",
+    status: "To Close",
+    quantity: 75,
+    unit: "pcs",
+    state: "FL",
+  },
+  {
+    id: 9,
+    reference: "REF004",
+    startDate: "2025-09-12",
+    finishedProduct: "Widget D",
+    status: "To Close",
+    quantity: 75,
+    unit: "pcs",
+    state: "FL",
+  },
+  {
+    id: 10,
+    reference: "REF004",
+    startDate: "2025-09-12",
+    finishedProduct: "Widget D",
+    status: "To Close",
+    quantity: 75,
+    unit: "pcs",
+    state: "FL",
+  },
+  {
+    id: 11,
+    reference: "REF005",
+    startDate: "2025-09-15",
+    finishedProduct: "Widget E",
+    status: "Confirmed",
+    quantity: 120,
+    unit: "pcs",
+    state: "WA",
+  },
+  {
+    id: 12,
+    reference: "REF005",
+    startDate: "2025-09-15",
+    finishedProduct: "Widget E",
+    status: "Confirmed",
+    quantity: 120,
+    unit: "pcs",
+    state: "WA",
+  },
+  {
+    id: 13,
+    reference: "REF005",
+    startDate: "2025-09-15",
+    finishedProduct: "Widget E",
+    status: "Confirmed",
+    quantity: 120,
+    unit: "pcs",
+    state: "WA",
+  },
+];
+
+
 // Kanban View Component
 const KanbanCard = ({ order }: { order: ManufacturingOrder }) => {
   const router = useRouter();
@@ -66,10 +221,10 @@ const KanbanCard = ({ order }: { order: ManufacturingOrder }) => {
       className="bg-white border-2 w-full items-start text-left cursor-pointer border-border rounded-lg p-4 mb-3 hover:shadow-md transition-shadow"
     >
       <div className="font-medium text-lg mb-2">
-        MO-{order.id?.toString().padStart(6, "0")}
+        {order.product?.name || "Unknown Product"}
       </div>
       <div className="text-sm text-gray-600 mb-1">
-        {order.product?.name || "Unknown Product"}
+        MO-{order.id?.toString().padStart(6, "0")}
       </div>
       <div className="text-sm text-gray-500 mb-2">
         Start: {formatDate(order.scheduleStartDate)}
@@ -136,15 +291,15 @@ const KanbanView = ({ data }: { data: ManufacturingOrder[] }) => {
   return (
     <div className="w-full flex  overflow-auto">
       <div className="flex w-full gap-4  h-fit p-4">
-        {visibleColumns.map((column) => (
-          <KanbanColumn
-            key={column.status}
-            title={column.title}
-            orders={data.filter((order) => order.status === column.status)}
-            color={column.color}
-          />
-        ))}
-      </div>
+      {visibleColumns.map((column) => (
+        <KanbanColumn
+          key={column.status}
+          title={column.title}
+          orders={data.filter((item) => item.status === column.status)}
+          color={column.color}
+        />
+      ))}
+    </div>
     </div>
   );
 };

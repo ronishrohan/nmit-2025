@@ -85,10 +85,10 @@ const Page = () => {
                 {/* Left Side Details */}
                 <div className="space-y-1">
                   <div className="text-xl font-bold text-zinc-800">
-                    Work Center #{center.id}
+                    {center.name}
                   </div>
                   <div className="text-zinc-700">
-                    <span className="font-medium">Name:</span> {center.name}
+                    <span className="font-medium">WC:</span> #{center.id}
                   </div>
                   <div className="text-zinc-700">
                     <span className="font-medium">Location:</span>{" "}
