@@ -138,12 +138,13 @@ export default function page() {
     setIsLoading(true);
 
     try {
-      const response = await backend.post("/auth/reset-password", {
+      console.log("email",email);
+      const response = await axios.post("http://172.17.54.86:3000/resetpass", {
         email: email,
         otp: otp,
-        newPassword: password,
+        newPass: password,
       });
-
+      
       console.log("Password reset successful", response.data);
       setSuccess("Password reset successfully! Redirecting to login...");
 
@@ -154,16 +155,9 @@ export default function page() {
     } catch (err: any) {
       console.log("Reset password error:", err);
 
+      setError(err.response?.data?.error);
       // Handle different types of errors
-      if (err.response?.status === 400) {
-        setError("Invalid OTP or request. Please try again.");
-      } else if (err.response?.status === 404) {
-        setError("Reset request not found or expired.");
-      } else if (err.response?.data?.error) {
-        setError(err.response.data.error);
-      } else {
-        setError("Failed to reset password. Please try again.");
-      }
+      
     } finally {
       setIsLoading(false);
     }

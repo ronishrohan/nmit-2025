@@ -4,7 +4,7 @@ const BASE_URL = "http://172.17.54.86:3000/api";
 
 export async function POST(request: Request) {
   try {
-    const { loginId, password, email } = await request.json();
+    const { loginId, email,password } = await request.json();
 
     // Check for missing fields
     if (!loginId || !password || !email) {
