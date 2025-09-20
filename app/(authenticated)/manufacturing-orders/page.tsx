@@ -34,6 +34,11 @@ const FilterCard = ({
             ? "bg-accent-green/730 border-transparent text-black"
             : "bg-white hover:bg-zinc-200 border-border text-black/80"
         }
+        ${
+          isSelected
+            ? "bg-accent-green/730 border-transparent text-black"
+            : "bg-white hover:bg-zinc-200 border-border text-black/80"
+        }
         ${className}`}
     >
       <div>{number}</div>
@@ -85,6 +90,31 @@ const Page = () => {
 
   const filterCounts = getFilterCounts();
 
+  // Calculate counts for each filter dynamically
+  const getFilterCounts = () => {
+    const counts = {
+      draft: manufacturingOrders.filter((order) => order.status === "draft")
+        .length,
+      confirmed: manufacturingOrders.filter(
+        (order) => order.status === "confirmed"
+      ).length,
+      in_progress: manufacturingOrders.filter(
+        (order) => order.status === "in_progress"
+      ).length,
+      to_close: manufacturingOrders.filter(
+        (order) => order.status === "to_close"
+      ).length,
+      done: manufacturingOrders.filter((order) => order.status === "done")
+        .length,
+      cancelled: manufacturingOrders.filter(
+        (order) => order.status === "cancelled"
+      ).length,
+    };
+    return counts;
+  };
+
+  const filterCounts = getFilterCounts();
+
   const filters = [
     { number: filterCounts.draft, title: "Draft", status: "draft" },
     { number: filterCounts.confirmed, title: "Confirmed", status: "confirmed" },
@@ -105,6 +135,7 @@ const Page = () => {
     const statusMatch =
       selectedFilter !== null
         ? order.status === filters[selectedFilter].status
+        ? order.status === filters[selectedFilter].status
         : true;
     // Mode filter
     let modeMatch = true;
@@ -117,6 +148,8 @@ const Page = () => {
     const searchMatch =
       order.id.toString().includes(searchQuery) ||
       order.productId?.toString().includes(searchQuery) ||
+      (product &&
+        product.name.toLowerCase().includes(searchQuery.toLowerCase())) ||
       (product &&
         product.name.toLowerCase().includes(searchQuery.toLowerCase())) ||
       order.quantity?.toString().includes(searchQuery);
@@ -151,6 +184,8 @@ const Page = () => {
         <Dropdown
           currentValue={mode}
           setValue={setMode}
+          width={240}
+          values={["All", "My Orders", "Assigned to me"]}
           width={240}
           values={["All", "My Orders", "Assigned to me"]}
         />
@@ -222,6 +257,18 @@ const Page = () => {
                     </div>
                     <div className="text-zinc-500 text-sm">
                       Created:{" "}
+                      {order.createdAt
+                        ? new Date(order.createdAt).toLocaleDateString(
+                            "en-US",
+                            {
+                              year: "numeric",
+                              month: "short",
+                              day: "numeric",
+                              hour: "2-digit",
+                              minute: "2-digit",
+                            }
+                          )
+                        : "N/A"}
                       {order.createdAt
                         ? new Date(order.createdAt).toLocaleDateString(
                             "en-US",
