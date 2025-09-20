@@ -24,18 +24,20 @@ const SidebarButton = ({
   active,
   open,
   onClick,
+  action
 }: {
   children: ReactNode;
   icon: ReactNode;
   active: boolean;
   onClick: () => void;
   open: boolean;
+  action?: boolean;
 }) => {
   const { fullName, email } = useUserStore();
   return (
     <button
       onClick={onClick}
-      className={`rounded-xl h-[66px] overflow-hidden w-full whitespace-nowrap cursor-pointer flex gap-4 items-center  text-xl outline-none  p-5 ${
+      className={`rounded-xl ${action && "bg-accent hover:!bg-accent hover:brightness-90 !text-white"} h-[66px] overflow-hidden w-full whitespace-nowrap cursor-pointer flex gap-4 items-center  text-xl outline-none  p-5 ${
         active
           ? "text-zinc-900 bg-accent-green font-medium "
           : "text-inactive font-medium hover:bg-zinc-200 hover:text-zinc-900"
@@ -70,7 +72,7 @@ function Sidebar() {
       className=" shrink-0 h-full flex flex-col rounded-xl border-2 border-border"
     >
       <div
-        className="h-[84px] overflow-hidden
+        className="h-[84px] shrink-0 overflow-hidden
          text-3xl font-bold border-b-2 flex items-center  relative pl-6 border-border "
       >
         {/* <div className="size-full z-40 rounded-full border-[20px]   border-white mix-blend-difference absolute  " ></div> */}
@@ -170,14 +172,7 @@ function Sidebar() {
           </SidebarButton>
         </div>
         <div className="mt-auto p-2 gap-2 flex flex-col">
-          <SidebarButton
-            open={open}
-            onClick={() => router.push("/create-order")}
-            active={pathname === "/create-order"}
-            icon={<PlusCircle size={26} weight="bold" />}
-          >
-            Create Order
-          </SidebarButton>
+          
           <SidebarButton
             open={open}
             onClick={() => router.push("/reports")}
@@ -186,9 +181,18 @@ function Sidebar() {
           >
             Reports
           </SidebarButton>
+          <SidebarButton
+            open={open}
+            action
+            onClick={() => router.push("/create-order")}
+            active={pathname === "/create-order"}
+            icon={<PlusCircle size={26} weight="bold" />}
+          >
+            Create Order
+          </SidebarButton>
         </div>
       </div>
-      <div className="border-t-2 border-border h-[84px] overflow-hidden w-full mt-auto p-2 gap-4 flex">
+      <div className="border-t-2 border-border shrink-0 h-[84px] overflow-hidden w-full mt-auto p-2 gap-4 flex">
         <div
           className="h-full aspect-square shrink-0
             rounded-lg bg-gradient-to-br from-accent to-accent-red relative overflow-hidden"
