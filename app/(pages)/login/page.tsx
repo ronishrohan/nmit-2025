@@ -7,13 +7,13 @@ import TextInputField from "../../components/ui/TextInputField";
 import { useRouter } from "next/navigation";
 import { useUserStore } from "@/app/store/userStore";
 export default function page() {
-  const [loginId, setLoginId] = useState("");
+  const [loginId, setUserLoginId] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
 
-  const { login } = useUserStore();
+  const { login, setName, setEmail, setRole, setLoginId } = useUserStore();
 
   const validateForm = () => {
     if (!loginId.trim()) {
@@ -44,6 +44,9 @@ export default function page() {
 
       console.log("Login successful", response.data);
       // Redirect to dashboard or home page on success
+      setEmail(response.data.email);
+      setRole("user");
+      setLoginId(response.data.loginId);
       login();
       router.push("/dashboard");
     } catch (err: any) {
@@ -52,7 +55,7 @@ export default function page() {
       // Handle different types of errors
       if (err.response?.status === 401) {
         setError(
-          "Invalid login credentials. Please check your login ID and password."
+          "Invalid login credentials. Please check your login ID and password.",
         );
       } else if (err.response?.status === 400) {
         setError("Please enter both login ID and password.");
@@ -80,7 +83,7 @@ export default function page() {
             type="text"
             placeholder="Login ID"
             value={loginId}
-            onChange={(e) => setLoginId(e.target.value)}
+            onChange={(e) => setUserLoginId(e.target.value)}
             onKeyPress={handleKeyPress}
           />
           <TextInputField

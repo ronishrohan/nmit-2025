@@ -7,14 +7,14 @@ import TextInputField from "../../components/ui/TextInputField";
 import { useRouter } from "next/navigation";
 import { useUserStore } from "@/app/store/userStore";
 export default function page() {
-  const [loginId, setLoginId] = useState("");
-  const [email, setEmail] = useState("");
+  const [loginId, setUserLoginId] = useState("");
+  const [email, setUserEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
-  const { login } = useUserStore();
+  const { login, setEmail, setRole, setLoginId } = useUserStore();
   const validateForm = () => {
     // Login ID validation
     if (!loginId.trim()) {
@@ -27,7 +27,7 @@ export default function page() {
     }
     if (!/^[a-zA-Z0-9_-]+$/.test(loginId)) {
       setError(
-        "Login ID can only contain letters, numbers, underscores, and hyphens"
+        "Login ID can only contain letters, numbers, underscores, and hyphens",
       );
       return false;
     }
@@ -66,7 +66,7 @@ export default function page() {
     }
     if (!/(?=.*[@$!%*?&])/.test(password)) {
       setError(
-        "Password must contain at least one special character (@$!%*?&)"
+        "Password must contain at least one special character (@$!%*?&)",
       );
       return false;
     }
@@ -99,6 +99,9 @@ export default function page() {
 
       console.log("Signup successful", response.data);
       // Redirect to login page on success
+      setEmail(response.data.email);
+      setLoginId(response.data.loginId);
+      setRole("user");
       login();
       router.push("/");
     } catch (err: any) {
@@ -107,7 +110,7 @@ export default function page() {
       // Handle different types of errors
       if (err.response?.status === 400) {
         setError(
-          err.response.data?.error || "Please check your input and try again."
+          err.response.data?.error || "Please check your input and try again.",
         );
       } else if (err.response?.status === 409) {
         setError("An account with this login ID or email already exists.");
@@ -138,14 +141,14 @@ export default function page() {
             type="text"
             placeholder="Enter login id"
             value={loginId}
-            onChange={(e) => setLoginId(e.target.value)}
+            onChange={(e) => setUserLoginId(e.target.value)}
             onKeyPress={handleKeyPress}
           />
           <TextInputField
             type="email"
             placeholder="Enter email id"
             value={email}
-            onChange={(e) => setEmail(e.target.value)}
+            onChange={(e) => setUserEmail(e.target.value)}
             onKeyPress={handleKeyPress}
           />
           <TextInputField
