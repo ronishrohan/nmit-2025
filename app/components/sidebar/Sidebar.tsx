@@ -130,7 +130,7 @@ function Sidebar() {
 
           <SidebarButton
             open={open}
-            onClick={() => router.push("/create-order")}
+            onClick={() => router.push("/manufacturing-orders")}
             active={pathname === "/manufacturing-orders"}
             icon={<Package size={26} weight="bold" />}
           >
@@ -138,7 +138,7 @@ function Sidebar() {
           </SidebarButton>
           <SidebarButton
             open={open}
-            onClick={() => router.push("/create-order")}
+            onClick={() => router.push("/work-orders")}
             active={pathname === "/work-orders"}
             icon={<Factory size={26} weight="bold" />}
           >
@@ -146,25 +146,25 @@ function Sidebar() {
           </SidebarButton>
           <SidebarButton
             open={open}
-            onClick={() => router.push("/create-order")}
+            onClick={() => router.push("/bom")}
             active={pathname === "/bom"}
-            icon={<ReceiptIndianRupee size={26} weight="bold" />}
+            icon={<ReceiptIndianRupee size={26} />}
           >
             Bill of Materials
           </SidebarButton>
           <SidebarButton
             open={open}
-            onClick={() => router.push("/create-order")}
+            onClick={() => router.push("/work-center")}
             active={pathname === "/work-center"}
-            icon={<BriefcaseBusiness size={26} weight="bold" />}
+            icon={<BriefcaseBusiness size={26} />}
           >
             Work Center
           </SidebarButton>
           <SidebarButton
             open={open}
-            onClick={() => router.push("/create-order")}
+            onClick={() => router.push("/stock-ledger")}
             active={pathname === "/stock-ledger"}
-            icon={<ClipboardPen size={26} weight="bold" />}
+            icon={<ClipboardPen size={26} />}
           >
             Stock Ledger
           </SidebarButton>
