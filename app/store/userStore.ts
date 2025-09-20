@@ -62,6 +62,21 @@ interface UserStore {
   reset: () => void;
 }
 
+const getPersistedState = () => {
+  if (typeof window !== "undefined") {
+    const persisted = localStorage.getItem("user-store");
+    if (persisted) {
+      try {
+        const parsed = JSON.parse(persisted).state;
+        return parsed || {};
+      } catch {
+        return {};
+      }
+    }
+  }
+  return {};
+};
+
 const initialState = {
   user: null,
   token: null,
@@ -71,6 +86,7 @@ const initialState = {
   name: null,
   loginId: null,
   email: null,
+  ...getPersistedState(),
 };
 
 export const useUserStore = create<UserStore>()(
@@ -221,7 +237,11 @@ export const useUserStore = create<UserStore>()(
           user: null,
           token: null,
           isLoggedIn: false,
+          loading: false,
           error: null,
+          name: null,
+          loginId: null,
+          email: null,
         });
         removeAuthToken();
       },
@@ -342,17 +362,7 @@ export const useUserStore = create<UserStore>()(
     }),
     {
       name: "user-store",
-      partialize: (state) => ({
-        user: state.user,
-        token: state.token,
-        isLoggedIn: state.isLoggedIn,
-      }),
-      onRehydrateStorage: () => (state) => {
-        if (state) {
-          // Check if token is still valid when rehydrating
-          state.checkAuth();
-        }
-      },
-    },
-  ),
+      partialize: (state) => ({ ...state }), // persist everything including isLoggedIn
+    }
+  )
 );

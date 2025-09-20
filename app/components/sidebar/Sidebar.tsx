@@ -11,6 +11,7 @@ import { SidebarSimple } from "@phosphor-icons/react/dist/ssr/SidebarSimple";
 import { usePathname } from "next/navigation";
 import { Factory, SignOut } from "@phosphor-icons/react";
 import { useUserStore } from "@/app/store/userStore";
+import { useEffect } from "react";
 import {
   BriefcaseBusiness,
   BuildingIcon,
@@ -64,6 +65,11 @@ function Sidebar() {
   const [open, setOpen] = useState(true);
   const pathname = usePathname();
   const { loginId, name, isLoggedIn,email } = useUserStore();
+  useEffect(()=>{
+    if(!isLoggedIn){
+      router.push("/");
+    }
+  },[isLoggedIn]);
   if (!isLoggedIn) return null;
   return (
     <motion.div
