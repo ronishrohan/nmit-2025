@@ -221,7 +221,7 @@ function Sidebar() {
           )}
         </AnimatePresence>
       </div>
-      <div className="p-2 w-full">
+      <div className="p-2 pt-0 w-full">
         <SidebarButton
           open={open}
           onClick={() => {
