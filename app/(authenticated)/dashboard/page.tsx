@@ -9,6 +9,7 @@ import { getOrders } from '@/app/database/orders.database'
 import { motion } from "motion/react"
 import { CaretDown } from '@phosphor-icons/react/dist/ssr/CaretDown'
 import { Dropdown } from '@/app/components/ui/dropdown/Dropdown'
+import { useRouter } from 'next/navigation'
 
 type FilterCardProps = {
     number: number | string
@@ -107,6 +108,7 @@ const data: Item[] = [
 ];
 
 const Page = () => {
+  const router = useRouter();
     const [selectedFilter, setSelectedFilter] = useState<number | null>(null)
 
     useEffect(() => {

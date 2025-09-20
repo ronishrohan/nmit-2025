@@ -4,12 +4,38 @@ import React from "react";
 import axios from "axios";
 import { useState } from "react";
 import TextInputField from "../../components/ui/TextInputField";
-
+import { useRouter } from "next/navigation";
+import { useUserStore } from "@/app/store/userStore";
 export default function page() {
   const [loginId, setLoginId] = useState("");
   const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const router = useRouter();
+
+  const { login } = useUserStore();
+
+  const validateForm = () => {
+    if (!loginId.trim()) {
+      setError("Please enter your login ID");
+      return false;
+    }
+    if (!password.trim()) {
+      setError("Please enter your password");
+      return false;
+    }
+    return true;
+  };
 
   const handleLogin = async () => {
+    setError(""); // Clear previous errors
+
+    if (!validateForm()) {
+      return;
+    }
+
+    setIsLoading(true);
+
     try {
       const response = await axios.post("/api/login", {
         loginId: loginId,
@@ -17,8 +43,26 @@ export default function page() {
       });
 
       console.log("Login successful", response.data);
+      // Redirect to dashboard or home page on success
+      login();
+      router.push("/dashboard");
     } catch (err: any) {
-      console.log("Login error:", err.message);
+      console.log("Login error:", err);
+
+      // Handle different types of errors
+      if (err.response?.status === 401) {
+        setError(
+          "Invalid login credentials. Please check your login ID and password."
+        );
+      } else if (err.response?.status === 400) {
+        setError("Please enter both login ID and password.");
+      } else if (err.response?.data?.error) {
+        setError(err.response.data.error);
+      } else {
+        setError("Login failed. Please try again.");
+      }
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -47,6 +91,13 @@ export default function page() {
             onKeyPress={handleKeyPress}
             className="mb-1"
           />
+
+          {error && (
+            <div className="w-full lg:w-1/4 mb-2">
+              <p className="text-red-500 text-sm font-medium">{error}</p>
+            </div>
+          )}
+
           <div className="w-full lg:w-1/4 flex justify-end mb-4">
             <button
               type="button"
@@ -58,9 +109,14 @@ export default function page() {
           <button
             type="button"
             onClick={handleLogin}
-            className="bg-accent font-medium text-white p-3 rounded-xl lg:w-1/4 w-full cursor-pointer"
+            disabled={isLoading}
+            className={`font-medium text-white p-3 rounded-xl lg:w-1/4 w-full cursor-pointer ${
+              isLoading
+                ? "bg-accent cursor-not-allowed brightness-80"
+                : "bg-accent hover:bg-accent/90"
+            }`}
           >
-            Login
+            {isLoading ? "Logging in..." : "Login"}
           </button>
 
           <div className="flex items-center w-full lg:w-1/4 my-6">
@@ -71,6 +127,9 @@ export default function page() {
 
           <button
             type="button"
+            onClick={() => {
+              router.push("/signup");
+            }}
             className="border border-accent font-medium text-black p-3 rounded-xl lg:w-1/4 w-full cursor-pointer hover:bg-gray-50"
           >
             Create Account
