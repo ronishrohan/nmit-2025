@@ -47,7 +47,7 @@ const CheckboxTable = <T extends { id: number }>({ columns, data }: TableProps<T
             <tr
               key={item.id}
               onClick={() => router.push("/order/" + item.id)}
-              className="hover:bg-accent-yellow/20 cursor-pointer transition-colors duration-100"
+              className="hover:bg-zinc-100 cursor-pointer transition-colors duration-100"
             >
               {columns.map((col, index) => (
                 <td
