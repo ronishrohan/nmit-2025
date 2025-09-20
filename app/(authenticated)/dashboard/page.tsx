@@ -16,6 +16,7 @@ import { useUserStore } from "@/app/store/userStore";
 import { ArrowUpRight } from "@phosphor-icons/react/dist/ssr/ArrowUpRight";
 import { useMoStore } from "@/app/store/moStore";
 import { CaretDoubleUp } from "@phosphor-icons/react/dist/ssr/CaretDoubleUp";
+import { ManufacturingOrder, OrderStatus } from "@/app/types";
 
 type FilterCardProps = {
   number: number | string;
@@ -49,141 +50,87 @@ const FilterCard = ({
   );
 };
 
-interface Item {
-  id: number;
-  reference: string;
-  startDate: string; // ISO date string like "2025-09-01"
-  finishedProduct: string;
-  status: "Draft" | "Confirmed" | "In-Progress" | "To Close" | "Done"; // Updated to match kanban columns
-  quantity: number;
-  unit: string; // e.g., "Units"
-  state: string; // Component Status: "Available", "Not Available", etc.
-}
-
-const columns: Column[] = [
-  { key: "reference", label: "Reference" },
-  { key: "startDate", label: "Start Date" },
-  { key: "finishedProduct", label: "Finished Product" },
-  { key: "state", label: "Component Status" },
-  { key: "quantity", label: "Quantity" },
-  { key: "unit", label: "Unit" },
-  { key: "status", label: "State" },
-];
-
-const data: Item[] = [
-  {
-    id: 1,
-    reference: "MO-000001",
-    startDate: "Tomorrow",
-    finishedProduct: "Dining Table",
-    status: "Confirmed",
-    quantity: 5.0,
-    unit: "Units",
-    state: "Not Available",
-  },
-  {
-    id: 2,
-    reference: "MO-000002",
-    startDate: "Yesterday",
-    finishedProduct: "Drawer",
-    status: "In-Progress",
-    quantity: 2.0,
-    unit: "Units",
-    state: "Available",
-  },
-  {
-    id: 3,
-    reference: "MO-000003",
-    startDate: "2025-09-20",
-    finishedProduct: "Chair",
-    status: "Draft",
-    quantity: 10.0,
-    unit: "Units",
-    state: "Available",
-  },
-  {
-    id: 4,
-    reference: "MO-000004",
-    startDate: "2025-09-22",
-    finishedProduct: "Desk",
-    status: "To Close",
-    quantity: 3.0,
-    unit: "Units",
-    state: "Partially Available",
-  },
-  {
-    id: 5,
-    reference: "MO-000005",
-    startDate: "2025-09-18",
-    finishedProduct: "Cabinet",
-    status: "Done",
-    quantity: 1.0,
-    unit: "Units",
-    state: "Available",
-  },
-];
-
 // Kanban View Component
-const KanbanCard = ({ item }: { item: Item }) => {
+const KanbanCard = ({ order }: { order: ManufacturingOrder }) => {
   const router = useRouter();
+
+  // Format date helper
+  const formatDate = (date?: Date) => {
+    if (!date) return "Not scheduled";
+    return new Date(date).toLocaleDateString();
+  };
+
   return (
     <button
-      onClick={() => router.push("/order/" + item.id)}
+      onClick={() => router.push("/manufacturing-orders/" + order.id)}
       className="bg-white border-2 w-full items-start text-left cursor-pointer border-border rounded-lg p-4 mb-3 hover:shadow-md transition-shadow"
     >
-      <div className="font-medium text-lg mb-2">{item.reference}</div>
-      <div className="text-sm text-gray-600 mb-1">{item.finishedProduct}</div>
-      <div className="text-sm text-gray-500 mb-2">Start: {item.startDate}</div>
+      <div className="font-medium text-lg mb-2">
+        MO-{order.id?.toString().padStart(6, "0")}
+      </div>
+      <div className="text-sm text-gray-600 mb-1">
+        {order.product?.name || "Unknown Product"}
+      </div>
+      <div className="text-sm text-gray-500 mb-2">
+        Start: {formatDate(order.scheduleStartDate)}
+      </div>
       <div className="flex justify-between items-center">
         <span className="text-sm">
-          {item.quantity} {item.unit}
+          {order.quantity || 0} {order.product?.unit || "Units"}
         </span>
-        <span className="text-sm text-gray-500">{item.state}</span>
+        <span className="text-sm text-gray-500 capitalize">
+          {order.status?.replace("_", " ")}
+        </span>
       </div>
+      {order.assignedTo && (
+        <div className="text-xs text-gray-400 mt-1">
+          Assigned: {order.assignedTo.fullName}
+        </div>
+      )}
     </button>
   );
 };
 
 const KanbanColumn = ({
   title,
-  items,
+  orders,
   color,
 }: {
   title: string;
-  items: Item[];
+  orders: ManufacturingOrder[];
   color: string;
 }) => {
   return (
     <div className="flex-1 h-fit min-w-0">
       <div className={`rounded-lg sticky top-0 p-4 mb-4 ${color}`}>
         <h3 className="font-medium text-lg text-white">{title}</h3>
-        <span className="text-white/80 text-sm">({items.length})</span>
+        <span className="text-white/80 text-sm">({orders.length})</span>
       </div>
       <div className="space-y-2">
-        {items.map((item) => (
-          <KanbanCard key={item.id} item={item} />
+        {orders.map((order) => (
+          <KanbanCard key={order.id} order={order} />
         ))}
       </div>
     </div>
   );
 };
 
-const KanbanView = ({ data }: { data: Item[] }) => {
+const KanbanView = ({ data }: { data: ManufacturingOrder[] }) => {
   const columns = [
-    { title: "Draft", status: "Draft" as const, color: "bg-gray-500" },
-    { title: "Confirmed", status: "Confirmed" as const, color: "bg-[#33A7FF]" },
+    { title: "Draft", status: "draft" as const, color: "bg-gray-500" },
+    { title: "Confirmed", status: "confirmed" as const, color: "bg-[#33A7FF]" },
     {
       title: "In-Progress",
-      status: "In-Progress" as const,
+      status: "in_progress" as const,
       color: "bg-yellow-400",
     },
-    { title: "To Close", status: "To Close" as const, color: "bg-accent-red" },
-    { title: "Done", status: "Done" as const, color: "bg-[#99C24D]" },
+    { title: "To Close", status: "to_close" as const, color: "bg-accent-red" },
+    { title: "Done", status: "done" as const, color: "bg-[#99C24D]" },
   ];
 
   // Filter out columns that have no items
   const visibleColumns = columns.filter((column) =>
-    data.some((item) => item.status === column.status)
+    data.some((order) => order.status === column.status)
   );
 
   return (
@@ -193,7 +140,7 @@ const KanbanView = ({ data }: { data: Item[] }) => {
           <KanbanColumn
             key={column.status}
             title={column.title}
-            items={data.filter((item) => item.status === column.status)}
+            orders={data.filter((order) => order.status === column.status)}
             color={column.color}
           />
         ))}
@@ -220,13 +167,42 @@ const Page = () => {
 
   const [ordersHidden, setOrdersHidden] = useState(false);
 
+  // Calculate counts for each filter dynamically
+  const getFilterCounts = () => {
+    const counts = {
+      draft: manufacturingOrders.filter((order) => order.status === "draft")
+        .length,
+      confirmed: manufacturingOrders.filter(
+        (order) => order.status === "confirmed"
+      ).length,
+      in_progress: manufacturingOrders.filter(
+        (order) => order.status === "in_progress"
+      ).length,
+      to_close: manufacturingOrders.filter(
+        (order) => order.status === "to_close"
+      ).length,
+      not_assigned: manufacturingOrders.filter((order) => !order.assignedToId)
+        .length, // Orders without assignee
+      late: manufacturingOrders.filter(
+        (order) =>
+          order.deadline &&
+          new Date(order.deadline) < new Date() &&
+          order.status !== "done" &&
+          order.status !== "cancelled"
+      ).length, // Orders past deadline and not completed
+    };
+    return counts;
+  };
+
+  const filterCounts = getFilterCounts();
+
   const filters = [
-    { number: 2, title: "draft" },
-    { number: 5, title: "confirmed" },
-    { number: 3, title: "in_progress" },
-    { number: 1, title: "to_close" },
-    { number: 4, title: "not_assigned" },
-    { number: 6, title: "late" },
+    { number: filterCounts.draft, title: "draft" },
+    { number: filterCounts.confirmed, title: "confirmed" },
+    { number: filterCounts.in_progress, title: "in_progress" },
+    { number: filterCounts.to_close, title: "to_close" },
+    { number: filterCounts.not_assigned, title: "not_assigned" },
+    { number: filterCounts.late, title: "late" },
   ];
   const [mode, setMode] = useState("All");
 
@@ -239,11 +215,27 @@ const Page = () => {
     { key: "createdAt", label: "Created At" },
   ];
 
-  // Prepare data for the table
-  const filteredData = manufacturingOrders
+  // Prepare base filtered data
+  const baseFilteredData = manufacturingOrders
     .filter((order) => {
       if (selectedFilter === null) return true;
-      return order.status === filters[selectedFilter].title;
+      const filterTitle = filters[selectedFilter].title;
+
+      // Handle special filter cases
+      if (filterTitle === "not_assigned") {
+        return !order.assignedToId;
+      }
+      if (filterTitle === "late") {
+        return (
+          order.deadline &&
+          new Date(order.deadline) < new Date() &&
+          order.status !== "done" &&
+          order.status !== "cancelled"
+        );
+      }
+
+      // Handle regular status filters
+      return order.status === filterTitle;
     })
     .filter((order) => {
       return (
@@ -253,6 +245,20 @@ const Page = () => {
         order.createdAt?.toString().includes(searchQuery)
       );
     });
+
+  // Prepare data for the table with formatted dates
+  const tableData = baseFilteredData.map((order) => ({
+    ...order,
+    createdAt: order.createdAt
+      ? new Date(order.createdAt).toLocaleDateString("en-US", {
+          year: "numeric",
+          month: "short",
+          day: "numeric",
+          hour: "2-digit",
+          minute: "2-digit",
+        })
+      : "Not set",
+  }));
 
   return (
     <div className="h-fit w-full p-2 flex flex-col">
@@ -305,24 +311,27 @@ const Page = () => {
           setValue={setMode}
           values={["All", "My"]}
         />
-        {viewMode === "list" && <>
-        <div className="flex gap-2">
-          {filters.map((filter, index) => (
-          <FilterCard
-            key={index}
-            number={filter.number}
-            title={filter.title}
-            isSelected={selectedFilter === index}
-            onClick={() => {
-              if (selectedFilter == index) {
-                setSelectedFilter(null);
-              } else {
-                setSelectedFilter(index);
-              }
-            }}
-          />
-        ))}
-        </div></>}
+        {viewMode === "list" && (
+          <>
+            <div className="flex gap-2">
+              {filters.map((filter, index) => (
+                <FilterCard
+                  key={index}
+                  number={filter.number}
+                  title={filter.title}
+                  isSelected={selectedFilter === index}
+                  onClick={() => {
+                    if (selectedFilter == index) {
+                      setSelectedFilter(null);
+                    } else {
+                      setSelectedFilter(index);
+                    }
+                  }}
+                />
+              ))}
+            </div>
+          </>
+        )}
       </div>
       <motion.div
         initial={{ height: "auto" }}
@@ -357,17 +366,18 @@ const Page = () => {
         </div>
         {loading && <div className="text-center text-lg">Loading...</div>}
         {error && <div className="text-center text-red-500">{error}</div>}
-        {!loading && !error && filteredData.length === 0 && (
+        {!loading && !error && baseFilteredData.length === 0 && (
           <div className="text-center py-8">No Orders Yet</div>
         )}
-        {!loading && !error && filteredData.length > 0 ? (
+        {!loading && !error && baseFilteredData.length > 0 ? (
           viewMode === "list" ? (
-            <ProductionTable columns={columns} data={filteredData} />
+            <ProductionTable columns={columns} data={tableData} />
           ) : (
-            <KanbanView data={data} />
+            <KanbanView data={baseFilteredData} />
           )
         ) : (
-          <KanbanView data={data} />
+          !loading &&
+          !error && <div className="text-center py-8">No Orders Yet</div>
         )}
       </motion.div>
       <div className="h-[100dvh]"></div>
