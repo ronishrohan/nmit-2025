@@ -11,6 +11,7 @@ import { CaretDown } from "@phosphor-icons/react/dist/ssr/CaretDown";
 import { Dropdown } from "@/app/components/ui/dropdown/Dropdown";
 import { useRouter } from "next/navigation";
 import { useUserStore } from "@/app/store/userStore";
+import { ArrowUpRight } from "@phosphor-icons/react/dist/ssr/ArrowUpRight";
 
 type FilterCardProps = {
   number: number | string;
@@ -31,7 +32,11 @@ const FilterCard = ({
     <button
       onClick={onClick}
       className={`rounded-xl outline-none border-2 gap-2 px-6 h-full w-fit font-medium cursor-pointer duration-100 text-xl flex items-center justify-between transition-colors
-        ${isSelected ? "bg-accent-green/730 border-transparent text-black" : "bg-white hover:bg-zinc-200 border-border text-black/80"}
+        ${
+          isSelected
+            ? "bg-accent-green/730 border-transparent text-black"
+            : "bg-white hover:bg-zinc-200 border-border text-black/80"
+        }
         ${className}`}
     >
       <div>{number}</div>
@@ -124,10 +129,6 @@ const Page = () => {
     });
   }, []);
 
-  if (!isLoggedIn) {
-    router.push("/login");
-  }
-
   const filters = [
     { number: 2, title: "Draft" },
     { number: 5, title: "Confirmed" },
@@ -142,7 +143,10 @@ const Page = () => {
     <div className="h-fit w-full p-2 flex flex-col">
       {/* Search & Buttons */}
       <div className="w-full flex h-[66px] gap-2 items-center">
-        <Button onClick={() => router.push("/create-order")} className="px-6 shrink-0 h-[calc(100%-4px)]">
+        <Button
+          onClick={() => router.push("/create-order")}
+          className="px-6 shrink-0 h-[calc(100%-4px)]"
+        >
           <Plus size={20} weight="regular" /> Create Order
         </Button>
         <div className="h-full w-full bg-white rounded-xl group border-2 focus-within:border-accent transition-colors duration-150 border-border flex relative">
@@ -185,7 +189,15 @@ const Page = () => {
           />
         ))}
       </div>
-      <div className="w-full h-fit mt-2">
+      <div className="w-full h-fit border-2 border-border mt-2 bg-white flex flex-col rounded-xl overflow-hidden">
+        <div className="text-3xl p-4 px-6 flex w-full justify-between h-[70px] items-center relative">
+          <div>Orders</div>{" "}
+          <div className="absolute p-2 right-0 top-0 h-full aspect-square shrink-0">
+            <button onClick={() => router.push("/manufacturing-orders")} className="size-full cursor-pointer  rounded-lg border-2 border-border/50  hover:bg-zinc-200 flex items-center justify-center transition-colors duration-100">
+              <ArrowUpRight size={24} />
+            </button>
+          </div>
+        </div>
         <ProductionTable columns={columns} data={data} />
       </div>
     </div>
