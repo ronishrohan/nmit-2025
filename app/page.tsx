@@ -9,15 +9,15 @@ export default function Home() {
   const clickMe = async () => {
     const res = await axios.get("/api/login");
     if (res.data.message == "works") {
-      router.push("/pages/landing");
+      router.push("/landing");
     }
   };
   return (
     <div
-      className="cursor-pointer text-blue-600 underline"
+      className="size-full flex items-center justify-center text-6xl"
       onClick={() => clickMe()}
     >
-      {name || "Click me please"}
+     is this instrument-sans
     </div>
   );
 }
