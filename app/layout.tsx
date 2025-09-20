@@ -27,10 +27,10 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${fontPrimary.className} ${geist_mono.variable} antialiased p-2 pr-0 font-primary text-foreground bg-background flex`}
+        className={`${fontPrimary.className} ${geist_mono.variable} antialiased p-2 overflow-hidden pr-0 font-primary text-foreground bg-background flex`}
       >
         <Sidebar />
-        <div className="flex flex-col size-full ">
+        <div className="flex flex-col size-full overflow-y-auto">
           <Topbar />
           {children}
         </div>

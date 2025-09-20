@@ -26,7 +26,7 @@ const CheckboxTable = <T extends { id: number }>({ columns, data }: TableProps<T
   return (
     <div className="overflow-x-auto text-xl p-2 py-0 rounded-xl bg-white border-border ">
       <table className="min-w-full border-2 !border-border rounded-xl  text-left overflow-hidden">
-        <thead>
+        <thead className="">
           <tr>
             {columns.map((col, index) => (
               <th

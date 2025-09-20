@@ -14,6 +14,7 @@ import { Dropdown } from "@/app/components/ui/dropdown/Dropdown";
 import { useRouter } from "next/navigation";
 import { useUserStore } from "@/app/store/userStore";
 import { ArrowUpRight } from "@phosphor-icons/react/dist/ssr/ArrowUpRight";
+import { CaretDoubleUp } from "@phosphor-icons/react/dist/ssr/CaretDoubleUp";
 
 type FilterCardProps = {
   number: number | string;
@@ -123,8 +124,12 @@ const data: Item[] = [
 
 // Kanban View Component
 const KanbanCard = ({ item }: { item: Item }) => {
+  const router = useRouter();
   return (
-    <div className="bg-white border-2 border-border rounded-lg p-4 mb-3 hover:shadow-md transition-shadow">
+    <button
+      onClick={() => router.push("/order/" + item.id)}
+      className="bg-white border-2 w-full items-start text-left cursor-pointer border-border rounded-lg p-4 mb-3 hover:shadow-md transition-shadow"
+    >
       <div className="font-medium text-lg mb-2">{item.reference}</div>
       <div className="text-sm text-gray-600 mb-1">{item.finishedProduct}</div>
       <div className="text-sm text-gray-500 mb-2">Start: {item.startDate}</div>
@@ -134,7 +139,7 @@ const KanbanCard = ({ item }: { item: Item }) => {
         </span>
         <span className="text-sm text-gray-500">{item.state}</span>
       </div>
-    </div>
+    </button>
   );
 };
 
@@ -148,8 +153,8 @@ const KanbanColumn = ({
   color: string;
 }) => {
   return (
-    <div className="flex-1 min-w-0">
-      <div className={`rounded-lg p-4 mb-4 ${color}`}>
+    <div className="flex-1 h-fit min-w-0">
+      <div className={`rounded-lg sticky top-0 p-4 mb-4 ${color}`}>
         <h3 className="font-medium text-lg text-white">{title}</h3>
         <span className="text-white/80 text-sm">({items.length})</span>
       </div>
@@ -181,15 +186,17 @@ const KanbanView = ({ data }: { data: Item[] }) => {
   );
 
   return (
-    <div className="flex gap-4 overflow-x-auto p-4">
-      {visibleColumns.map((column) => (
-        <KanbanColumn
-          key={column.status}
-          title={column.title}
-          items={data.filter((item) => item.status === column.status)}
-          color={column.color}
-        />
-      ))}
+    <div className="w-full flex  overflow-auto">
+      <div className="flex w-full gap-4  h-fit p-4">
+        {visibleColumns.map((column) => (
+          <KanbanColumn
+            key={column.status}
+            title={column.title}
+            items={data.filter((item) => item.status === column.status)}
+            color={column.color}
+          />
+        ))}
+      </div>
     </div>
   );
 };
@@ -204,6 +211,8 @@ const Page = () => {
       console.log(data);
     });
   }, []);
+
+  const [ordersHidden, setOrdersHidden] = useState(false)
 
   const filters = [
     { number: 2, title: "Draft" },
@@ -280,16 +289,32 @@ const Page = () => {
           />
         ))}
       </div>
-      <div className="w-full max-h-[50vh] border-2 border-border mt-2 bg-white flex flex-col rounded-xl overflow-hidden">
+      <motion.div
+        initial={{ height: "auto" }}
+        animate={{ height: ordersHidden ? "72px" : "auto" }}
+        className="w-full max-h-[50vh] border-2 border-border mt-2 bg-white flex flex-col rounded-xl overflow-hidden"
+      >
         <div className="text-3xl p-4 px-6 flex w-full justify-between h-[70px] items-center relative">
           <div>Manufacturing Orders</div>{" "}
-          <div className="absolute p-2 right-0 top-0 h-full aspect-square shrink-0">
-            <button
-              onClick={() => router.push("/manufacturing-orders")}
-              className="size-full cursor-pointer  rounded-lg border-2 border-border/50  hover:bg-zinc-200 flex items-center justify-center transition-colors duration-100"
-            >
-              <ArrowUpRight size={24} />
-            </button>
+          <div className="flex h-[70px] w-fit absolute right-0 p-2 gap-2">
+            <div className="right-0 top-0 h-full aspect-square shrink-0">
+              <button
+                onClick={() => router.push("/manufacturing-orders")}
+                className="size-full cursor-pointer  rounded-lg border-2 border-border/50  hover:bg-zinc-200 flex items-center justify-center transition-colors duration-100"
+              >
+                <ArrowUpRight size={24} />
+              </button>
+            </div>
+            <div className="right-0 top-0 h-full aspect-square shrink-0">
+              <button
+                onClick={() => setOrdersHidden(v => !v)}
+                className="size-full cursor-pointer  rounded-lg border-2 border-border/50  hover:bg-zinc-200 flex items-center justify-center transition-colors duration-100"
+              >
+                <motion.div animate={{rotateZ: ordersHidden ? "180deg" : "0deg"}} transition={{duration: 0.2, ease: 'circInOut'}}>
+                  <CaretDoubleUp  size={24} />
+                </motion.div>
+              </button>
+            </div>
           </div>
         </div>
         {viewMode === "list" ? (
@@ -297,7 +322,8 @@ const Page = () => {
         ) : (
           <KanbanView data={data} />
         )}
-      </div>
+      </motion.div>
+      <div className="h-[100dvh]" ></div>
     </div>
   );
 };

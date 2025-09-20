@@ -195,7 +195,7 @@ function Sidebar() {
       <div className="border-t-2 border-border shrink-0 h-[84px] overflow-hidden w-full mt-auto p-2 gap-4 flex">
         <div
           className="h-full aspect-square shrink-0
-            rounded-lg bg-gradient-to-br from-accent to-accent-red relative overflow-hidden"
+            rounded-xl bg-gradient-to-br from-accent to-accent-red relative overflow-hidden"
         >
           <img
             src="https://cdn.jsdelivr.net/gh/alohe/avatars/png/3d_2.png"

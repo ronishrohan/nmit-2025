@@ -38,7 +38,7 @@ const Topbar = () => {
   const { isLoggedIn } = useUserStore();
   if (!isLoggedIn) return null;
   return (
-    <div className="h-[86px] shrink-0 border-b-2 border-b-border p-4 flex">
+    <div className="h-[86px] sticky top-0 shrink-0 bg-background z-[100000]  border-b-2 border-b-border p-4 flex">
       <div className="h-full flex flex-col items-start justify-between  text-2xl font-bold px-4">
         <div className="leading-5">{title[0]}</div>
         <div className="text-lg font-medium text-inactive">{title[1]}</div>
