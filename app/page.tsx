@@ -6,7 +6,7 @@ import axios from "axios";
 export default function Home() {
   const router = useRouter();
   const { isLoggedIn } = useUserStore();
-  if(!isLoggedIn){
+  if (!isLoggedIn) {
     router.push("/login");
   }
   const clickMe = async () => {
@@ -15,12 +15,13 @@ export default function Home() {
       router.push("/landing");
     }
   };
+  if (!isLoggedIn) return null;
   return (
     <div
       className="size-full flex items-center justify-center text-6xl"
       onClick={() => clickMe()}
     >
-     is this instrument-sans
+      is this instrument-sans
     </div>
   );
 }
