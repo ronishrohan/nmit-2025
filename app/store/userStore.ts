@@ -98,10 +98,9 @@ export const useUserStore = create<UserStore>()(
 
       setToken: (token) => {
         set({ token });
+        // Do NOT clear token ever, so do not call removeAuthToken()
         if (token) {
           setAuthToken(token);
-        } else {
-          removeAuthToken();
         }
       },
 
@@ -127,11 +126,10 @@ export const useUserStore = create<UserStore>()(
           if (user && token) {
             set({
               user,
-              token,
               isLoggedIn: true,
               loading: false,
             });
-            setAuthToken(token);
+            get().setToken(token);
             return true;
           } else {
             set({
@@ -166,11 +164,10 @@ export const useUserStore = create<UserStore>()(
           if (user && token) {
             set({
               user,
-              token,
               isLoggedIn: true,
               loading: false,
             });
-            setAuthToken(token);
+            get().setToken(token);
             return true;
           } else {
             set({
