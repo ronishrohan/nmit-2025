@@ -30,9 +30,11 @@ export default function RootLayout({
         className={`${fontPrimary.className} ${geist_mono.variable} antialiased p-2 overflow-hidden pr-0 font-primary text-foreground bg-background flex`}
       >
         <Sidebar />
-        <div className="flex flex-col size-full overflow-y-auto">
+        <div className="flex flex-col size-full overflow-hidden ">
           <Topbar />
-          {children}
+          <div className="overflow-y-auto">
+            {children}
+          </div>
         </div>
       </body>
     </html>
