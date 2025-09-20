@@ -13,7 +13,8 @@ const Page = () => {
   const router = useRouter();
   const [searchTerm, setSearchTerm] = useState("");
   const { isLoggedIn } = useUserStore();
-  const { workCenters, fetchWorkCenters, loading, error } = useWorkCenterStore();
+  const { workCenters, fetchWorkCenters, loading, error } =
+    useWorkCenterStore();
 
   useEffect(() => {
     if (!isLoggedIn) {
@@ -23,7 +24,7 @@ const Page = () => {
     }
   }, [isLoggedIn, router, fetchWorkCenters]);
 
-  const filteredWorkCenters = workCenters.filter(center =>
+  const filteredWorkCenters = workCenters.filter((center) =>
     center.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
@@ -60,53 +61,68 @@ const Page = () => {
         {!loading && !error && filteredWorkCenters.length === 0 && (
           <div className="text-center">
             <div className="text-6xl mb-4">🏢</div>
-            <h2 className="text-2xl font-semibold text-zinc-800 mb-2">No Work Centers Found</h2>
-            <p className="text-zinc-600 mb-6">Try adjusting your search term or create a new work center</p>
-            <Button className="px-8" onClick={() => router.push('/work-center/new')}>
+            <h2 className="text-2xl font-semibold text-zinc-800 mb-2">
+              No Work Centers Found
+            </h2>
+            <p className="text-zinc-600 mb-6">
+              Try adjusting your search term or create a new work center
+            </p>
+            <Button
+              className="px-8"
+              onClick={() => router.push("/work-center/new")}
+            >
               <Plus size={20} weight="regular" /> Create Work Center
             </Button>
           </div>
         )}
         {!loading && !error && filteredWorkCenters.length > 0 && (
-  <div className="divide-y divide-border">
-    {filteredWorkCenters.map((center) => (
-      <div
-        key={center.id}
-        className="p-4 flex flex-col gap-3 md:flex-row md:items-center md:justify-between hover:bg-zinc-50 transition-colors"
-      >
-        {/* Left Side Details */}
-        <div className="space-y-1">
-          <div className="text-xl font-bold text-zinc-800">
-            Work Center #{center.id}
-          </div>
-          <div className="text-zinc-700">
-            <span className="font-medium">Name:</span> {center.name}
-          </div>
-          <div className="text-zinc-700">
-            <span className="font-medium">Location:</span>{" "}
-            {center.location ?? "N/A"}
-          </div>
-          <div className="text-zinc-700">
-            <span className="font-medium">Capacity/hr:</span>{" "}
-            {center.capacityPerHour ?? "N/A"}
-          </div>
-          <div className="text-zinc-500 text-sm">
-            Created: {center.createdAt ? String(center.createdAt) : "N/A"}
-          </div>
-        </div>
+          <div className="divide-y divide-border">
+            {filteredWorkCenters.map((center) => (
+              <div
+                key={center.id}
+                className="p-4 flex flex-col gap-3 md:flex-row md:items-center md:justify-between hover:bg-zinc-50 transition-colors"
+              >
+                {/* Left Side Details */}
+                <div className="space-y-1">
+                  <div className="text-xl font-bold text-zinc-800">
+                    Work Center #{center.id}
+                  </div>
+                  <div className="text-zinc-700">
+                    <span className="font-medium">Name:</span> {center.name}
+                  </div>
+                  <div className="text-zinc-700">
+                    <span className="font-medium">Location:</span>{" "}
+                    {center.location ?? "N/A"}
+                  </div>
+                  <div className="text-zinc-700">
+                    <span className="font-medium">Capacity/hr:</span>{" "}
+                    {center.capacityPerHour ?? "N/A"}
+                  </div>
+                  <div className="text-zinc-500 text-sm">
+                    Created:{" "}
+                    {center.createdAt
+                      ? new Date(center.createdAt).toLocaleDateString("en-US", {
+                          year: "numeric",
+                          month: "short",
+                          day: "numeric",
+                          hour: "2-digit",
+                          minute: "2-digit",
+                        })
+                      : "N/A"}
+                  </div>
+                </div>
 
-        {/* Right Side Button */}
-        <Button
-          className="mt-auto"
-          onClick={() => router.push(`/work-center/${center.id}`)}
-        >
-          View Details
-        </Button>
-      </div>
-    ))}
-  </div>
-)}
-
+                {/* Right Side Button */}
+                <Button
+                  className="mt-auto"
+                  onClick={() => router.push(`/work-center/${center.id}`)}
+                >
+                  View Details
+                </Button>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );
