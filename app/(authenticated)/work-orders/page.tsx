@@ -3,7 +3,7 @@ import Button from "@/app/components/ui/button/Button";
 import { ArrowClockwise } from "@phosphor-icons/react/dist/ssr/ArrowClockwise";
 import { MagnifyingGlass } from "@phosphor-icons/react/dist/ssr/MagnifyingGlass";
 import { Plus } from "@phosphor-icons/react/dist/ssr/Plus";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { useUserStore } from "@/app/store/userStore";
 import { Dropdown } from "@/app/components/ui/dropdown/Dropdown";
@@ -48,11 +48,15 @@ const Page = () => {
   const router = useRouter();
   const [selectedFilter, setSelectedFilter] = useState<number | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
+  const [mode, setMode] = useState("All");
+  const [modalOpen, setModalOpen] = useState(false);
+
   const { isLoggedIn, user } = useUserStore();
   const { workOrders, fetchWorkOrders, loading, error } = useWorkOrderStore();
   const { manufacturingOrders, fetchManufacturingOrders } = useMoStore();
   const { products, fetchProducts } = useProductStore();
 
+  // Redirect if not logged in and fetch data
   useEffect(() => {
     if (!isLoggedIn) {
       router.push("/login");
@@ -61,57 +65,56 @@ const Page = () => {
       fetchManufacturingOrders();
       fetchProducts();
     }
-  }, [
-    isLoggedIn,
-    router,
-    fetchWorkOrders,
-    fetchManufacturingOrders,
-    fetchProducts,
-  ]);
+  }, [isLoggedIn, router, fetchWorkOrders, fetchManufacturingOrders, fetchProducts]);
+
+  // Memoized filter counts
+  const filterCounts = useMemo(() => {
+    return {
+      to_do: workOrders.filter((order) => order.status === "to_do").length,
+      started: workOrders.filter((order) => order.status === "started").length,
+      paused: workOrders.filter((order) => order.status === "paused").length,
+      completed: workOrders.filter((order) => order.status === "completed").length,
+    };
+  }, [workOrders]);
 
   const filters = [
-    { number: 4, title: "Pending" },
-    { number: 8, title: "Ready" },
-    { number: 6, title: "In Progress" },
-    { number: 3, title: "Waiting" },
-    { number: 2, title: "Done" },
-    { number: 1, title: "Cancelled" },
+    { number: filterCounts.to_do, title: "To do", status: "to_do" },
+    { number: filterCounts.started, title: "Started", status: "started" },
+    { number: filterCounts.paused, title: "Paused", status: "paused" },
+    { number: filterCounts.completed, title: "Completed", status: "completed" },
   ];
-  const [mode, setMode] = useState("All");
 
   const filteredWorkOrders = workOrders.filter((order) => {
-    const mo = manufacturingOrders.find((mo: any) => mo.id === order.moId);
-    const product = mo
-      ? products.find((p: any) => p.id === mo.productId)
-      : undefined;
+    const mo = manufacturingOrders.find((mo) => mo.id === order.moId);
+    const product = mo ? products.find((p) => p.id === mo.productId) : undefined;
+
     // Status filter
     const statusMatch =
       selectedFilter !== null
-        ? order.status.toLowerCase() ===
-          filters[selectedFilter].title.toLowerCase().replace(/ /g, "_")
+        ? order.status === filters[selectedFilter]?.status
         : true;
+
     // Mode filter
     let modeMatch = true;
     if (mode === "My Work Orders" && user) {
       modeMatch = order.assignedToId === user.id;
     }
+
     // Search filter
     const searchMatch =
       order.operation.toLowerCase().includes(searchQuery.toLowerCase()) ||
       order.moId.toString().includes(searchQuery) ||
-      (product &&
-        product.name.toLowerCase().includes(searchQuery.toLowerCase())) ||
-      (product && product.id.toString().includes(searchQuery));
+      product?.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      product?.id.toString().includes(searchQuery);
+
     return statusMatch && modeMatch && searchMatch;
   });
-  const [modalOpen, setModalOpen] = useState(false);
 
   return (
     <>
-    <Modal open={modalOpen} setOpen={setModalOpen} />
-      <div className="h-fit w-full p-2 flex flex-col">
-        {/* Page Title */}
+      <Modal open={modalOpen} setOpen={setModalOpen} />
 
+      <div className="h-fit w-full p-2 flex flex-col">
         {/* Search & Buttons */}
         <div className="w-full flex h-[66px] gap-2 items-center">
           <Button
@@ -120,6 +123,7 @@ const Page = () => {
           >
             <Plus size={20} weight="regular" /> New Work Order
           </Button>
+
           <div className="h-full w-full bg-white rounded-xl group border-2 focus-within:border-accent transition-colors duration-150 border-border flex relative">
             <MagnifyingGlass
               weight="bold"
@@ -134,37 +138,30 @@ const Page = () => {
               onChange={(e) => setSearchQuery(e.target.value)}
             />
           </div>
+
           <Button variant="secondary" className="px-6 h-full shrink-0">
             <ArrowClockwise size={20} weight="regular" /> Reset
           </Button>
         </div>
 
-        {/* Filter Cards */}
-        <div className="h-[66px] mt-2 w-full flex gap-2">
-          {/* <Dropdown
-          currentValue={mode}
-          setValue={setMode}
-          values={["All", "My Work Orders", "By Work Center", "By Employee"]}
-        /> */}
+        {/* Filter Cards + Mode Dropdown */}
+        <div className="h-[66px] mt-2 w-full flex gap-2 items-center">
+          
           {filters.map((filter, index) => (
             <FilterCard
-              key={index}
+              key={filter.status}
               number={filter.number}
               title={filter.title}
               isSelected={selectedFilter === index}
-              onClick={() => {
-                if (selectedFilter == index) {
-                  setSelectedFilter(null);
-                } else {
-                  setSelectedFilter(index);
-                }
-              }}
+              onClick={() =>
+                setSelectedFilter(selectedFilter === index ? null : index)
+              }
             />
           ))}
         </div>
 
         {/* Content Area */}
-        <div className="w-full h-fit mt-4 bg-white rounded-xl overflow-hidden border-2 border-border ">
+        <div className="w-full h-fit mt-2 bg-white rounded-xl overflow-hidden border-2 border-border">
           {/* Loading state */}
           {loading && (
             <div className="p-6 text-center text-lg text-zinc-600 animate-pulse">
@@ -174,9 +171,7 @@ const Page = () => {
 
           {/* Error state */}
           {error && (
-            <div className="p-6 text-center text-red-600 font-medium">
-              {error}
-            </div>
+            <div className="p-6 text-center text-red-600 font-medium">{error}</div>
           )}
 
           {/* Empty state */}
@@ -190,13 +185,17 @@ const Page = () => {
                 Create work orders to assign specific operations to work centers
                 and employees.
               </p>
-              <Button className="px-8 py-3 text-lg">
+              <Button
+                className="px-8 py-3 text-lg"
+                onClick={() => setModalOpen(true)}
+              >
                 <Plus size={20} weight="regular" className="mr-2" /> Create Work
                 Order
               </Button>
             </div>
           )}
 
+          {/* Work Orders List */}
           {!loading && !error && filteredWorkOrders.length > 0 && (
             <div className="divide-y divide-border">
               {filteredWorkOrders.map((order) => (
@@ -211,7 +210,8 @@ const Page = () => {
                     </div>
                     <div className="text-zinc-700">
                       <span className="font-medium">Status:</span>{" "}
-                      {order.status}
+                      {order.status.replace("_", " ").charAt(0).toUpperCase() +
+                        order.status.replace("_", " ").slice(1)}
                     </div>
                     <div className="text-zinc-700">
                       <span className="font-medium">Operation:</span>{" "}
@@ -222,7 +222,15 @@ const Page = () => {
                     </div>
                     <div className="text-zinc-500 text-sm">
                       Created:{" "}
-                      {order.createdAt ? String(order.createdAt) : "N/A"}
+                      {order.createdAt
+                        ? new Date(order.createdAt).toLocaleDateString("en-US", {
+                            year: "numeric",
+                            month: "short",
+                            day: "numeric",
+                            hour: "2-digit",
+                            minute: "2-digit",
+                          })
+                        : "N/A"}
                     </div>
                   </div>
 

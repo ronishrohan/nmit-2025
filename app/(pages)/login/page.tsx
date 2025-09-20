@@ -85,7 +85,7 @@ export default function page() {
           <div className="w-1/2 flex flex-col">
           <div className="text-3xl font-bold mb-4 flex gap-2"><GearSix weight="fill" size={30} />OUTWORKS</div>
           <TextInputField
-          className="!w-full"
+          className="!w-full mb-2"
             type="text"
             placeholder="Login ID"
             value={loginId}
@@ -93,7 +93,7 @@ export default function page() {
             onKeyPress={handleKeyPress}
           />
           <TextInputField
-          className="!w-full"
+          className="!w-full mb-2"
             type="password"
             placeholder="Password"
             value={password}
@@ -129,7 +129,7 @@ export default function page() {
             {isLoading ? "Logging in..." : "Login"}
           </button>
 
-          <div className="flex items-center w-full my-6">
+          <div className="flex items-center w-full my-4">
             <div className="flex-1 h-px bg-gray-300"></div>
             <span className="px-4 text-gray-500 text-sm">or</span>
             <div className="flex-1 h-px bg-gray-300"></div>
@@ -146,7 +146,8 @@ export default function page() {
           </button>
         
           </div>
-          <div className="w-1/2 rounded-xl bg-accent" ></div>
+          <div className="w-1/2 rounded-xl bg-accent overflow-hidden relative flex items-center justify-center" >
+          <img src="/images/flower.jpg" className="size-full absolute left-0 top-0 object-cover" alt="" /></div>
         </div>
       </div>
     </>

@@ -120,11 +120,11 @@ const KanbanView = ({ data }: { data: ManufacturingOrder[] }) => {
     { title: "Draft", status: "draft" as const, color: "bg-gray-500" },
     { title: "Confirmed", status: "confirmed" as const, color: "bg-[#33A7FF]" },
     {
-      title: "In-Progress",
+      title: "In progress",
       status: "in_progress" as const,
       color: "bg-yellow-400",
     },
-    { title: "To Close", status: "to_close" as const, color: "bg-accent-red" },
+    { title: "To close", status: "to_close" as const, color: "bg-accent-red" },
     { title: "Done", status: "done" as const, color: "bg-[#99C24D]" },
   ];
 
@@ -166,8 +166,6 @@ const Page = () => {
     console.log(manufacturingOrders);
   }, [isLoggedIn, router, fetchManufacturingOrders]);
 
-  
-
   const [ordersHidden, setOrdersHidden] = useState(false);
 
   // Calculate counts for each filter dynamically
@@ -200,12 +198,12 @@ const Page = () => {
   const filterCounts = getFilterCounts();
 
   const filters = [
-    { number: filterCounts.draft, title: "draft" },
-    { number: filterCounts.confirmed, title: "confirmed" },
-    { number: filterCounts.in_progress, title: "in_progress" },
-    { number: filterCounts.to_close, title: "to_close" },
-    { number: filterCounts.not_assigned, title: "not_assigned" },
-    { number: filterCounts.late, title: "late" },
+    { number: filterCounts.draft, title: "Draft" },
+    { number: filterCounts.confirmed, title: "Confirmed" },
+    { number: filterCounts.in_progress, title: "In progress" },
+    { number: filterCounts.to_close, title: "To close" },
+    { number: filterCounts.not_assigned, title: "Not assigned" },
+    { number: filterCounts.late, title: "Late" },
   ];
   const [mode, setMode] = useState("All");
 
@@ -241,7 +239,7 @@ const Page = () => {
       return order.status === filterTitle;
     })
     .filter((order) => {
-      console.log("order", order)
+      console.log("order", order);
       return (
         order.id?.toString().includes(searchQuery) ||
         order.productId?.toString().includes(searchQuery) ||
@@ -253,6 +251,9 @@ const Page = () => {
   // Prepare data for the table with formatted dates
   const tableData = baseFilteredData.map((order) => ({
     ...order,
+    status:
+      order.status.replace("_", " ").charAt(0).toUpperCase() +
+      order.status.replace("_", " ").slice(1),
     createdAt: order.createdAt
       ? new Date(order.createdAt).toLocaleDateString("en-US", {
           year: "numeric",

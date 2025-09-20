@@ -29,7 +29,11 @@ const FilterCard = ({
     <button
       onClick={onClick}
       className={`rounded-xl outline-none border-2 gap-2 px-6 h-full w-fit font-medium cursor-pointer duration-100 text-xl flex items-center justify-between
-        ${isSelected ? "bg-accent-green/730 border-transparent text-black" : "bg-white hover:bg-zinc-200 border-border text-black/80"}
+        ${
+          isSelected
+            ? "bg-accent-green/730 border-transparent text-black"
+            : "bg-white hover:bg-zinc-200 border-border text-black/80"
+        }
         ${className}`}
     >
       <div>{number}</div>
@@ -56,13 +60,42 @@ const Page = () => {
     }
   }, [isLoggedIn, router, fetchManufacturingOrders, fetchProducts]);
 
+  // Calculate counts for each filter dynamically
+  const getFilterCounts = () => {
+    const counts = {
+      draft: manufacturingOrders.filter((order) => order.status === "draft")
+        .length,
+      confirmed: manufacturingOrders.filter(
+        (order) => order.status === "confirmed"
+      ).length,
+      in_progress: manufacturingOrders.filter(
+        (order) => order.status === "in_progress"
+      ).length,
+      to_close: manufacturingOrders.filter(
+        (order) => order.status === "to_close"
+      ).length,
+      done: manufacturingOrders.filter((order) => order.status === "done")
+        .length,
+      cancelled: manufacturingOrders.filter(
+        (order) => order.status === "cancelled"
+      ).length,
+    };
+    return counts;
+  };
+
+  const filterCounts = getFilterCounts();
+
   const filters = [
-    { number: 3, title: "Draft" },
-    { number: 7, title: "Planned" },
-    { number: 5, title: "In Progress" },
-    { number: 2, title: "To Close" },
-    { number: 1, title: "Done" },
-    { number: 4, title: "Cancelled" },
+    { number: filterCounts.draft, title: "Draft", status: "draft" },
+    { number: filterCounts.confirmed, title: "Confirmed", status: "confirmed" },
+    {
+      number: filterCounts.in_progress,
+      title: "In progress",
+      status: "in_progress",
+    },
+    { number: filterCounts.to_close, title: "To close", status: "to_close" },
+    { number: filterCounts.done, title: "Done", status: "done" },
+    { number: filterCounts.cancelled, title: "Cancelled", status: "cancelled" },
   ];
   const [mode, setMode] = useState("All");
 
@@ -71,7 +104,7 @@ const Page = () => {
     // Status filter
     const statusMatch =
       selectedFilter !== null
-        ? order.status.toLowerCase() === filters[selectedFilter].title.toLowerCase().replace(/ /g, "_")
+        ? order.status === filters[selectedFilter].status
         : true;
     // Mode filter
     let modeMatch = true;
@@ -84,7 +117,8 @@ const Page = () => {
     const searchMatch =
       order.id.toString().includes(searchQuery) ||
       order.productId?.toString().includes(searchQuery) ||
-      (product && product.name.toLowerCase().includes(searchQuery.toLowerCase())) ||
+      (product &&
+        product.name.toLowerCase().includes(searchQuery.toLowerCase())) ||
       order.quantity?.toString().includes(searchQuery);
     return statusMatch && modeMatch && searchMatch;
   });
@@ -114,7 +148,12 @@ const Page = () => {
 
       {/* Filter Cards */}
       <div className="h-[66px] mt-2 w-full flex gap-2">
-        {/* <Droz */}
+        <Dropdown
+          currentValue={mode}
+          setValue={setMode}
+          width={240}
+          values={["All", "My Orders", "Assigned to me"]}
+        />
         {filters.map((filter, index) => (
           <FilterCard
             key={index}
@@ -145,55 +184,72 @@ const Page = () => {
             <p className="text-zinc-600 mb-6">
               Create your first manufacturing order to get started
             </p>
-            <Button className="px-8">
+            <Button
+              onClick={() => router.push("/create-order")}
+              className="px-8"
+            >
               <Plus size={20} weight="regular" /> Create Manufacturing Order
             </Button>
           </div>
         )}
         {!loading && !error && filteredOrders.length > 0 && (
-  <div className="divide-y divide-border">
-    {filteredOrders.map((order) => {
-      const product = products.find((p) => p.id === order.productId);
-      return (
-        <div
-          key={order.id}
-          className="p-4 flex flex-col gap-3 md:flex-row md:items-center md:justify-between hover:bg-zinc-50 transition-colors"
-        >
-          {/* Left Side Details */}
-          <div className="space-y-1">
-            <div className="text-xl font-bold text-zinc-800">
-              MO #{order.id}
-            </div>
-            <div className="text-zinc-700">
-              <span className="font-medium">Product:</span>{" "}
-              {product
-                ? `${product.name} (ID: ${product.id})`
-                : `ID: ${order.productId}`}
-            </div>
-            <div className="text-zinc-700">
-              <span className="font-medium">Quantity:</span> {order.quantity}
-            </div>
-            <div className="text-zinc-700">
-              <span className="font-medium">Status:</span> {order.status}
-            </div>
-            <div className="text-zinc-500 text-sm">
-              Created: {order.createdAt ? String(order.createdAt) : "N/A"}
-            </div>
+          <div className="divide-y divide-border">
+            {filteredOrders.map((order) => {
+              const product = products.find((p) => p.id === order.productId);
+              return (
+                <div
+                  key={order.id}
+                  className="p-4 flex flex-col gap-3 md:flex-row md:items-center md:justify-between hover:bg-zinc-50 transition-colors"
+                >
+                  {/* Left Side Details */}
+                  <div className="space-y-1">
+                    <div className="text-xl font-bold text-zinc-800">
+                      MO #{order.id}
+                    </div>
+                    <div className="text-zinc-700">
+                      <span className="font-medium">Product:</span>{" "}
+                      {product
+                        ? `${product.name} (ID: ${product.id})`
+                        : `ID: ${order.productId}`}
+                    </div>
+                    <div className="text-zinc-700">
+                      <span className="font-medium">Quantity:</span>{" "}
+                      {order.quantity}
+                    </div>
+                    <div className="text-zinc-700">
+                      <span className="font-medium">Status:</span>{" "}
+                      {order.status.replace("_", " ").charAt(0).toUpperCase() +
+                        order.status.replace("_", " ").slice(1)}
+                    </div>
+                    <div className="text-zinc-500 text-sm">
+                      Created:{" "}
+                      {order.createdAt
+                        ? new Date(order.createdAt).toLocaleDateString(
+                            "en-US",
+                            {
+                              year: "numeric",
+                              month: "short",
+                              day: "numeric",
+                              hour: "2-digit",
+                              minute: "2-digit",
+                            }
+                          )
+                        : "N/A"}
+                    </div>
+                  </div>
+
+                  {/* Right Side Button */}
+                  <Button
+                    className="mt-auto"
+                    onClick={() => router.push(`/order/${order.id}`)}
+                  >
+                    View Details
+                  </Button>
+                </div>
+              );
+            })}
           </div>
-
-          {/* Right Side Button */}
-          <Button
-            className="mt-auto"
-            onClick={() => router.push(`/order/${order.id}`)}
-          >
-            View Details
-          </Button>
-        </div>
-      );
-    })}
-  </div>
-)}
-
+        )}
       </div>
     </div>
   );

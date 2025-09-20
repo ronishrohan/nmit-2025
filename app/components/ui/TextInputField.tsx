@@ -1,4 +1,5 @@
 import React from "react";
+import { cn } from "@/lib/utils"; // utility to merge classNames
 
 interface TextInputFieldProps {
   type?: "text" | "email" | "password";
@@ -7,25 +8,46 @@ interface TextInputFieldProps {
   onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
   onKeyPress?: (e: React.KeyboardEvent<HTMLInputElement>) => void;
   className?: string;
+  icon?: React.ReactNode;
+  fullWidth?: boolean;
+  disabled?: boolean;
 }
 
 const TextInputField: React.FC<TextInputFieldProps> = ({
   type = "text",
-  placeholder,
+  placeholder = "Enter text",
   value,
   onChange,
   onKeyPress,
-  className = "",
+  className,
+  icon,
+  fullWidth = true,
+  disabled = false,
 }) => {
   return (
-    <input
-      type={type}
-      placeholder={placeholder}
-      value={value}
-      onChange={onChange}
-      onKeyPress={onKeyPress}
-      className={`p-3 font-medium bg-card rounded-xl w-full mb-4 border-2 border-border lg:w-1/4 ${className}`}
-    />
+    <div
+      className={cn(
+        "bg-white rounded-xl overflow-hidden group border-2 focus-within:border-accent transition-colors duration-150 border-border flex items-center relative",
+        fullWidth ? "w-full h-full" : "w-fit",
+        className
+      )}
+    >
+      {icon && <div className="absolute left-3 text-gray-500">{icon}</div>}
+
+      <input
+        type={type}
+        value={value}
+        onChange={onChange}
+        onKeyPress={onKeyPress}
+        placeholder={placeholder}
+        disabled={disabled}
+        className={cn(
+          "outline-none py-4 px-6 h-full text-xl font-medium bg-transparent",
+          fullWidth ? "w-full h-full" : "",
+          icon ? "pl-10" : ""
+        )}
+      />
+    </div>
   );
 };
 

@@ -84,7 +84,7 @@ const Page = () => {
 
         {/* Right Side Button */}
         <Button
-          className="mt-2 md:mt-0 self-start md:self-auto"
+          className="mt-auto"
           onClick={() => router.push(`/stock-ledger/${stock.id}`)}
         >
           View Details
