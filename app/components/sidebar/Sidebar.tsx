@@ -24,7 +24,7 @@ const SidebarButton = ({
   active,
   open,
   onClick,
-  action
+  action,
 }: {
   children: ReactNode;
   icon: ReactNode;
@@ -63,7 +63,7 @@ function Sidebar() {
   const router = useRouter();
   const [open, setOpen] = useState(true);
   const pathname = usePathname();
-  const { loginId, email, isLoggedIn } = useUserStore();
+  const { loginId, name, isLoggedIn,email } = useUserStore();
   if (!isLoggedIn) return null;
   return (
     <motion.div
@@ -172,7 +172,6 @@ function Sidebar() {
           </SidebarButton>
         </div>
         <div className="mt-auto p-2 gap-2 flex flex-col">
-          
           <SidebarButton
             open={open}
             onClick={() => router.push("/reports")}

@@ -26,11 +26,12 @@ interface UserStore {
   isLoggedIn: boolean;
   loading: boolean;
   error: string | null;
+  name: string | null;
+  loginId: string | null;
+  email: string | null;
 
   // Computed properties
   fullName: string | null;
-  email: string | null;
-  loginId: string | null;
   userId: number | null;
   role: string | null;
 
@@ -40,6 +41,9 @@ interface UserStore {
   setLoading: (loading: boolean) => void;
   setError: (error: string | null) => void;
   clearError: () => void;
+  setName: (name: string) => void;
+  setLoginId: (loginId: string) => void;
+  setEmail: (email: string) => void;
 
   // Auth Actions
   login: (loginId: string, pwd: string) => Promise<boolean>;
@@ -64,6 +68,9 @@ const initialState = {
   isLoggedIn: false,
   loading: false,
   error: null,
+  name: null,
+  loginId: null,
+  email: null,
 };
 
 export const useUserStore = create<UserStore>()(
@@ -74,12 +81,6 @@ export const useUserStore = create<UserStore>()(
       // Computed properties
       get fullName() {
         return get().user?.name || null;
-      },
-      get email() {
-        return get().user?.email || null;
-      },
-      get loginId() {
-        return get().user?.loginId || null;
       },
       get userId() {
         return get().user?.id || null;
@@ -93,6 +94,9 @@ export const useUserStore = create<UserStore>()(
         set({
           user,
           isLoggedIn: !!user,
+          name: user?.name ?? null,
+          loginId: user?.loginId ?? null,
+          email: user?.email ?? null,
         });
       },
 
@@ -109,6 +113,25 @@ export const useUserStore = create<UserStore>()(
       setError: (error) => set({ error }),
 
       clearError: () => set({ error: null }),
+
+      setName: (name: string) => {
+        set((state) => ({
+          name,
+          user: state.user ? { ...state.user, name } : null,
+        }));
+      },
+      setLoginId: (loginId: string) => {
+        set((state) => ({
+          loginId,
+          user: state.user ? { ...state.user, loginId } : null,
+        }));
+      },
+      setEmail: (email: string) => {
+        set((state) => ({
+          email,
+          user: state.user ? { ...state.user, email } : null,
+        }));
+      },
 
       // Auth Actions
       login: async (loginId, pwd) => {
@@ -128,6 +151,9 @@ export const useUserStore = create<UserStore>()(
               user,
               isLoggedIn: true,
               loading: false,
+              name: user.name ?? null,
+              loginId: user.loginId ?? null,
+              email: user.email ?? null,
             });
             get().setToken(token);
             return true;
@@ -166,6 +192,9 @@ export const useUserStore = create<UserStore>()(
               user,
               isLoggedIn: true,
               loading: false,
+              name: user.name ?? null,
+              loginId: user.loginId ?? null,
+              email: user.email ?? null,
             });
             get().setToken(token);
             return true;
