@@ -20,7 +20,7 @@ const Button = ({
   className,
 }: ButtonProps) => {
   const baseStyles =
-    "rounded-xl  text-lg flex gap-2 items-center transition-all duration-100";
+    "rounded-xl  text-lg flex gap-2 items-center cursor-pointer transition-all duration-100";
 
   const variantStyles = {
     primary: "bg-accent text-white hover:bg-accent/90 border-2 border-accent",
