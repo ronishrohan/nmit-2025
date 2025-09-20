@@ -5,7 +5,10 @@ import { useUserStore } from "./store/userStore";
 import axios from "axios";
 export default function Home() {
   const router = useRouter();
-  const { name } = useUserStore();
+  const { isLoggedIn } = useUserStore();
+  if(!isLoggedIn){
+    router.push("/login");
+  }
   const clickMe = async () => {
     const res = await axios.get("/api/login");
     if (res.data.message == "works") {

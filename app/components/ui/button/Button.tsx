@@ -23,7 +23,7 @@ const Button = ({
     "rounded-xl  text-lg flex gap-2 items-center cursor-pointer transition-all duration-100";
 
   const variantStyles = {
-    primary: "bg-accent text-white hover:bg-accent/90 border-2 border-accent",
+    primary: "bg-accent text-white hover:brightness-90 border-2 border-accent",
     secondary: "bg-white text-inactive hover:text-black border-2 border-border hover:bg-zinc-200 ",
     outline:
       "",
