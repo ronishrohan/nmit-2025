@@ -92,19 +92,10 @@ export default function page() {
           <TextInputField
           className="!w-full mb-2"
             type="text"
-            placeholder="Login ID"
+            placeholder="Enter your email ID"
             value={loginId}
             onChange={(e) => setUserLoginId(e.target.value)}
             onKeyPress={handleKeyPress}
-          />
-          <TextInputField
-          className="!w-full mb-2"
-            type="password"
-            placeholder="Password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            onKeyPress={handleKeyPress}
-            
           />
 
           {error && (
@@ -113,14 +104,14 @@ export default function page() {
             </div>
           )}
 
-          <div className="w-full flex justify-end mb-4">
+          {/* <div className="w-full flex justify-end mb-4">
             <button
               type="button"
               className="font-medium text-xs text-black/60 cursor-pointer"
             >
               Forgot Password?
             </button>
-          </div>
+          </div> */}
           <button
             type="button"
             onClick={handleLogin}
@@ -131,7 +122,7 @@ export default function page() {
                 : "bg-accent hover:bg-accent/90"
             }`}
           >
-            {isLoading ? "Logging in..." : "Login"}
+            {isLoading ? "Sending..." : "Continue"}
           </button>
 
           <div className="flex items-center w-full my-4">
