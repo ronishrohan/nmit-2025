@@ -6,7 +6,10 @@ import TextInputField from "../../components/ui/TextInputField";
 import { useRouter } from "next/navigation";
 import { GearSix } from "@phosphor-icons/react/dist/ssr/GearSix";
 import { backend } from "@/app/util/axios";
+import { sendOtpEmail } from "@/app/util/sendOtpMail";
 import axios from "axios";
+
+
 export default function page() {
   const [step, setStep] = useState<"email" | "reset">("email");
 
@@ -97,13 +100,12 @@ export default function page() {
       const response= await axios.post("http://172.17.54.86:3000/getotp",{
         email:email
       })
-      const otp = 4610;
-      // send otp to mail
+      const otp = response.data.otp;
+      
+      await sendOtpEmail(email,otp);
 
-      //type otp and check in backend
 
-
-      console.log("Forgot password request successful", response.data);
+      // console.log("Forgot password request successful", response.data);
       setSuccess("OTP has been sent to your email address.");
 
       setStep("reset");
