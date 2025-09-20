@@ -43,7 +43,7 @@ export const Dropdown: React.FC<DropdownProps> = ({
           marginTop: isOpen ? 4 : 0,
         }}
         initial={{height: 0, opacity: 0}}
-        className="absolute bg-white top-full left-0 rounded-xl overflow-hidden border-2 border-border w-full flex flex-col font-medium text-xl"
+        className="absolute bg-white top-full z-50 left-0 rounded-xl overflow-hidden border-2 border-border w-full flex flex-col font-medium text-xl"
       >
         {values.map((value) => (
           <div
