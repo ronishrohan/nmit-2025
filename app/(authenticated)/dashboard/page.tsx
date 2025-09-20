@@ -212,9 +212,9 @@ const Page = () => {
   // Prepare columns for the table
   const columns: Column[] = [
     { key: "id", label: "Order ID" },
-    { key: "status", label: "Status" },
-    { key: "productId", label: "Product ID" },
+    { key: "productName", label: "Product" },
     { key: "quantity", label: "Quantity" },
+    { key: "status", label: "Status" },
     { key: "createdAt", label: "Created At" },
   ];
 
@@ -241,6 +241,7 @@ const Page = () => {
       return order.status === filterTitle;
     })
     .filter((order) => {
+      console.log("order", order)
       return (
         order.id?.toString().includes(searchQuery) ||
         order.productId?.toString().includes(searchQuery) ||
