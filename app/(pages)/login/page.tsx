@@ -6,6 +6,7 @@ import { useState } from "react";
 import TextInputField from "../../components/ui/TextInputField";
 import { useRouter } from "next/navigation";
 import { useUserStore } from "@/app/store/userStore";
+import { GearSix } from "@phosphor-icons/react/dist/ssr/GearSix";
 export default function page() {
   const [loginId, setUserLoginId] = useState("");
   const [password, setPassword] = useState("");
@@ -79,8 +80,11 @@ export default function page() {
   return (
     <>
       <div className="flex flex-col w-full items-center justify-center min-h-screen py-2">
-        <div className="flex flex-col items-center w-full px-8">
+        <div className="flex  w-[800px] gap-4 bg-white rounded-xl p-4">
+          <div className="w-1/2 flex flex-col">
+          <div className="text-3xl font-bold mb-4 flex gap-2"><GearSix weight="fill" size={30} />OUTWORKS</div>
           <TextInputField
+          className="!w-full"
             type="text"
             placeholder="Login ID"
             value={loginId}
@@ -88,21 +92,22 @@ export default function page() {
             onKeyPress={handleKeyPress}
           />
           <TextInputField
+          className="!w-full"
             type="password"
             placeholder="Password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             onKeyPress={handleKeyPress}
-            className="mb-1"
+            
           />
 
           {error && (
-            <div className="w-full lg:w-1/4 mb-2">
+            <div className="w-full  mb-2">
               <p className="text-red-500 text-sm font-medium">{error}</p>
             </div>
           )}
 
-          <div className="w-full lg:w-1/4 flex justify-end mb-4">
+          <div className="w-full flex justify-end mb-4">
             <button
               type="button"
               className="font-medium text-xs text-black/60 cursor-pointer"
@@ -114,7 +119,7 @@ export default function page() {
             type="button"
             onClick={handleLogin}
             disabled={isLoading}
-            className={`font-medium text-white p-3 rounded-xl lg:w-1/4 w-full cursor-pointer ${
+            className={`font-medium text-white p-3 rounded-xl  w-full cursor-pointer ${
               isLoading
                 ? "bg-accent cursor-not-allowed brightness-80"
                 : "bg-accent hover:bg-accent/90"
@@ -123,7 +128,7 @@ export default function page() {
             {isLoading ? "Logging in..." : "Login"}
           </button>
 
-          <div className="flex items-center w-full lg:w-1/4 my-6">
+          <div className="flex items-center w-full my-6">
             <div className="flex-1 h-px bg-gray-300"></div>
             <span className="px-4 text-gray-500 text-sm">or</span>
             <div className="flex-1 h-px bg-gray-300"></div>
@@ -134,10 +139,13 @@ export default function page() {
             onClick={() => {
               router.push("/signup");
             }}
-            className="border border-accent font-medium text-black p-3 rounded-xl lg:w-1/4 w-full cursor-pointer hover:bg-gray-50"
+            className="border border-accent font-medium text-black p-3 rounded-xl  w-full cursor-pointer hover:bg-gray-50"
           >
             Create Account
           </button>
+        
+          </div>
+          <div className="w-1/2 rounded-xl bg-accent" ></div>
         </div>
       </div>
     </>
