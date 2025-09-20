@@ -131,7 +131,7 @@ function Sidebar() {
           <SidebarButton
             open={open}
             onClick={() => router.push("/create-order")}
-            active={pathname === "/create-order"}
+            active={pathname === "/manufacturing-orders"}
             icon={<Package size={26} weight="bold" />}
           >
             Manufacturing Orders
@@ -139,7 +139,7 @@ function Sidebar() {
           <SidebarButton
             open={open}
             onClick={() => router.push("/create-order")}
-            active={pathname === "/create-order"}
+            active={pathname === "/work-orders"}
             icon={<Factory size={26} weight="bold" />}
           >
             Work Orders
@@ -147,7 +147,7 @@ function Sidebar() {
           <SidebarButton
             open={open}
             onClick={() => router.push("/create-order")}
-            active={pathname === "/create-order"}
+            active={pathname === "/bom"}
             icon={<ReceiptIndianRupee size={26} weight="bold" />}
           >
             Bill of Materials
@@ -155,7 +155,7 @@ function Sidebar() {
           <SidebarButton
             open={open}
             onClick={() => router.push("/create-order")}
-            active={pathname === "/create-order"}
+            active={pathname === "/work-center"}
             icon={<BriefcaseBusiness size={26} weight="bold" />}
           >
             Work Center
@@ -163,7 +163,7 @@ function Sidebar() {
           <SidebarButton
             open={open}
             onClick={() => router.push("/create-order")}
-            active={pathname === "/create-order"}
+            active={pathname === "/stock-ledger"}
             icon={<ClipboardPen size={26} weight="bold" />}
           >
             Stock Ledger
