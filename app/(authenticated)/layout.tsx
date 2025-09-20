@@ -14,6 +14,7 @@ export default function RootLayout({
   if (!isLoggedIn) {
     router.push("/login");
   }
+  if (!isLoggedIn) return null;
   return (
     <html lang="en">
       <body

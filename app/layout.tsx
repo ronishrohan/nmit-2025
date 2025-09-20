@@ -3,11 +3,11 @@ import { Geist, Geist_Mono, Instrument_Sans } from "next/font/google";
 import "./globals.css";
 import Sidebar from "./components/sidebar/Sidebar";
 import Topbar from "./components/topbar/Topbar";
-
+import { useUserStore } from "./store/userStore";
 const fontPrimary = Instrument_Sans({
   weight: ["400", "500", "600", "700"],
-  variable: "--font-instrument-sans"
-})
+  variable: "--font-instrument-sans",
+});
 
 export const metadata: Metadata = {
   title: "Manufacturing CRM",
@@ -25,7 +25,7 @@ export default function RootLayout({
         className={`${fontPrimary.className} antialiased p-2 pr-0 font-primary text-foreground bg-background flex`}
       >
         <Sidebar />
-        <div className="flex flex-col size-full " >
+        <div className="flex flex-col size-full ">
           <Topbar />
           {children}
         </div>

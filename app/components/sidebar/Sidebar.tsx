@@ -61,7 +61,8 @@ function Sidebar() {
   const router = useRouter();
   const [open, setOpen] = useState(true);
   const pathname = usePathname();
-  const { loginId, email } = useUserStore();
+  const { loginId, email, isLoggedIn } = useUserStore();
+  if (!isLoggedIn) return null;
   return (
     <motion.div
       initial={{ width: "320px" }}
@@ -109,16 +110,16 @@ function Sidebar() {
         </div>
       </div>
       <div className="flex flex-col justify-between h-full">
-      <div className="h-fit flex flex-col w-full p-2 gap-2">
-        <SidebarButton
-          open={open}
-          onClick={() => router.push("/dashboard")}
-          active={pathname === "/dashboard"}
-          icon={<House size={26} weight="bold" />}
-        >
-          Dashboard
-        </SidebarButton>
-        {/* <SidebarButton
+        <div className="h-fit flex flex-col w-full p-2 gap-2">
+          <SidebarButton
+            open={open}
+            onClick={() => router.push("/dashboard")}
+            active={pathname === "/dashboard"}
+            icon={<House size={26} weight="bold" />}
+          >
+            Dashboard
+          </SidebarButton>
+          {/* <SidebarButton
           open={open}
           onClick={() => router.push("/orders")}
           active={pathname === "/orders"}
@@ -127,65 +128,65 @@ function Sidebar() {
           Orders
         </SidebarButton> */}
 
-        <SidebarButton
-          open={open}
-          onClick={() => router.push("/create-order")}
-          active={pathname === "/create-order"}
-          icon={<Package size={26} weight="bold" />}
-        >
-          Manufacturing Orders
-        </SidebarButton>
-        <SidebarButton
-          open={open}
-          onClick={() => router.push("/create-order")}
-          active={pathname === "/create-order"}
-          icon={<Factory size={26} weight="bold" />}
-        >
-          Work Orders
-        </SidebarButton>
-        <SidebarButton
-          open={open}
-          onClick={() => router.push("/create-order")}
-          active={pathname === "/create-order"}
-          icon={<ReceiptIndianRupee size={26} weight="bold" />}
-        >
-          Bill of Materials
-        </SidebarButton>
-        <SidebarButton
-          open={open}
-          onClick={() => router.push("/create-order")}
-          active={pathname === "/create-order"}
-          icon={<BriefcaseBusiness size={26} weight="bold" />}
-        >
-          Work Center
-        </SidebarButton>
-        <SidebarButton
-          open={open}
-          onClick={() => router.push("/create-order")}
-          active={pathname === "/create-order"}
-          icon={<ClipboardPen size={26} weight="bold" />}
-        >
-          Stock Ledger
-        </SidebarButton>
-      </div>
-      <div className="mt-auto p-2 gap-2 flex flex-col">
-        <SidebarButton
-          open={open}
-          onClick={() => router.push("/create-order")}
-          active={pathname === "/create-order"}
-          icon={<PlusCircle size={26} weight="bold" />}
-        >
-          Create Order
-        </SidebarButton>
-        <SidebarButton
-          open={open}
-          onClick={() => router.push("/reports")}
-          active={pathname === "/reports"}
-          icon={<Files size={26} weight="bold" />}
-        >
-          Reports
-        </SidebarButton>
-      </div>
+          <SidebarButton
+            open={open}
+            onClick={() => router.push("/create-order")}
+            active={pathname === "/create-order"}
+            icon={<Package size={26} weight="bold" />}
+          >
+            Manufacturing Orders
+          </SidebarButton>
+          <SidebarButton
+            open={open}
+            onClick={() => router.push("/create-order")}
+            active={pathname === "/create-order"}
+            icon={<Factory size={26} weight="bold" />}
+          >
+            Work Orders
+          </SidebarButton>
+          <SidebarButton
+            open={open}
+            onClick={() => router.push("/create-order")}
+            active={pathname === "/create-order"}
+            icon={<ReceiptIndianRupee size={26} weight="bold" />}
+          >
+            Bill of Materials
+          </SidebarButton>
+          <SidebarButton
+            open={open}
+            onClick={() => router.push("/create-order")}
+            active={pathname === "/create-order"}
+            icon={<BriefcaseBusiness size={26} weight="bold" />}
+          >
+            Work Center
+          </SidebarButton>
+          <SidebarButton
+            open={open}
+            onClick={() => router.push("/create-order")}
+            active={pathname === "/create-order"}
+            icon={<ClipboardPen size={26} weight="bold" />}
+          >
+            Stock Ledger
+          </SidebarButton>
+        </div>
+        <div className="mt-auto p-2 gap-2 flex flex-col">
+          <SidebarButton
+            open={open}
+            onClick={() => router.push("/create-order")}
+            active={pathname === "/create-order"}
+            icon={<PlusCircle size={26} weight="bold" />}
+          >
+            Create Order
+          </SidebarButton>
+          <SidebarButton
+            open={open}
+            onClick={() => router.push("/reports")}
+            active={pathname === "/reports"}
+            icon={<Files size={26} weight="bold" />}
+          >
+            Reports
+          </SidebarButton>
+        </div>
       </div>
       <div className="border-t-2 border-border h-[84px] overflow-hidden w-full mt-auto p-2 gap-4 flex">
         <div

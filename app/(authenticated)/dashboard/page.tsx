@@ -10,6 +10,7 @@ import { motion } from "motion/react";
 import { CaretDown } from "@phosphor-icons/react/dist/ssr/CaretDown";
 import { Dropdown } from "@/app/components/ui/dropdown/Dropdown";
 import { useRouter } from "next/navigation";
+import { useUserStore } from "@/app/store/userStore";
 
 type FilterCardProps = {
   number: number | string;
@@ -116,12 +117,16 @@ const data: Item[] = [
 const Page = () => {
   const router = useRouter();
   const [selectedFilter, setSelectedFilter] = useState<number | null>(null);
-
+  const { isLoggedIn } = useUserStore();
   useEffect(() => {
     getOrders().then((data) => {
       console.log(data);
     });
   }, []);
+
+  if (!isLoggedIn) {
+    router.push("/login");
+  }
 
   const filters = [
     { number: 2, title: "Draft" },
