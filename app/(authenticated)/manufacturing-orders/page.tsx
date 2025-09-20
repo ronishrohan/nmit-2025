@@ -30,7 +30,7 @@ const FilterCard = ({
         ${isSelected ? "bg-accent-green/730 border-transparent text-black" : "bg-white hover:bg-zinc-200 border-border text-black/80"}
         ${className}`}
     >
-      <div>{number}</div>
+      <div>{number} ok ho</div>
       <div>{title}</div>
     </button>
   );
@@ -61,8 +61,12 @@ const Page = () => {
     <div className="h-fit w-full p-2 flex flex-col">
       {/* Page Title */}
       <div className="mb-4">
-        <h1 className="text-3xl font-bold text-zinc-900">Manufacturing Orders</h1>
-        <p className="text-zinc-600 mt-1">Manage your manufacturing orders and production planning</p>
+        <h1 className="text-3xl font-bold text-zinc-900">
+          Manufacturing Orders
+        </h1>
+        <p className="text-zinc-600 mt-1">
+          Manage your manufacturing orders and production planning
+        </p>
       </div>
 
       {/* Search & Buttons */}
@@ -115,8 +119,13 @@ const Page = () => {
       <div className="w-full h-fit mt-2 bg-white rounded-xl border-2 border-border p-8">
         <div className="text-center">
           <div className="text-6xl mb-4">🏭</div>
-          <h2 className="text-2xl font-semibold text-zinc-800 mb-2">No Manufacturing Orders Yet</h2>
-          <p className="text-zinc-600 mb-6">Start by creating your first manufacturing order to track production processes</p>
+          <h2 className="text-2xl font-semibold text-zinc-800 mb-2">
+            No Manufacturing Orders Yet
+          </h2>
+          <p className="text-zinc-600 mb-6">
+            Start by creating your first manufacturing order to track production
+            processes
+          </p>
           <Button className="px-8">
             <Plus size={20} weight="regular" /> Create Manufacturing Order
           </Button>
