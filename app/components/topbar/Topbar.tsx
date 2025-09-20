@@ -44,16 +44,7 @@ const Topbar = () => {
         <div className="text-lg font-medium text-inactive">{title[1]}</div>
       </div>
       <div className="ml-auto h-full w-fit" >
-        <div
-          className="h-full aspect-square shrink-0
-            rounded-xl bg-gradient-to-br from-accent to-accent-red relative overflow-hidden"
-        >
-          <img
-            src="https://cdn.jsdelivr.net/gh/alohe/avatars/png/3d_2.png"
-            className="absolute left-0 top-0 size-full object-cover"
-            alt=""
-          />
-        </div>
+        
       </div>
     </div>
   );
