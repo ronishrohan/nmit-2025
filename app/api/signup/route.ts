@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import axios from "axios";
-const BASE_URL = "http://172.17.54.64:3000/api";
+const BASE_URL = "http://172.17.54.86:3000/api";
 
 export async function POST(request: Request) {
   try {
@@ -13,7 +13,7 @@ export async function POST(request: Request) {
           error:
             "Missing required fields: loginId, password, and email are required",
         },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -21,7 +21,7 @@ export async function POST(request: Request) {
     if (loginId.length < 3) {
       return NextResponse.json(
         { error: "Login ID must be at least 3 characters long" },
-        { status: 400 }
+        { status: 400 },
       );
     }
     if (!/^[a-zA-Z0-9_-]+$/.test(loginId)) {
@@ -30,7 +30,7 @@ export async function POST(request: Request) {
           error:
             "Login ID can only contain letters, numbers, underscores, and hyphens",
         },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -39,7 +39,7 @@ export async function POST(request: Request) {
     if (!emailRegex.test(email)) {
       return NextResponse.json(
         { error: "Please enter a valid email address" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -47,25 +47,25 @@ export async function POST(request: Request) {
     if (password.length < 8) {
       return NextResponse.json(
         { error: "Password must be at least 8 characters long" },
-        { status: 400 }
+        { status: 400 },
       );
     }
     if (!/(?=.*[a-z])/.test(password)) {
       return NextResponse.json(
         { error: "Password must contain at least one lowercase letter" },
-        { status: 400 }
+        { status: 400 },
       );
     }
     if (!/(?=.*[A-Z])/.test(password)) {
       return NextResponse.json(
         { error: "Password must contain at least one uppercase letter" },
-        { status: 400 }
+        { status: 400 },
       );
     }
     if (!/(?=.*\d)/.test(password)) {
       return NextResponse.json(
         { error: "Password must contain at least one number" },
-        { status: 400 }
+        { status: 400 },
       );
     }
     if (!/(?=.*[@$!%*?&])/.test(password)) {
@@ -74,7 +74,7 @@ export async function POST(request: Request) {
           error:
             "Password must contain at least one special character (@$!%*?&)",
         },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -97,17 +97,17 @@ export async function POST(request: Request) {
     if (error.response?.status === 409) {
       return NextResponse.json(
         { error: "An account with this login ID or email already exists" },
-        { status: 409 }
+        { status: 409 },
       );
     } else if (error.response?.status === 400) {
       return NextResponse.json(
         { error: error.response.data?.message || "Invalid input data" },
-        { status: 400 }
+        { status: 400 },
       );
     } else {
       return NextResponse.json(
         { error: "Internal server error" },
-        { status: 500 }
+        { status: 500 },
       );
     }
   }

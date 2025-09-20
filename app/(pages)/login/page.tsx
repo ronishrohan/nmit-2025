@@ -44,9 +44,10 @@ export default function page() {
 
       console.log("Login successful", response.data);
       // Redirect to dashboard or home page on success
-      setEmail(response.data.email);
+      setEmail(response.data.user.email);
       setRole("user");
-      setLoginId(response.data.loginId);
+      setName(response.data.user.fullName);
+      setLoginId(response.data.user.loginId);
       login();
       router.push("/dashboard");
     } catch (err: any) {

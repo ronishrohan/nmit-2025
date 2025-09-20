@@ -14,7 +14,7 @@ export default function page() {
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
-  const { login, setEmail, setRole, setLoginId } = useUserStore();
+  const { login, setEmail, setRole, setLoginId, setName } = useUserStore();
   const validateForm = () => {
     // Login ID validation
     if (!loginId.trim()) {
@@ -99,8 +99,9 @@ export default function page() {
 
       console.log("Signup successful", response.data);
       // Redirect to login page on success
-      setEmail(response.data.email);
-      setLoginId(response.data.loginId);
+      setEmail(response.data.user.email);
+      setLoginId(response.data.user.loginId);
+      setName(response.data.user.fullName);
       setRole("user");
       login();
       router.push("/");

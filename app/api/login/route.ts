@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import axios from "axios";
-const BASE_URL = "http://172.17.54.64:3000/api";
+const BASE_URL = "http://172.17.54.86:3000/api";
 
 export async function POST(request: Request) {
   try {
@@ -9,7 +9,7 @@ export async function POST(request: Request) {
     if (!loginId || !password) {
       return NextResponse.json(
         { error: "Missing loginId or password" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -31,17 +31,17 @@ export async function POST(request: Request) {
     if (error.response?.status === 401) {
       return NextResponse.json(
         { error: "Invalid login credentials" },
-        { status: 401 }
+        { status: 401 },
       );
     } else if (error.response?.status === 400) {
       return NextResponse.json(
         { error: error.response.data?.message || "Bad request" },
-        { status: 400 }
+        { status: 400 },
       );
     } else {
       return NextResponse.json(
         { error: "Internal server error" },
-        { status: 500 }
+        { status: 500 },
       );
     }
   }

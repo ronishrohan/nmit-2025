@@ -25,6 +25,7 @@ const SidebarButton = ({
   onClick: () => void;
   open: boolean;
 }) => {
+  const { fullName, email } = useUserStore();
   return (
     <button
       onClick={onClick}
@@ -54,6 +55,7 @@ function Sidebar() {
   const router = useRouter();
   const [open, setOpen] = useState(true);
   const pathname = usePathname();
+  const { fullName, email } = useUserStore();
   return (
     <motion.div
       initial={{ width: "320px" }}
@@ -154,10 +156,10 @@ function Sidebar() {
                 exit={{ opacity: 0 }}
                 className="flex flex-col h-full shrink-1 justify-center"
               >
-                <div className="text-lg font-semibold leading-4">John Doe</div>
-                <div className="font-medium text-inactive">
-                  example@gmail.com
+                <div className="text-lg font-semibold leading-4">
+                  {fullName ? fullName : "Login please"}
                 </div>
+                <div className="font-medium text-inactive">{email}</div>
               </motion.div>
             </>
           )}
@@ -166,7 +168,10 @@ function Sidebar() {
       <div className="p-2 w-full">
         <SidebarButton
           open={open}
-          onClick={() => {useUserStore.getState().logout(); router.push("/login")}}
+          onClick={() => {
+            useUserStore.getState().logout();
+            router.push("/login");
+          }}
           active={false}
           icon={<SignOut size={26} weight="bold" />}
         >
