@@ -43,7 +43,7 @@ const Page = () => {
   const router = useRouter();
   const [selectedFilter, setSelectedFilter] = useState<number | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
-  const { isLoggedIn } = useUserStore();
+  const { isLoggedIn, user } = useUserStore();
   const { workOrders, fetchWorkOrders, loading, error } = useWorkOrderStore();
   const { manufacturingOrders, fetchManufacturingOrders } = useMoStore();
   const { products, fetchProducts } = useProductStore();
@@ -71,13 +71,23 @@ const Page = () => {
   const filteredWorkOrders = workOrders.filter((order) => {
     const mo = manufacturingOrders.find((mo: any) => mo.id === order.moId);
     const product = mo ? products.find((p: any) => p.id === mo.productId) : undefined;
-    const statusMatch = selectedFilter !== null ? order.status === filters[selectedFilter].title : true;
+    // Status filter
+    const statusMatch =
+      selectedFilter !== null
+        ? order.status.toLowerCase() === filters[selectedFilter].title.toLowerCase().replace(/ /g, "_")
+        : true;
+    // Mode filter
+    let modeMatch = true;
+    if (mode === "My Work Orders" && user) {
+      modeMatch = order.assignedToId === user.id;
+    }
+    // Search filter
     const searchMatch =
       order.operation.toLowerCase().includes(searchQuery.toLowerCase()) ||
       order.moId.toString().includes(searchQuery) ||
       (product && product.name.toLowerCase().includes(searchQuery.toLowerCase())) ||
       (product && product.id.toString().includes(searchQuery));
-    return statusMatch && searchMatch;
+    return statusMatch && modeMatch && searchMatch;
   });
 
   return (
