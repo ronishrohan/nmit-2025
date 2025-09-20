@@ -15,8 +15,31 @@ import { useRouter } from "next/navigation";
 import { useUserStore } from "@/app/store/userStore";
 import { ArrowUpRight } from "@phosphor-icons/react/dist/ssr/ArrowUpRight";
 import { useMoStore } from "@/app/store/moStore";
+import { useProductStore } from "@/app/store/productStore";
 import { CaretDoubleUp } from "@phosphor-icons/react/dist/ssr/CaretDoubleUp";
 import { ManufacturingOrder, OrderStatus } from "@/app/types";
+import {
+  Bar,
+  BarChart,
+  XAxis,
+  YAxis,
+  Pie,
+  PieChart,
+  LabelList,
+} from "recharts";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import {
+  ChartConfig,
+  ChartContainer,
+  ChartTooltip,
+  ChartTooltipContent,
+} from "@/components/ui/chart";
 
 type FilterCardProps = {
   number: number | string;
@@ -204,7 +227,6 @@ const data: Item[] = [
   },
 ];
 
-
 // Kanban View Component
 const KanbanCard = ({ order }: { order: ManufacturingOrder }) => {
   const router = useRouter();
@@ -243,6 +265,210 @@ const KanbanCard = ({ order }: { order: ManufacturingOrder }) => {
         </div>
       )}
     </button>
+  );
+};
+
+// Stock Levels Chart Component
+const StockLevelsChart = () => {
+  const { products } = useProductStore();
+
+  // Prepare chart data from products with stock information
+  const chartData = products
+    .filter((product) => product.stock && product.stock.quantity > 0)
+    .map((product) => ({
+      name:
+        product.name.length > 15
+          ? product.name.substring(0, 15) + "..."
+          : product.name,
+      fullName: product.name,
+      stock: product.stock?.quantity || 0,
+      unit: product.unit,
+    }))
+    .sort((a, b) => a.stock - b.stock) // Sort by stock level (lowest first)
+    .slice(0, 8); // Show top 8 products
+
+  const chartConfig = {
+    stock: {
+      label: "Stock Quantity",
+      color: "hsl(var(--chart-1))",
+    },
+  } satisfies ChartConfig;
+
+  // Determine if stock is low (less than 50 units)
+  const lowStockCount = chartData.filter((item) => item.stock < 50).length;
+
+  return (
+    <Card className="w-3/4">
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2">
+          Stock Levels by Product
+          {lowStockCount > 0 && (
+            <span className="text-sm bg-red-100 text-red-800 px-2 py-1 rounded-full">
+              {lowStockCount} Low Stock
+            </span>
+          )}
+        </CardTitle>
+        <CardDescription>
+          Current inventory levels - Products with low stock appear first
+        </CardDescription>
+      </CardHeader>
+      <CardContent>
+        {chartData.length > 0 ? (
+          <ChartContainer config={chartConfig} className="h-[300px]">
+            <BarChart
+              accessibilityLayer
+              data={chartData}
+              margin={{
+                top: 20,
+                right: 30,
+                left: 20,
+                bottom: 60,
+              }}
+            >
+              <XAxis
+                dataKey="name"
+                tickLine={false}
+                tickMargin={10}
+                axisLine={false}
+                angle={-45}
+                textAnchor="end"
+                height={80}
+              />
+              <YAxis tickLine={false} axisLine={false} tickMargin={10} />
+              <ChartTooltip
+                cursor={false}
+                content={({ active, payload }) => {
+                  if (active && payload && payload.length) {
+                    const data = payload[0].payload;
+                    return (
+                      <div className="bg-white p-3 border rounded-lg shadow-lg">
+                        <p className="font-medium">{data.fullName}</p>
+                        <p className="text-sm text-gray-600">
+                          Stock: {data.stock} {data.unit}
+                        </p>
+                        {data.stock < 50 && (
+                          <p className="text-sm text-red-600 font-medium">
+                            ⚠️ Low Stock
+                          </p>
+                        )}
+                      </div>
+                    );
+                  }
+                  return null;
+                }}
+              />
+              <Bar
+                dataKey="stock"
+                fill={(entry: any) =>
+                  entry.stock < 50 ? "#ef4444" : "var(--color-stock)"
+                }
+                radius={4}
+              />
+            </BarChart>
+          </ChartContainer>
+        ) : (
+          <div className="text-center py-8 text-gray-500">
+            No stock data available
+          </div>
+        )}
+      </CardContent>
+    </Card>
+  );
+};
+
+// MO Status Distribution Pie Chart Component
+const MOStatusChart = () => {
+  const { manufacturingOrders } = useMoStore();
+
+  // Calculate status distribution
+  const statusCounts = manufacturingOrders.reduce((acc, order) => {
+    const status = order.status;
+    acc[status] = (acc[status] || 0) + 1;
+    return acc;
+  }, {} as Record<string, number>);
+
+  // Prepare pie chart data
+  const chartData = Object.entries(statusCounts).map(
+    ([status, count], index) => ({
+      status:
+        status.replace("_", " ").charAt(0).toUpperCase() +
+        status.replace("_", " ").slice(1),
+      count,
+      percentage: ((count / manufacturingOrders.length) * 100).toFixed(1),
+      fill: `var(--chart-${index + 1})`,
+    })
+  );
+
+  const chartConfig = chartData.reduce((config, item, index) => {
+    config[item.status.toLowerCase().replace(" ", "_")] = {
+      label: item.status,
+      color: `var(--chart-${index + 1})`,
+    };
+    return config;
+  }, {} as any) satisfies ChartConfig;
+
+  const totalOrders = manufacturingOrders.length;
+
+  return (
+    <Card className="w-1/4">
+      <CardHeader>
+        <CardTitle>MO Status Distribution</CardTitle>
+        <CardDescription>
+          {totalOrders} total manufacturing orders
+        </CardDescription>
+      </CardHeader>
+
+      <CardContent className="flex items-center justify-center">
+        {totalOrders > 0 ? (
+          <ChartContainer
+            config={chartConfig}
+            className="h-[300px] flex items-center justify-center"
+          >
+            <PieChart>
+              <ChartTooltip
+                cursor={false}
+                content={({ active, payload }) => {
+                  if (active && payload && payload.length) {
+                    const data = payload[0].payload;
+                    return (
+                      <div className="bg-white p-3 border rounded-lg shadow-lg">
+                        <p className="font-medium">{data.status}</p>
+                        <p className="text-sm text-gray-600">
+                          {data.count} orders ({data.percentage}%)
+                        </p>
+                      </div>
+                    );
+                  }
+                  return null;
+                }}
+              />
+              <Pie
+                data={chartData}
+                dataKey="count"
+                nameKey="status"
+                innerRadius={36}
+                outerRadius={120}
+                strokeWidth={2}
+                paddingAngle={4}
+                cornerRadius={8}
+              >
+                <LabelList
+                  dataKey="percentage"
+                  className="fill-background"
+                  stroke="none"
+                  fontSize={12}
+                  formatter={(value: any) => `${value}%`}
+                />
+              </Pie>
+            </PieChart>
+          </ChartContainer>
+        ) : (
+          <div className="text-center py-8 text-gray-500">
+            No manufacturing orders data
+          </div>
+        )}
+      </CardContent>
+    </Card>
   );
 };
 
@@ -291,15 +517,15 @@ const KanbanView = ({ data }: { data: ManufacturingOrder[] }) => {
   return (
     <div className="w-full flex  overflow-auto">
       <div className="flex w-full gap-4  h-fit p-4">
-      {visibleColumns.map((column) => (
-        <KanbanColumn
-          key={column.status}
-          title={column.title}
-          orders={data.filter((item) => item.status === column.status)}
-          color={column.color}
-        />
-      ))}
-    </div>
+        {visibleColumns.map((column) => (
+          <KanbanColumn
+            key={column.status}
+            title={column.title}
+            orders={data.filter((item) => item.status === column.status)}
+            color={column.color}
+          />
+        ))}
+      </div>
     </div>
   );
 };
@@ -312,14 +538,17 @@ const Page = () => {
   const { isLoggedIn } = useUserStore();
   const { manufacturingOrders, fetchManufacturingOrders, loading, error } =
     useMoStore();
+  const { products, fetchProducts } = useProductStore();
+
   useEffect(() => {
     if (!isLoggedIn) {
       router.push("/login");
     } else {
       fetchManufacturingOrders();
+      fetchProducts(); // Fetch products for stock chart
     }
     console.log(manufacturingOrders);
-  }, [isLoggedIn, router, fetchManufacturingOrders]);
+  }, [isLoggedIn, router, fetchManufacturingOrders, fetchProducts]);
 
   const [ordersHidden, setOrdersHidden] = useState(false);
 
@@ -540,6 +769,13 @@ const Page = () => {
           !error && <div className="text-center py-8">No Orders Yet</div>
         )}
       </motion.div>
+
+      {/* Charts Section - Side by side */}
+      <div className="flex gap-4 mt-4">
+        <StockLevelsChart />
+        <MOStatusChart />
+      </div>
+
       <div className="h-[100dvh]"></div>
     </div>
   );

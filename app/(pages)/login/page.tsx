@@ -15,15 +15,16 @@ export default function page() {
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
 
-  const { login, setUser, setToken, setName, setLoginId, setEmail } =
+  const { login, setUser,email, setToken, setName, setLoginId, setEmail } =
     useUserStore();
-
+  console.log("yea bro",email);
   const validateForm = () => {
     if (!loginId.trim()) {
       setError("Please enter your login ID");
       return false;
     }
     if (!password.trim()) {
+     
       setError("Please enter your password");
       return false;
     }
