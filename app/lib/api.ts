@@ -116,6 +116,7 @@ export const apiCall = async <T>(
   };
 
   try {
+    // console.log(config)
     const response = await fetch(url, config);
     return await handleApiResponse<T>(response);
   } catch (error) {

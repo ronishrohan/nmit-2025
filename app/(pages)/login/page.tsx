@@ -88,7 +88,7 @@ export default function page() {
       <div className="flex flex-col w-full items-center justify-center min-h-screen py-2">
         <div className="flex  w-[800px] gap-4 bg-white rounded-xl p-4">
           <div className="w-1/2 flex flex-col">
-          <div className="text-3xl font-bold mb-4 flex gap-2"><GearSix weight="fill" size={30} />OUTWORKS</div>
+          <div className="text-3xl font-bold mb-4 flex gap-2 items-center"><GearSix weight="fill" size={30} />OUTWORKS</div>
           <TextInputField
           className="!w-full mb-2"
             type="text"

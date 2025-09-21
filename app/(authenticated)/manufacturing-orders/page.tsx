@@ -124,8 +124,6 @@ const Page = () => {
       order.productId?.toString().includes(searchQuery) ||
       (product &&
         product.name.toLowerCase().includes(searchQuery.toLowerCase())) ||
-      (product &&
-        product.name.toLowerCase().includes(searchQuery.toLowerCase())) ||
       order.quantity?.toString().includes(searchQuery);
     return statusMatch && modeMatch && searchMatch;
   });

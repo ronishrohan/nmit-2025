@@ -404,13 +404,13 @@ const MOStatusChart = () => {
   const totalOrders = manufacturingOrders.length;
 
   return (
-    <Card className="w-1/4">
-      <CardHeader>
-        <CardTitle>MO Status Distribution</CardTitle>
-        <CardDescription>
+    <div className="w-1/4 bg-white rounded-xl border-2 border-border p-4">
+      <div>
+        <div className="text-xl font-medium">MO Status Distribution</div>
+        <div className="flex text-lg font-medium text-inactive">
           {totalOrders} total manufacturing orders
-        </CardDescription>
-      </CardHeader>
+        </div>
+      </div>
 
       <CardContent className="flex items-center justify-center">
         {totalOrders > 0 ? (
@@ -418,7 +418,7 @@ const MOStatusChart = () => {
             config={chartConfig}
             className="h-[300px] flex items-center justify-center"
           >
-            <PieChart>
+            <PieChart >
               <ChartTooltip
                 cursor={false}
                 content={({ active, payload }) => {
@@ -441,8 +441,9 @@ const MOStatusChart = () => {
                 dataKey="count"
                 nameKey="status"
                 innerRadius={36}
+                
                 outerRadius={120}
-                strokeWidth={2}
+                // strokeWidth={2}
                 paddingAngle={4}
                 cornerRadius={8}
               >
@@ -462,7 +463,7 @@ const MOStatusChart = () => {
           </div>
         )}
       </CardContent>
-    </Card>
+    </div>
   );
 };
 
