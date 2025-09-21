@@ -128,12 +128,9 @@ export const useMoStore = create<ManufacturingOrderStore>((set, get) => ({
   fetchManufacturingOrderById: async (id) => {
     set({ loading: true, error: null });
     try {
-      let manufacturingOrders = get().manufacturingOrders;
-      if (!manufacturingOrders.length) {
-        const response = await moApi.getAll();
-        manufacturingOrders = Array.isArray(response.data) ? response.data : [];
-      }
-      const order = manufacturingOrders.find((o: any) => o.id === id) || null;
+      // Always fetch the latest order from backend for edit mode
+      const response = await moApi.getById(id);
+      const order = response.data && Object.keys(response.data).length > 0 ? response.data as ManufacturingOrder : null;
       set({ currentOrder: order });
       if (!order) set({ error: "Manufacturing order not found" });
     } catch (error) {

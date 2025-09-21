@@ -34,11 +34,6 @@ const FilterCard = ({
             ? "bg-accent-green/730 border-transparent text-black"
             : "bg-white hover:bg-zinc-200 border-border text-black/80"
         }
-        ${
-          isSelected
-            ? "bg-accent-green/730 border-transparent text-black"
-            : "bg-white hover:bg-zinc-200 border-border text-black/80"
-        }
         ${className}`}
     >
       <div>{number}</div>
@@ -245,9 +240,13 @@ const Page = () => {
                   {/* Right Side Button */}
                   <Button
                     className="mt-auto"
-                    onClick={() =>
-                      router.push(`/manufacturing-orders/${order.id}`)
-                    }
+                    onClick={() => {
+                      if (order.status === "draft") {
+                        router.push(`/create-order?editId=${order.id}`);
+                      } else {
+                        router.push(`/order/${order.id}`);
+                      }
+                    }}
                   >
                     View Details
                   </Button>

@@ -7,7 +7,7 @@ import { Dropdown } from "@/app/components/ui/dropdown/Dropdown";
 import Input from "@/app/components/ui/input/Input";
 import { useUserStore } from "@/app/store";
 import React, { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 // TypeScript interfaces
 interface Component {
   id: number;
@@ -83,6 +83,7 @@ interface Order {
 type TabType = "components" | "workorders";
 
 const page: React.FC = () => {
+  const searchParams = useSearchParams();
   const [presets, setPresets] = useState<Preset[] | null>(null);
   const [productData, setProductData] = useState<Product | null>(null);
   const [selectedPresetData, setSelectedPresetData] = useState<Preset | null>(
@@ -110,21 +111,41 @@ const page: React.FC = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
+        // If editId is present, fetch the order and prefill
+        const editId = searchParams.get("editId");
+        if (editId) {
+          // Fetch the order by ID and prefill form
+          const orderRes = await moApi.getById(Number(editId));
+          const orderData = orderRes.data as Order & { productId?: number; quantity?: number; scheduleStartDate?: string; deadline?: string; assignedToId?: number };
+          setOrder(orderData);
+          setQuantity(orderData.quantity ?? 1);
+          setScheduleStartDate(orderData.scheduleStartDate || "");
+          setDeadline(orderData.deadline || "");
+          setAssignedToId(orderData.assignedToId || 10);
+          // Fetch presets and set selected preset
+          const presetsResponse = await moPresetsApi.getAll();
+          const presetsData = presetsResponse.data as Preset[];
+          setPresets(presetsData);
+          const preset = presetsData.find((p: any) => p.productId === orderData.productId);
+          setSelectedPresetData(preset || null);
+          setProduct(preset?.name || null);
+          // Optionally, fetch and set component prices, etc.
+          // ...
+          return;
+        }
+
         console.log("user id", userId);
         const orderResponse = await moApi.create({ userId: userId });
-        console.log(orderResponse);
-        setOrder(orderResponse.data);
-
+        setOrder(orderResponse.data as Order);
         const presetsResponse = await moPresetsApi.getAll();
-        console.log("presets", presetsResponse.data);
-        setPresets(presetsResponse.data);
+        setPresets(presetsResponse.data as Preset[]);
       } catch (error) {
         console.error("Error fetching data:", error);
       }
     };
 
     fetchData();
-  }, [userId]);
+  }, [userId, searchParams]);
 
   const handlePresetSelection = async (presetName: string): Promise<void> => {
     if (!presets) return;
@@ -179,7 +200,7 @@ const page: React.FC = () => {
 
       componentResults.forEach((result) => {
         if (result.data) {
-          componentPricesMap[result.componentId] = result.data;
+          componentPricesMap[result.componentId] = result.data as ComponentProduct;
         }
       });
 
@@ -514,7 +535,6 @@ const page: React.FC = () => {
           placeholder="Total Price"
           type="number"
           value={totalPrice > 0 ? totalPrice.toFixed(2) : ""}
-          readOnly
           disabled={isLoading}
         />
 
