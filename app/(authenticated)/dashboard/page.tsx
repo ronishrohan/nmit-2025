@@ -50,6 +50,92 @@ type FilterCardProps = {
   className?: string;
 };
 
+// Skeleton Components
+const SkeletonFilterCard = () => {
+  return (
+    <div className="rounded-xl border-2 border-border bg-white px-6 h-full w-fit flex items-center justify-between animate-pulse">
+      <div className="bg-gray-200 h-6 w-8 rounded mr-2"></div>
+      <div className="bg-gray-200 h-6 w-20 rounded"></div>
+    </div>
+  );
+};
+
+const SkeletonTableRow = () => {
+  return (
+    <tr className="border-b border-gray-200">
+      <td className="p-3">
+        <div className="bg-gray-200 h-4 w-16 rounded animate-pulse"></div>
+      </td>
+      <td className="p-3">
+        <div className="bg-gray-200 h-4 w-32 rounded animate-pulse"></div>
+      </td>
+      <td className="p-3">
+        <div className="bg-gray-200 h-4 w-12 rounded animate-pulse"></div>
+      </td>
+      <td className="p-3">
+        <div className="bg-gray-200 h-4 w-20 rounded animate-pulse"></div>
+      </td>
+      <td className="p-3">
+        <div className="bg-gray-200 h-4 w-24 rounded animate-pulse"></div>
+      </td>
+    </tr>
+  );
+};
+
+const SkeletonKanbanCard = () => {
+  return (
+    <div className="bg-white border-2 border-border rounded-lg p-4 mb-3 animate-pulse">
+      <div className="bg-gray-200 h-5 w-3/4 rounded mb-2"></div>
+      <div className="bg-gray-200 h-4 w-1/2 rounded mb-1"></div>
+      <div className="bg-gray-200 h-4 w-2/3 rounded mb-2"></div>
+      <div className="flex justify-between items-center">
+        <div className="bg-gray-200 h-4 w-16 rounded"></div>
+        <div className="bg-gray-200 h-4 w-20 rounded"></div>
+      </div>
+    </div>
+  );
+};
+
+const SkeletonKanbanColumn = () => {
+  return (
+    <div className="flex-1 h-fit min-w-0">
+      <div className="rounded-lg p-4 mb-4 bg-gray-300 animate-pulse">
+        <div className="bg-gray-200 h-6 w-24 rounded mb-1"></div>
+        <div className="bg-gray-200 h-4 w-8 rounded"></div>
+      </div>
+      <div className="space-y-2">
+        {[1, 2, 3].map((i) => (
+          <SkeletonKanbanCard key={i} />
+        ))}
+      </div>
+    </div>
+  );
+};
+
+const SkeletonChart = ({
+  title,
+  description,
+}: {
+  title: string;
+  description: string;
+}) => {
+  return (
+    <Card className="flex-1">
+      <CardHeader>
+        <CardTitle>
+          <div className="bg-gray-200 h-6 w-48 rounded animate-pulse"></div>
+        </CardTitle>
+        <CardDescription>
+          <div className="bg-gray-200 h-4 w-64 rounded animate-pulse"></div>
+        </CardDescription>
+      </CardHeader>
+      <CardContent>
+        <div className="h-[300px] w-full bg-gray-200 rounded animate-pulse"></div>
+      </CardContent>
+    </Card>
+  );
+};
+
 const FilterCard = ({
   number,
   title,
@@ -93,139 +179,6 @@ const columns: Column[] = [
   { key: "quantity", label: "Quantity" },
   { key: "unit", label: "Unit" },
   { key: "state", label: "State" },
-];
-
-const data: Item[] = [
-  {
-    id: 1,
-    reference: "REF001",
-    startDate: "2025-09-01",
-    finishedProduct: "Widget A",
-    status: "Done",
-    quantity: 100,
-    unit: "pcs",
-    state: "NY",
-  },
-  {
-    id: 2,
-    reference: "REF002",
-    startDate: "2025-09-05",
-    finishedProduct: "Widget B",
-    status: "In-Progress",
-    quantity: 250,
-    unit: "pcs",
-    state: "CA",
-  },
-  {
-    id: 3,
-    reference: "REF003",
-    startDate: "2025-09-10",
-    finishedProduct: "Widget C",
-    status: "Draft",
-    quantity: 50,
-    unit: "pcs",
-    state: "TX",
-  },
-  {
-    id: 4,
-    reference: "REF007",
-    startDate: "2025-09-10",
-    finishedProduct: "Widget C",
-    status: "To Close",
-    quantity: 50,
-    unit: "pcs",
-    state: "TX",
-  },
-  {
-    id: 5,
-    reference: "REF004",
-    startDate: "2025-09-12",
-    finishedProduct: "Widget D",
-    status: "To Close",
-    quantity: 75,
-    unit: "pcs",
-    state: "FL",
-  },
-  {
-    id: 6,
-    reference: "REF004",
-    startDate: "2025-09-12",
-    finishedProduct: "Widget D",
-    status: "To Close",
-    quantity: 75,
-    unit: "pcs",
-    state: "FL",
-  },
-  {
-    id: 7,
-    reference: "REF004",
-    startDate: "2025-09-12",
-    finishedProduct: "Widget D",
-    status: "To Close",
-    quantity: 75,
-    unit: "pcs",
-    state: "FL",
-  },
-  {
-    id: 8,
-    reference: "REF004",
-    startDate: "2025-09-12",
-    finishedProduct: "Widget D",
-    status: "To Close",
-    quantity: 75,
-    unit: "pcs",
-    state: "FL",
-  },
-  {
-    id: 9,
-    reference: "REF004",
-    startDate: "2025-09-12",
-    finishedProduct: "Widget D",
-    status: "To Close",
-    quantity: 75,
-    unit: "pcs",
-    state: "FL",
-  },
-  {
-    id: 10,
-    reference: "REF004",
-    startDate: "2025-09-12",
-    finishedProduct: "Widget D",
-    status: "To Close",
-    quantity: 75,
-    unit: "pcs",
-    state: "FL",
-  },
-  {
-    id: 11,
-    reference: "REF005",
-    startDate: "2025-09-15",
-    finishedProduct: "Widget E",
-    status: "Confirmed",
-    quantity: 120,
-    unit: "pcs",
-    state: "WA",
-  },
-  {
-    id: 12,
-    reference: "REF005",
-    startDate: "2025-09-15",
-    finishedProduct: "Widget E",
-    status: "Confirmed",
-    quantity: 120,
-    unit: "pcs",
-    state: "WA",
-  },
-  {
-    id: 13,
-    reference: "REF005",
-    startDate: "2025-09-15",
-    finishedProduct: "Widget E",
-    status: "Confirmed",
-    quantity: 120,
-    unit: "pcs",
-    state: "WA",
-  },
 ];
 
 // Kanban View Component
@@ -539,6 +492,7 @@ const Page = () => {
   const [selectedFilter, setSelectedFilter] = useState<number | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [viewMode, setViewMode] = useState("list");
+  const [isInitialLoading, setIsInitialLoading] = useState(true);
   const { isLoggedIn } = useUserStore();
   const { manufacturingOrders, fetchManufacturingOrders, loading, error } =
     useMoStore();
@@ -550,6 +504,13 @@ const Page = () => {
     } else {
       fetchManufacturingOrders();
       fetchProducts(); // Fetch products for stock chart
+
+      // Show skeleton loading for 1.5 seconds
+      const timer = setTimeout(() => {
+        setIsInitialLoading(false);
+      }, 500);
+
+      return () => clearTimeout(timer);
     }
     console.log(manufacturingOrders);
   }, [isLoggedIn, router, fetchManufacturingOrders, fetchProducts]);
@@ -657,7 +618,6 @@ const Page = () => {
     return actualStatus ? order.status === actualStatus : false;
   });
 
-  // Then apply fuzzy search using Fuse.js
   const baseFilteredData = useMemo(() => {
     if (!searchQuery.trim()) {
       return statusFilteredData;
@@ -668,7 +628,6 @@ const Page = () => {
     return results.map((result) => result.item);
   }, [statusFilteredData, searchQuery, fuseOptions]);
 
-  // Prepare data for the table with formatted dates
   const tableData = baseFilteredData.map((order) => ({
     ...order,
     productName: order.product?.name || "Unknown Product",
@@ -688,149 +647,245 @@ const Page = () => {
 
   return (
     <div className="h-fit w-full p-2 flex flex-col">
-      {/* Search & Buttons */}
-      <div className="w-full flex h-[66px] gap-2 items-center">
-        <Button
-          onClick={() => router.push("/create-order")}
-          className="px-6 shrink-0 h-[calc(100%-4px)]"
-        >
-          <Plus size={20} weight="regular" /> Create Order
-        </Button>
-        <div className="h-full w-full bg-white rounded-xl group border-2 focus-within:border-accent transition-colors duration-150 border-border flex relative">
-          <MagnifyingGlass
-            weight="bold"
-            size={20}
-            className="text-zinc-500 group-focus-within:text-accent h-full mx-3 absolute aspect-square pointer-events-none shrink-0"
-          />
-          <input
-            type="text"
-            className="size-full outline-none pl-10 text-xl font-medium"
-            placeholder="Search orders, products, assignees..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-          />
-        </div>
-        <Button
-          variant="secondary"
-          className="px-6 h-full shrink-0"
-          onClick={() => {
-            setSelectedFilter(null);
-            setSearchQuery("");
-          }}
-        >
-          <ArrowClockwise size={20} weight="regular" /> Reset
-        </Button>
-        <Button
-          variant="secondary"
-          className="px-4 h-full shrink-0 aspect-square flex items-center justify-center"
-          onClick={() => setViewMode(viewMode === "list" ? "kanban" : "list")}
-        >
-          {viewMode === "list" ? (
-            <>
-              <Kanban size={20} weight="regular" />
-            </>
-          ) : (
-            <>
-              <List size={20} weight="regular" />
-            </>
-          )}
-        </Button>
-      </div>
+      {isInitialLoading ? (
+        // Skeleton Loading UI
+        <>
+          {/* Search & Buttons Skeleton */}
+          <div className="w-full flex h-[66px] gap-2 items-center">
+            <div className="px-6 shrink-0 h-[calc(100%-4px)] bg-gray-200 rounded-xl animate-pulse w-36"></div>
+            <div className="h-full w-full bg-gray-200 rounded-xl animate-pulse"></div>
+            <div className="px-6 h-full shrink-0 bg-gray-200 rounded-xl animate-pulse w-24"></div>
+            <div className="px-4 h-full shrink-0 aspect-square bg-gray-200 rounded-xl animate-pulse"></div>
+          </div>
 
-      {/* Filter Cards */}
-      <div className="h-[66px] mt-2 w-full flex gap-2">
-        <Dropdown
-          currentValue={mode}
-          setValue={setMode}
-          values={["All", "My"]}
-        />
-        {viewMode === "list" && (
-          <>
+          {/* Filter Cards Skeleton */}
+          <div className="h-[66px] mt-2 w-full flex gap-2">
+            <div className="bg-gray-200 rounded-xl animate-pulse w-20 h-full"></div>
             <div className="flex gap-2">
-              {filters.map((filter, index) => (
-                <FilterCard
-                  key={index}
-                  number={filter.number}
-                  title={filter.title}
-                  isSelected={selectedFilter === index}
-                  onClick={() => {
-                    if (selectedFilter == index) {
-                      setSelectedFilter(null);
-                    } else {
-                      setSelectedFilter(index);
-                    }
-                  }}
-                />
+              {[1, 2, 3, 4, 5, 6].map((i) => (
+                <SkeletonFilterCard key={i} />
               ))}
             </div>
-          </>
-        )}
-      </div>
-      <motion.div
-        initial={{ height: "auto" }}
-        animate={{ height: ordersHidden ? "72px" : "auto" }}
-        className="w-full max-h-[50vh] border-2 border-border mt-2 bg-white flex flex-col rounded-xl overflow-hidden"
-      >
-        <div className="text-2xl p-4 px-6 flex w-full justify-between h-[70px] items-center relative">
-          <div className="font-medium flex items-center gap-3">
-            Manufacturing Orders
-            {searchQuery && (
-              <span className="text-sm font-normal bg-accent/10 text-accent px-2 py-1 rounded-md">
-                {baseFilteredData.length} result
-                {baseFilteredData.length !== 1 ? "s" : ""}
-              </span>
-            )}
-          </div>{" "}
-          <div className="flex h-[70px] w-fit absolute right-0 p-2 gap-2">
-            <div className="right-0 top-0 h-full aspect-square shrink-0">
-              <button
-                onClick={() => router.push("/manufacturing-orders")}
-                className="size-full cursor-pointer  rounded-lg border-2 border-border/50  hover:bg-zinc-200 flex items-center justify-center transition-colors duration-100"
-              >
-                <ArrowUpRight size={24} />
-              </button>
+          </div>
+
+          {/* Manufacturing Orders Skeleton */}
+          <div className="w-full border-2 border-border mt-2 bg-white flex flex-col rounded-xl overflow-hidden">
+            <div className="text-2xl p-4 px-6 flex w-full justify-between h-[70px] items-center">
+              <div className="bg-gray-200 h-8 w-48 rounded animate-pulse"></div>
+              <div className="flex gap-2">
+                <div className="bg-gray-200 h-12 w-12 rounded-lg animate-pulse"></div>
+                <div className="bg-gray-200 h-12 w-12 rounded-lg animate-pulse"></div>
+              </div>
             </div>
-            <div className="right-0 top-0 h-full aspect-square shrink-0">
-              <button
-                onClick={() => setOrdersHidden((v) => !v)}
-                className="size-full cursor-pointer  rounded-lg border-2 border-border/50  hover:bg-zinc-200 flex items-center justify-center transition-colors duration-100"
-              >
-                <motion.div
-                  animate={{ rotateZ: ordersHidden ? "180deg" : "0deg" }}
-                  transition={{ duration: 0.2, ease: "circInOut" }}
-                >
-                  <CaretDoubleUp size={24} />
-                </motion.div>
-              </button>
+
+            {viewMode === "list" ? (
+              <div className="p-4">
+                <div className="w-full">
+                  <table className="w-full">
+                    <thead>
+                      <tr className="border-b border-gray-200 bg-gray-50">
+                        <th className="text-left p-3">
+                          <div className="bg-gray-200 h-4 w-16 rounded animate-pulse"></div>
+                        </th>
+                        <th className="text-left p-3">
+                          <div className="bg-gray-200 h-4 w-20 rounded animate-pulse"></div>
+                        </th>
+                        <th className="text-left p-3">
+                          <div className="bg-gray-200 h-4 w-16 rounded animate-pulse"></div>
+                        </th>
+                        <th className="text-left p-3">
+                          <div className="bg-gray-200 h-4 w-16 rounded animate-pulse"></div>
+                        </th>
+                        <th className="text-left p-3">
+                          <div className="bg-gray-200 h-4 w-20 rounded animate-pulse"></div>
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {[1, 2, 3, 4, 5].map((i) => (
+                        <SkeletonTableRow key={i} />
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            ) : (
+              <div className="w-full flex overflow-auto">
+                <div className="flex w-full gap-4 h-fit p-4">
+                  {[1, 2, 3, 4, 5].map((i) => (
+                    <SkeletonKanbanColumn key={i} />
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Charts Section Skeleton */}
+          <div className="flex flex-col lg:flex-row gap-6 mt-6">
+            <div className="w-full lg:w-2/3">
+              <SkeletonChart
+                title="Stock Levels by Product"
+                description="Current inventory levels"
+              />
+            </div>
+            <div className="w-full lg:w-1/3">
+              <SkeletonChart
+                title="MO Status Distribution"
+                description="Manufacturing orders breakdown"
+              />
             </div>
           </div>
-        </div>
-        {loading && <div className="text-center text-lg">Loading...</div>}
-        {error && <div className="text-center text-red-500">{error}</div>}
-        {!loading && !error && baseFilteredData.length === 0 && (
-          <div className="text-center py-8">No Orders Yet</div>
-        )}
-        {!loading && !error && baseFilteredData.length > 0 ? (
-          viewMode === "list" ? (
-            <ProductionTable columns={columns} data={tableData} />
-          ) : (
-            <KanbanView data={baseFilteredData} />
-          )
-        ) : (
-          !loading &&
-          !error && <div className="text-center py-8">No Orders Yet</div>
-        )}
-      </motion.div>
+        </>
+      ) : (
+        // Actual Content
+        <>
+          {/* Search & Buttons */}
+          <div className="w-full flex h-[66px] gap-2 items-center">
+            <Button
+              onClick={() => router.push("/create-order")}
+              className="px-6 shrink-0 h-[calc(100%-4px)]"
+            >
+              <Plus size={20} weight="regular" /> Create Order
+            </Button>
+            <div className="h-full w-full bg-white rounded-xl group border-2 focus-within:border-accent transition-colors duration-150 border-border flex relative">
+              <MagnifyingGlass
+                weight="bold"
+                size={20}
+                className="text-zinc-500 group-focus-within:text-accent h-full mx-3 absolute aspect-square pointer-events-none shrink-0"
+              />
+              <input
+                type="text"
+                className="size-full outline-none pl-10 text-xl font-medium"
+                placeholder="Search orders, products, assignees..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+              />
+            </div>
+            <Button
+              variant="secondary"
+              className="px-6 h-full shrink-0"
+              onClick={() => {
+                setSelectedFilter(null);
+                setSearchQuery("");
+              }}
+            >
+              <ArrowClockwise size={20} weight="regular" /> Reset
+            </Button>
+            <Button
+              variant="secondary"
+              className="px-4 h-full shrink-0 aspect-square flex items-center justify-center"
+              onClick={() =>
+                setViewMode(viewMode === "list" ? "kanban" : "list")
+              }
+            >
+              {viewMode === "list" ? (
+                <>
+                  <Kanban size={20} weight="regular" />
+                </>
+              ) : (
+                <>
+                  <List size={20} weight="regular" />
+                </>
+              )}
+            </Button>
+          </div>
 
-      {/* Charts Section - Side by side */}
-      <div className="flex flex-col lg:flex-row gap-6 mt-6">
-        <div className="w-full lg:w-2/3">
-          <StockLevelsChart />
-        </div>
-        <div className="w-full lg:w-1/3">
-          <MOStatusChart />
-        </div>
-      </div>
+          {/* Filter Cards */}
+          <div className="h-[66px] mt-2 w-full flex gap-2">
+            <Dropdown
+              currentValue={mode}
+              setValue={setMode}
+              values={["All", "My"]}
+            />
+            {viewMode === "list" && (
+              <>
+                <div className="flex gap-2">
+                  {filters.map((filter, index) => (
+                    <FilterCard
+                      key={index}
+                      number={filter.number}
+                      title={filter.title}
+                      isSelected={selectedFilter === index}
+                      onClick={() => {
+                        if (selectedFilter == index) {
+                          setSelectedFilter(null);
+                        } else {
+                          setSelectedFilter(index);
+                        }
+                      }}
+                    />
+                  ))}
+                </div>
+              </>
+            )}
+          </div>
+          <motion.div
+            initial={{ height: "auto" }}
+            animate={{ height: ordersHidden ? "72px" : "auto" }}
+            className="w-full max-h-[50vh] border-2 border-border mt-2 bg-white flex flex-col rounded-xl overflow-hidden"
+          >
+            <div className="text-2xl p-4 px-6 flex w-full justify-between h-[70px] items-center relative">
+              <div className="font-medium flex items-center gap-3">
+                Manufacturing Orders
+                {searchQuery && (
+                  <span className="text-sm font-normal bg-accent/10 text-accent px-2 py-1 rounded-md">
+                    {baseFilteredData.length} result
+                    {baseFilteredData.length !== 1 ? "s" : ""}
+                  </span>
+                )}
+              </div>{" "}
+              <div className="flex h-[70px] w-fit absolute right-0 p-2 gap-2">
+                <div className="right-0 top-0 h-full aspect-square shrink-0">
+                  <button
+                    onClick={() => router.push("/manufacturing-orders")}
+                    className="size-full cursor-pointer  rounded-lg border-2 border-border/50  hover:bg-zinc-200 flex items-center justify-center transition-colors duration-100"
+                  >
+                    <ArrowUpRight size={24} />
+                  </button>
+                </div>
+                <div className="right-0 top-0 h-full aspect-square shrink-0">
+                  <button
+                    onClick={() => setOrdersHidden((v) => !v)}
+                    className="size-full cursor-pointer  rounded-lg border-2 border-border/50  hover:bg-zinc-200 flex items-center justify-center transition-colors duration-100"
+                  >
+                    <motion.div
+                      animate={{ rotateZ: ordersHidden ? "180deg" : "0deg" }}
+                      transition={{ duration: 0.2, ease: "circInOut" }}
+                    >
+                      <CaretDoubleUp size={24} />
+                    </motion.div>
+                  </button>
+                </div>
+              </div>
+            </div>
+            {loading && <div className="text-center text-lg">Loading...</div>}
+            {error && <div className="text-center text-red-500">{error}</div>}
+            {!loading && !error && baseFilteredData.length === 0 && (
+              <div className="text-center py-8">No Orders Yet</div>
+            )}
+            {!loading && !error && baseFilteredData.length > 0 ? (
+              viewMode === "list" ? (
+                <ProductionTable columns={columns} data={tableData} />
+              ) : (
+                <KanbanView data={baseFilteredData} />
+              )
+            ) : (
+              !loading &&
+              !error && <div className="text-center py-8">No Orders Yet</div>
+            )}
+          </motion.div>
+
+          {/* Charts Section - Side by side */}
+          <div className="flex flex-col lg:flex-row gap-4 mt-4">
+            <div className="w-full lg:w-2/3">
+              <StockLevelsChart />
+            </div>
+            <div className="w-full lg:w-1/3">
+              <MOStatusChart />
+            </div>
+          </div>
+        </>
+      )}
 
       <div className="h-[100dvh]"></div>
     </div>

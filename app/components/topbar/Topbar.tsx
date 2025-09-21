@@ -1,7 +1,7 @@
 "use client";
 import { MagnifyingGlass } from "@phosphor-icons/react/dist/ssr/MagnifyingGlass";
 import { usePathname } from "next/navigation";
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { useUserStore } from "@/app/store/userStore";
 const titles: Record<string, string[]> = {
   "/dashboard": ["Dashboard", "See all your important data in one place"],
@@ -10,42 +10,45 @@ const titles: Record<string, string[]> = {
 
   "/manufacturing-orders": [
     "Manufacturing Orders",
-    "Manage your manufacturing orders and production planning"
+    "Manage your manufacturing orders and production planning",
   ],
   "/work-orders": [
     "Work Orders",
-    "Track and manage individual work orders and their operations"
+    "Track and manage individual work orders and their operations",
   ],
   "/bom": [
     "Bill of Materials",
-    "Manage product structures, components, and material requirements"
+    "Manage product structures, components, and material requirements",
   ],
   "/work-center": [
     "Work Centers",
-    "Manage work centers, machines, and production resources"
+    "Manage work centers, machines, and production resources",
   ],
   "/stock-ledger": [
     "Stock Ledger",
-    "Track inventory levels, stock movements, and material transactions"
-  ]
+    "Track inventory levels, stock movements, and material transactions",
+  ],
 } as const;
-
 
 const Topbar = () => {
   const pathname = usePathname();
+  const [isMounted, setIsMounted] = useState(false);
   const matchedKey = Object.keys(titles).find((key) => pathname.includes(key));
-  const title = matchedKey ? titles[matchedKey] : "";
+  const title = matchedKey ? titles[matchedKey] : ["", ""];
   const { isLoggedIn } = useUserStore();
-  if (!isLoggedIn) return null;
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
+  if (!isMounted || !isLoggedIn) return null;
   return (
     <div className="h-[86px] sticky top-0 shrink-0 bg-background z-[100000]  border-b-2 border-b-border p-4 flex">
       <div className="h-full flex flex-col items-start justify-between  text-2xl font-bold px-4">
         <div className="leading-5">{title[0]}</div>
         <div className="text-lg font-medium text-inactive">{title[1]}</div>
       </div>
-      <div className="ml-auto h-full w-fit" >
-        
-      </div>
+      <div className="ml-auto h-full w-fit"></div>
     </div>
   );
 };

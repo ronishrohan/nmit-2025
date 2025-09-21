@@ -153,6 +153,12 @@ const Page = () => {
     <div className="h-fit w-full p-2 flex flex-col">
       {/* Search & Buttons */}
       <div className="w-full flex h-[66px] gap-2 items-center">
+        <Button
+          className="px-8 py-3 text-lg"
+          onClick={() => router.push("/create-order")}
+        >
+          <Plus size={20} weight="regular" className="mr-2" /> Create Work Order
+        </Button>
         <div className="h-full w-full bg-white rounded-xl group border-2 focus-within:border-accent transition-colors duration-150 border-border flex relative">
           <MagnifyingGlass
             weight="bold"

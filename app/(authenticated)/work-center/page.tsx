@@ -8,10 +8,13 @@ import { useRouter } from "next/navigation";
 import { useUserStore } from "@/app/store/userStore";
 import { Dropdown } from "@/app/components/ui/dropdown/Dropdown";
 import { useWorkCenterStore } from "@/app/store/workCenterStore";
+import Modal from "@/app/components/modal/Modal";
+import WorkCenterForm from "@/app/components/WorkCenterForm";
 
 const Page = () => {
   const router = useRouter();
   const [searchTerm, setSearchTerm] = useState("");
+  const [modalOpen, setModalOpen] = useState(false);
   const { isLoggedIn } = useUserStore();
   const { workCenters, fetchWorkCenters, loading, error } =
     useWorkCenterStore();
@@ -29,10 +32,28 @@ const Page = () => {
   );
 
   return (
-    <div className="h-fit w-full p-2 flex flex-col">
+    <>
+      <Modal 
+        open={modalOpen} 
+        setOpen={setModalOpen}
+        title="Create Work Center"
+      >
+        <WorkCenterForm
+          onSuccess={() => {
+            setModalOpen(false);
+            fetchWorkCenters(); // Refresh the list
+          }}
+          onCancel={() => setModalOpen(false)}
+        />
+      </Modal>
+
+      <div className="h-fit w-full p-2 flex flex-col">
       {/* Search & Buttons */}
       <div className="w-full flex h-[66px] gap-2 items-center">
-        <Button className="px-6 shrink-0 h-[calc(100%-4px)]">
+        <Button 
+          className="px-6 shrink-0 h-[calc(100%-4px)]"
+          onClick={() => setModalOpen(true)}
+        >
           <Plus size={20} weight="regular" /> New Work Center
         </Button>
         <div className="h-full w-full bg-white rounded-xl group border-2 focus-within:border-accent transition-colors duration-150 border-border flex relative">
@@ -49,7 +70,11 @@ const Page = () => {
             onChange={(e) => setSearchTerm(e.target.value)}
           />
         </div>
-        <Button variant="secondary" className="px-6 h-full shrink-0">
+        <Button 
+          variant="secondary" 
+          className="px-6 h-full shrink-0"
+          onClick={() => setSearchTerm("")}
+        >
           <ArrowClockwise size={20} weight="regular" /> Reset
         </Button>
       </div>
@@ -69,7 +94,7 @@ const Page = () => {
             </p>
             <Button
               className="px-8"
-              onClick={() => router.push("/work-center/new")}
+              onClick={() => setModalOpen(true)}
             >
               <Plus size={20} weight="regular" /> Create Work Center
             </Button>
@@ -125,6 +150,7 @@ const Page = () => {
         )}
       </div>
     </div>
+    </>
   );
 };
 

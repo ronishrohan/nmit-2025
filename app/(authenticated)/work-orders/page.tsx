@@ -11,6 +11,7 @@ import { useWorkOrderStore } from "@/app/store/workOrderStore";
 import { useMoStore } from "@/app/store/moStore";
 import { useProductStore } from "@/app/store/productStore";
 import Modal from "@/app/components/modal/Modal";
+import WorkOrderForm from "@/app/components/WorkOrderForm";
 import Fuse from "fuse.js";
 
 type FilterCardProps = {
@@ -140,7 +141,16 @@ const Page = () => {
 
   return (
     <>
-      <Modal open={modalOpen} setOpen={setModalOpen} />
+      <Modal
+        open={modalOpen}
+        setOpen={setModalOpen}
+        title="Create a Work Order"
+      >
+        <WorkOrderForm
+          onSuccess={() => setModalOpen(false)}
+          onCancel={() => setModalOpen(false)}
+        />
+      </Modal>
 
       <div className="h-fit w-full p-2 flex flex-col">
         {/* Search & Buttons */}

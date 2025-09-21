@@ -8,11 +8,14 @@ import { useRouter } from "next/navigation";
 import { useUserStore } from "@/app/store/userStore";
 import { useBOMStore } from "@/app/store/bomStore";
 import { useProductStore } from "@/app/store/productStore";
+import Modal from "@/app/components/modal/Modal";
+import BOMForm from "@/app/components/BOMForm";
 import Fuse from "fuse.js";
 
 const Page = () => {
   const router = useRouter();
   const [searchQuery, setSearchQuery] = useState("");
+  const [modalOpen, setModalOpen] = useState(false);
   const { isLoggedIn } = useUserStore();
   const { billOfMaterials, fetchBillOfMaterials, loading, error } =
     useBOMStore();
@@ -56,10 +59,28 @@ const Page = () => {
   }, [billOfMaterials, searchQuery, fuseOptions]);
 
   return (
-    <div className="h-fit w-full p-2 flex flex-col">
+    <>
+      <Modal 
+        open={modalOpen} 
+        setOpen={setModalOpen}
+        title="Create Bill of Material"
+      >
+        <BOMForm
+          onSuccess={() => {
+            setModalOpen(false);
+            fetchBillOfMaterials(); // Refresh the list
+          }}
+          onCancel={() => setModalOpen(false)}
+        />
+      </Modal>
+
+      <div className="h-fit w-full p-2 flex flex-col">
       {/* Search & Buttons */}
       <div className="w-full flex h-[66px] gap-2 items-center">
-        <Button className="px-6 shrink-0 h-[calc(100%-4px)]">
+        <Button 
+          className="px-6 shrink-0 h-[calc(100%-4px)]"
+          onClick={() => setModalOpen(true)}
+        >
           <Plus size={20} weight="regular" /> New BOM
         </Button>
         <div className="h-full w-full bg-white rounded-xl group border-2 focus-within:border-accent transition-colors duration-150 border-border flex relative">
@@ -101,7 +122,10 @@ const Page = () => {
               Create your first BOM to define product structures and material
               requirements
             </p>
-            <Button className="px-8">
+            <Button 
+              className="px-8"
+              onClick={() => setModalOpen(true)}
+            >
               <Plus size={20} weight="regular" /> Create Bill of Materials
             </Button>
           </div>
@@ -159,6 +183,7 @@ const Page = () => {
         )}
       </div>
     </div>
+    </>
   );
 };
 

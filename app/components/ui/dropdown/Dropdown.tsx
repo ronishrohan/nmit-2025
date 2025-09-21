@@ -1,14 +1,14 @@
-"use client"
+"use client";
 
-import { motion } from "motion/react"
-import { CaretDown } from "@phosphor-icons/react/dist/ssr/CaretDown"
-import * as React from "react"
+import { motion } from "motion/react";
+import { CaretDown } from "@phosphor-icons/react/dist/ssr/CaretDown";
+import * as React from "react";
 
 interface DropdownProps {
-  width?: string | number
-  currentValue: string
-  setValue: (value: string) => void
-  values: string[]
+  width?: string | number;
+  currentValue: string;
+  setValue: (value: string) => void;
+  values: string[];
 }
 
 export const Dropdown: React.FC<DropdownProps> = ({
@@ -17,19 +17,19 @@ export const Dropdown: React.FC<DropdownProps> = ({
   setValue,
   values,
 }) => {
-  const [isOpen, setIsOpen] = React.useState(false)
+  const [isOpen, setIsOpen] = React.useState(false);
 
   return (
     <motion.div className="relative inline-block" style={{ width }}>
       <motion.button
         onClick={() => setIsOpen((v) => !v)}
-        className="h-full shrink-0 outline-none whitespace-nowrap px-6 rounded-xl bg-white hover:bg-zinc-100 transition-colors duration-100 flex items-center justify-between border-2 border-border font-medium text-xl w-full"
+        className="h-full min-h-[60px] shrink-0 outline-none whitespace-nowrap px-6 rounded-xl bg-white hover:bg-zinc-100 transition-colors duration-100 flex items-center justify-between border-2 border-border font-medium text-xl w-full"
       >
-        <div className="overflow-hidden" >{currentValue}</div>
+        <div className="overflow-hidden">{currentValue}</div>
         <motion.div
           transition={{ duration: 0.2, ease: "circInOut" }}
           animate={{ rotateZ: isOpen ? 180 : 0 }}
-          initial={{rotateZ: 0}}
+          initial={{ rotateZ: 0 }}
         >
           <CaretDown size={20} fill="bold" />
         </motion.div>
@@ -40,18 +40,19 @@ export const Dropdown: React.FC<DropdownProps> = ({
         animate={{
           height: isOpen ? "auto" : 0,
           opacity: isOpen ? 1 : 0,
+          pointerEvents: isOpen ? "all" : "none",
           marginTop: isOpen ? 4 : 0,
         }}
-        initial={{height: 0, opacity: 0}}
-        className="absolute bg-white top-full z-50 left-0 rounded-xl overflow-hidden border-2 border-border w-full flex flex-col font-medium text-xl"
+        initial={{ height: 0, opacity: 0 }}
+        className="absolute bg-white overflow-visible top-full z-[2000001] left-0 rounded-xl border-2 border-border w-full flex flex-col font-medium text-xl"
       >
         {values.map((value) => (
           <div
             key={value}
             onClick={() => {
-              setValue(value)
-              console.log(value)
-              setIsOpen(false)
+              setValue(value);
+              console.log(value);
+              setIsOpen(false);
             }}
             className="px-6 h-[60px] whitespace-nowrap flex items-center w-full hover:bg-zinc-100 transition-colors duration-100 cursor-pointer"
           >
@@ -60,5 +61,5 @@ export const Dropdown: React.FC<DropdownProps> = ({
         ))}
       </motion.div>
     </motion.div>
-  )
-}
+  );
+};

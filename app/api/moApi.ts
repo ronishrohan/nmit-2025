@@ -2,7 +2,7 @@ import { apiCall } from "../lib/api";
 
 export const moApi = {
   getAll: async () => apiCall("/fetch/manufacturingorders"),
-  getById: async (id: number) => apiCall(`/fetch/manufacturingorders/${id}`),
+  getById: async (id: number) => apiCall(`/mo/${id}`),
   search: async (q: string) =>
     apiCall(`/fetch/manufacturingorders?q=${encodeURIComponent(q)}`),
   create: async (data: any) =>

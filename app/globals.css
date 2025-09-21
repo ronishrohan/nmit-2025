@@ -27,21 +27,20 @@
 }
 
 @theme inline {
-  --color-background: #F2F3F0;
+  --color-background: #f2f3f0;
   --color-foreground: #000000;
   --color-inactive: #394541;
-  --color-disabled: #E8E8E4;
-  --color-card: #FFFFFF;
-  --color-border: #DEDFDC;
-  --color-accent: #204E4D;
-  --color-accent-green: #CCE88C;
-  --color-accent-red: #FF7D60;
-  --color-accent-yellow: #FFEB8C;
-  --color-accent-pink: #FDD7FB;
+  --color-disabled: #e8e8e4;
+  --color-card: #ffffff;
+  --color-border: #dedfdc;
+  --color-accent: #204e4d;
+  --color-accent-green: #cce88c;
+  --color-accent-red: #ff7d60;
+  --color-accent-yellow: #ffeb8c;
+  --color-accent-pink: #fdd7fb;
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
-  --font-primary: "Aeonik Pro"
-;
+  --font-primary: "Aeonik Pro";
   --color-sidebar-ring: var(--sidebar-ring);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
@@ -71,10 +70,10 @@
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
-  --radius-xl: calc(var(--radius) + 4px)}
+  --radius-xl: calc(var(--radius) + 4px);
+}
 
 body {
-
   height: 100dvh;
 }
 
@@ -98,13 +97,13 @@ body {
   --border: oklch(0.92 0.004 286.32);
   --input: oklch(0.92 0.004 286.32);
   --ring: oklch(0.705 0.015 286.067);
-  --chart-1: oklch(0.646 0.222 41.116);
-  --chart-2: oklch(0.6 0.118 184.704);
-  --chart-3: oklch(0.398 0.07 227.392);
-  --chart-4: oklch(0.828 0.189 84.429);
-  --chart-5: oklch(0.769 0.188 70.08);
-  --sidebar: oklch(0.985 0 0);
-  --sidebar-foreground: oklch(0.141 0.005 285.823);
+  --chart-1: #c6d0c2;
+  --chart-2: #b3e4bc;
+  --chart-3: #e3d379;
+  --chart-4: #cce4ff;
+  --chart-5: #99c2ff;
+  --sidebar: #f9f3c2;
+  --sidebar-foreground: #141414;
   --sidebar-primary: oklch(0.21 0.006 285.885);
   --sidebar-primary-foreground: oklch(0.985 0 0);
   --sidebar-accent: oklch(0.967 0.001 286.375);
@@ -156,14 +155,14 @@ body {
   }
 }
 
-::-webkit-scrollbar-track{
-  width: 10px;
+::-webkit-scrollbar-track {
+  width: 8px;
 }
-::-webkit-scrollbar-thumb{
-  width: 10px;
-  background-color: #BBBBBB;
-
+::-webkit-scrollbar-thumb {
+  width: 8px;
+  background-color: #bbbbbb;
 }
-::-webkit-scrollbar{
-  width: 10px;
+::-webkit-scrollbar {
+  background-color: white;
+  width: 8px;
 }
