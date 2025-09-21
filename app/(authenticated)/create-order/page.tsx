@@ -101,6 +101,7 @@ const page: React.FC = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
+        console.log("user id", userId)
         const orderResponse = await moApi.create({ userId: userId })
         console.log(orderResponse)
         setOrder(orderResponse.data)
