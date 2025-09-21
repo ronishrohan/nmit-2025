@@ -239,18 +239,6 @@ const Page = () => {
                             }
                           )
                         : "N/A"}
-                      {order.createdAt
-                        ? new Date(order.createdAt).toLocaleDateString(
-                            "en-US",
-                            {
-                              year: "numeric",
-                              month: "short",
-                              day: "numeric",
-                              hour: "2-digit",
-                              minute: "2-digit",
-                            }
-                          )
-                        : "N/A"}
                     </div>
                   </div>
 
