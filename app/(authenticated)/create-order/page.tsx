@@ -7,7 +7,7 @@ import { Dropdown } from '@/app/components/ui/dropdown/Dropdown'
 import Input from '@/app/components/ui/input/Input'
 import { useUserStore } from '@/app/store'
 import React, { useEffect, useState } from 'react'
-
+import { useRouter } from 'next/navigation' 
 // TypeScript interfaces
 interface Component {
   id: number
@@ -81,6 +81,8 @@ interface Order {
 }
 
 type TabType = 'components' | 'workorders'
+
+
 
 const page: React.FC = () => {
   const [presets, setPresets] = useState<Preset[] | null>(null)
@@ -226,9 +228,11 @@ const page: React.FC = () => {
     }
 
     setIsLoading(true)
+
+    
     
     try {
-      // Group BOM items by operation to create work orders
+      // Group BOM items by operation to create worout orders
       const operationGroups = selectedPresetData.product.bom.reduce((groups, bomItem) => {
         if (!groups[bomItem.operation]) {
           groups[bomItem.operation] = []
@@ -289,11 +293,12 @@ const page: React.FC = () => {
     }
   }
 
+  const router = useRouter()
   return (
     <div className='p-2 size-full'>
       <div className='flex gap-2 h-[66px] mb-2'>
         <Button className='text-xl px-6'>Confirm</Button>
-        <Button variant='secondary' className='text-xl px-6'>Back</Button>
+        <Button onClick={() => router.push("/dashboard")} variant='secondary' className='text-xl px-6'>Back</Button>
         <Button onClick={handleSaveDraft} className='text-xl px-6 ml-auto'>Save Draft</Button>
       </div>
 

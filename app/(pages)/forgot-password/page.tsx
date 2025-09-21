@@ -189,7 +189,7 @@ export default function page() {
           <div className="w-1/2 flex flex-col">
             <div className="text-3xl font-bold mb-4 flex gap-2">
               <GearSix weight="fill" size={30} />
-              OUTWORKS
+              UTWORKS
             </div>
 
             {step === "email" ? (

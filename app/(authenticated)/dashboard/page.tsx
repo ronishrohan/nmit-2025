@@ -298,7 +298,7 @@ const StockLevelsChart = () => {
   const lowStockCount = chartData.filter((item) => item.stock < 50).length;
 
   return (
-    <Card className="w-3/4">
+    <Card className="flex-1">
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           Stock Levels by Product
@@ -314,7 +314,7 @@ const StockLevelsChart = () => {
       </CardHeader>
       <CardContent>
         {chartData.length > 0 ? (
-          <ChartContainer config={chartConfig} className="h-[300px]">
+          <ChartContainer config={chartConfig} className="h-[300px] w-full">
             <BarChart
               accessibilityLayer
               data={chartData}
@@ -324,6 +324,8 @@ const StockLevelsChart = () => {
                 left: 20,
                 bottom: 60,
               }}
+              width={500}
+              height={300}
             >
               <XAxis
                 dataKey="name"
@@ -333,8 +335,14 @@ const StockLevelsChart = () => {
                 angle={-45}
                 textAnchor="end"
                 height={80}
+                fontSize={12}
               />
-              <YAxis tickLine={false} axisLine={false} tickMargin={10} />
+              <YAxis
+                tickLine={false}
+                axisLine={false}
+                tickMargin={10}
+                fontSize={12}
+              />
               <ChartTooltip
                 cursor={false}
                 content={({ active, payload }) => {
@@ -404,21 +412,21 @@ const MOStatusChart = () => {
   const totalOrders = manufacturingOrders.length;
 
   return (
-    <div className="w-1/4 bg-white rounded-xl border-2 border-border p-4">
-      <div>
-        <div className="text-xl font-medium">MO Status Distribution</div>
-        <div className="flex text-lg font-medium text-inactive">
+    <Card className="flex-1">
+      <CardHeader>
+        <CardTitle>MO Status Distribution</CardTitle>
+        <CardDescription>
           {totalOrders} total manufacturing orders
-        </div>
-      </div>
+        </CardDescription>
+      </CardHeader>
 
       <CardContent className="flex items-center justify-center">
         {totalOrders > 0 ? (
           <ChartContainer
             config={chartConfig}
-            className="h-[300px] flex items-center justify-center"
+            className="h-[300px] w-full flex items-center justify-center"
           >
-            <PieChart >
+            <PieChart width={350} height={300}>
               <ChartTooltip
                 cursor={false}
                 content={({ active, payload }) => {
@@ -438,18 +446,18 @@ const MOStatusChart = () => {
               />
               <Pie
                 data={chartData}
+                cx="50%"
+                cy="50%"
                 dataKey="count"
                 nameKey="status"
-                innerRadius={36}
-                
-                outerRadius={120}
-                // strokeWidth={2}
-                paddingAngle={4}
-                cornerRadius={8}
+                innerRadius={40}
+                outerRadius={100}
+                strokeWidth={2}
+                paddingAngle={2}
               >
                 <LabelList
                   dataKey="percentage"
-                  className="fill-background"
+                  className="fill-white font-medium"
                   stroke="none"
                   fontSize={12}
                   formatter={(value: any) => `${value}%`}
@@ -463,7 +471,7 @@ const MOStatusChart = () => {
           </div>
         )}
       </CardContent>
-    </div>
+    </Card>
   );
 };
 
@@ -766,9 +774,13 @@ const Page = () => {
       </motion.div>
 
       {/* Charts Section - Side by side */}
-      <div className="flex gap-4 mt-4">
-        <StockLevelsChart />
-        <MOStatusChart />
+      <div className="flex flex-col lg:flex-row gap-6 mt-6">
+        <div className="w-full lg:w-2/3">
+          <StockLevelsChart />
+        </div>
+        <div className="w-full lg:w-1/3">
+          <MOStatusChart />
+        </div>
       </div>
 
       <div className="h-[100dvh]"></div>

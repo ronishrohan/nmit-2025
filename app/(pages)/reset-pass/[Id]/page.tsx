@@ -139,7 +139,7 @@ export default function page() {
               >
                 <GearSix weight="fill" size={30} />
               </motion.div>
-              OUTWORKS
+              UTWORKS
             </div>
 
             <div className="text-lg font-semibold mb-2">Set New Password</div>
