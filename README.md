@@ -2,7 +2,7 @@
 
 Outworks is a modular manufacturing management frontend application built with **Next.js** and **Tailwind CSS**.  
 It aims to digitize and streamline the entire manufacturing process — from order creation to final output — replacing fragmented spreadsheets and manual tracking with a centralized, user-friendly platform.
-
+Video Link: https://drive.google.com/file/d/15cv9WblQ6jOma_J12xhGa_EY9E2yCqCh/view?usp=sharing
 ---
 
 ## Problem Statement (Overview)
