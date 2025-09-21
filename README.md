@@ -22,7 +22,7 @@ Manufacturing businesses often face challenges with scattered systems, lack of r
 
 - **Authentication & Access Control**  
   - Login, signup, and password recovery with OTP verification.
-
+Global Tailwind & custom styles
 - **Dashboard & Filters**  
   - View all manufacturing orders in real-time.  
   - Filter by order status and view KPIs like completed, delayed, and in-progress orders.
@@ -51,7 +51,7 @@ Manufacturing businesses often face challenges with scattered systems, lack of r
 
 - **Framework:** [Next.js](https://nextjs.org/)
 - **Styling:** [Tailwind CSS](https://tailwindcss.com/)
-- **State Management & API Calls:** React Hooks, Context API (or SWR/React Query if applicable)
+- **State Management & API Calls:** React Hooks, Zustand for Global State Management
 
 ---
 
@@ -77,23 +77,9 @@ The app will be available at **[http://localhost:3000](http://localhost:3000)**.
 outworks-frontend/
 ├── app/                 # Next.js App Router pages & layouts
 ├── components/          # Reusable UI components
-├── styles/              # Global Tailwind & custom styles
+├── lib/                 # Global libraries
 ├── public/              # Static assets
 └── package.json         # Project dependencies & scripts
 ```
 
 ---
-
-## Contribution
-
-1. Fork the repository  
-2. Create your feature branch (`git checkout -b feature/my-feature`)  
-3. Commit your changes (`git commit -m "Add my feature"`)  
-4. Push to the branch (`git push origin feature/my-feature`)  
-5. Open a Pull Request  
-
----
-
-## License
-
-This project is licensed under the **MIT License** – you are free to use, modify, and distribute with proper attribution.
