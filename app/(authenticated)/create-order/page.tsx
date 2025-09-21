@@ -491,7 +491,7 @@ const page: React.FC = () => {
           <Input
             placeholder="Quantity"
             type="number"
-            defaultValue="2"
+            defaultValue=""
             onChange={handleQuantityChange}
           />
         </div>

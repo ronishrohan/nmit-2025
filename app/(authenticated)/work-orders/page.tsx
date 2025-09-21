@@ -11,6 +11,7 @@ import { useWorkOrderStore } from "@/app/store/workOrderStore";
 import { useMoStore } from "@/app/store/moStore";
 import { useProductStore } from "@/app/store/productStore";
 import Modal from "@/app/components/modal/Modal";
+import Fuse from "fuse.js";
 
 type FilterCardProps = {
   number: number | string;
@@ -65,7 +66,31 @@ const Page = () => {
       fetchManufacturingOrders();
       fetchProducts();
     }
-  }, [isLoggedIn, router, fetchWorkOrders, fetchManufacturingOrders, fetchProducts]);
+  }, [
+    isLoggedIn,
+    router,
+    fetchWorkOrders,
+    fetchManufacturingOrders,
+    fetchProducts,
+  ]);
+
+  // Fuse.js configuration for fuzzy search
+  const fuseOptions = {
+    keys: [
+      { name: "id", weight: 0.2 },
+      { name: "operation", weight: 0.4 },
+      { name: "moId", weight: 0.3 },
+      { name: "mo.product.name", weight: 0.4 },
+      { name: "status", weight: 0.3 },
+      { name: "comments", weight: 0.2 },
+    ],
+    threshold: 0.4,
+    includeScore: true,
+    ignoreLocation: true,
+    findAllMatches: true,
+    minMatchCharLength: 2,
+    shouldSort: true,
+  };
 
   // Memoized filter counts
   const filterCounts = useMemo(() => {
@@ -73,7 +98,8 @@ const Page = () => {
       to_do: workOrders.filter((order) => order.status === "to_do").length,
       started: workOrders.filter((order) => order.status === "started").length,
       paused: workOrders.filter((order) => order.status === "paused").length,
-      completed: workOrders.filter((order) => order.status === "completed").length,
+      completed: workOrders.filter((order) => order.status === "completed")
+        .length,
     };
   }, [workOrders]);
 
@@ -84,10 +110,8 @@ const Page = () => {
     { number: filterCounts.completed, title: "Completed", status: "completed" },
   ];
 
-  const filteredWorkOrders = workOrders.filter((order) => {
-    const mo = manufacturingOrders.find((mo) => mo.id === order.moId);
-    const product = mo ? products.find((p) => p.id === mo.productId) : undefined;
-
+  // First apply status and mode filters
+  const statusAndModeFilteredOrders = workOrders.filter((order) => {
     // Status filter
     const statusMatch =
       selectedFilter !== null
@@ -100,15 +124,19 @@ const Page = () => {
       modeMatch = order.assignedToId === user.id;
     }
 
-    // Search filter
-    const searchMatch =
-      order.operation.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      order.moId.toString().includes(searchQuery) ||
-      product?.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      product?.id.toString().includes(searchQuery);
-
-    return statusMatch && modeMatch && searchMatch;
+    return statusMatch && modeMatch;
   });
+
+  // Then apply fuzzy search using Fuse.js
+  const filteredWorkOrders = useMemo(() => {
+    if (!searchQuery.trim()) {
+      return statusAndModeFilteredOrders;
+    }
+
+    const searchFuse = new Fuse(statusAndModeFilteredOrders, fuseOptions);
+    const results = searchFuse.search(searchQuery);
+    return results.map((result) => result.item);
+  }, [statusAndModeFilteredOrders, searchQuery, fuseOptions]);
 
   return (
     <>
@@ -133,20 +161,27 @@ const Page = () => {
             <input
               type="text"
               className="size-full outline-none pl-10 text-xl font-medium"
-              placeholder="Search work orders..."
+              placeholder="Search operations, orders, products..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
             />
           </div>
 
-          <Button variant="secondary" className="px-6 h-full shrink-0">
+          <Button
+            variant="secondary"
+            className="px-6 h-full shrink-0"
+            onClick={() => {
+              setSelectedFilter(null);
+              setSearchQuery("");
+              setMode("All");
+            }}
+          >
             <ArrowClockwise size={20} weight="regular" /> Reset
           </Button>
         </div>
 
         {/* Filter Cards + Mode Dropdown */}
         <div className="h-[66px] mt-2 w-full flex gap-2 items-center">
-          
           {filters.map((filter, index) => (
             <FilterCard
               key={filter.status}
@@ -171,7 +206,9 @@ const Page = () => {
 
           {/* Error state */}
           {error && (
-            <div className="p-6 text-center text-red-600 font-medium">{error}</div>
+            <div className="p-6 text-center text-red-600 font-medium">
+              {error}
+            </div>
           )}
 
           {/* Empty state */}
@@ -195,41 +232,44 @@ const Page = () => {
             </div>
           )}
 
-        {!loading && !error && filteredWorkOrders.length > 0 && (
-          <div className="divide-y divide-border">
-            {filteredWorkOrders.map((order) => (
-              <div
-                key={order.id}
-                className="p-4 flex flex-col gap-3 md:flex-row md:items-center md:justify-between hover:bg-zinc-50 transition-colors"
-              >
-                <div className="space-y-1">
-                  <div className="text-xl font-bold text-zinc-800">
-                    {order.operation}
+          {!loading && !error && filteredWorkOrders.length > 0 && (
+            <div className="divide-y divide-border">
+              {filteredWorkOrders.map((order) => (
+                <div
+                  key={order.id}
+                  className="p-4 flex flex-col gap-3 md:flex-row md:items-center md:justify-between hover:bg-zinc-50 transition-colors"
+                >
+                  <div className="space-y-1">
+                    <div className="text-xl font-bold text-zinc-800">
+                      {order.operation}
+                    </div>
+                    <div className="text-zinc-700">
+                      <span className="font-medium">WO:</span> #{order.id}
+                    </div>
+                    <div className="text-zinc-700">
+                      <span className="font-medium">Status:</span>{" "}
+                      {order.status.replace("_", " ").charAt(0).toUpperCase() +
+                        order.status.replace("_", " ").slice(1)}
+                    </div>
+                    <div className="text-zinc-700">
+                      <span className="font-medium">MO ID:</span> {order.moId}
+                    </div>
+                    <div className="text-zinc-500 text-sm">
+                      Created:{" "}
+                      {order.createdAt
+                        ? new Date(order.createdAt).toLocaleDateString(
+                            "en-US",
+                            {
+                              year: "numeric",
+                              month: "short",
+                              day: "numeric",
+                              hour: "2-digit",
+                              minute: "2-digit",
+                            }
+                          )
+                        : "N/A"}
+                    </div>
                   </div>
-                  <div className="text-zinc-700">
-                    <span className="font-medium">WO:</span> #{order.id}
-                  </div>
-                  <div className="text-zinc-700">
-                    <span className="font-medium">Status:</span>{" "}
-                    {order.status.replace("_", " ").charAt(0).toUpperCase() +
-                      order.status.replace("_", " ").slice(1)}
-                  </div>
-                  <div className="text-zinc-700">
-                    <span className="font-medium">MO ID:</span> {order.moId}
-                  </div>
-                  <div className="text-zinc-500 text-sm">
-                    Created:{" "}
-                    {order.createdAt
-                      ? new Date(order.createdAt).toLocaleDateString("en-US", {
-                          year: "numeric",
-                          month: "short",
-                          day: "numeric",
-                          hour: "2-digit",
-                          minute: "2-digit",
-                        })
-                      : "N/A"}
-                  </div>
-                </div>
 
                   {/* Right Side Button */}
                   <Button

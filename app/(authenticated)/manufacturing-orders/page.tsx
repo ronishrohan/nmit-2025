@@ -3,12 +3,13 @@ import Button from "@/app/components/ui/button/Button";
 import { ArrowClockwise } from "@phosphor-icons/react/dist/ssr/ArrowClockwise";
 import { MagnifyingGlass } from "@phosphor-icons/react/dist/ssr/MagnifyingGlass";
 import { Plus } from "@phosphor-icons/react/dist/ssr/Plus";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { useUserStore } from "@/app/store/userStore";
 import { Dropdown } from "@/app/components/ui/dropdown/Dropdown";
 import { useMoStore } from "@/app/store/moStore";
 import { useProductStore } from "@/app/store/productStore";
+import Fuse from "fuse.js";
 
 type FilterCardProps = {
   number: number | string;
@@ -50,6 +51,25 @@ const Page = () => {
   const { manufacturingOrders, fetchManufacturingOrders, loading, error } =
     useMoStore();
   const { products, fetchProducts } = useProductStore();
+
+  // Fuse.js configuration for fuzzy search
+  const fuseOptions = {
+    keys: [
+      { name: "id", weight: 0.3 },
+      { name: "productId", weight: 0.2 },
+      { name: "product.name", weight: 0.4 },
+      { name: "quantity", weight: 0.2 },
+      { name: "status", weight: 0.3 },
+      { name: "assignedTo.fullName", weight: 0.3 },
+      { name: "createdBy.fullName", weight: 0.2 },
+    ],
+    threshold: 0.4,
+    includeScore: true,
+    ignoreLocation: true,
+    findAllMatches: true,
+    minMatchCharLength: 2,
+    shouldSort: true,
+  };
 
   useEffect(() => {
     if (!isLoggedIn) {
@@ -99,13 +119,14 @@ const Page = () => {
   ];
   const [mode, setMode] = useState("All");
 
-  const filteredOrders = manufacturingOrders.filter((order) => {
-    const product = products.find((p) => p.id === order.productId);
+  // First apply status and mode filters
+  const statusAndModeFilteredOrders = manufacturingOrders.filter((order) => {
     // Status filter
     const statusMatch =
       selectedFilter !== null
         ? order.status === filters[selectedFilter].status
         : true;
+
     // Mode filter
     let modeMatch = true;
     if (mode === "My Orders" && user) {
@@ -113,15 +134,20 @@ const Page = () => {
     } else if (mode === "Assigned to Me" && user) {
       modeMatch = order.assignedToId === user.id;
     }
-    // Search filter
-    const searchMatch =
-      order.id.toString().includes(searchQuery) ||
-      order.productId?.toString().includes(searchQuery) ||
-      (product &&
-        product.name.toLowerCase().includes(searchQuery.toLowerCase())) ||
-      order.quantity?.toString().includes(searchQuery);
-    return statusMatch && modeMatch && searchMatch;
+
+    return statusMatch && modeMatch;
   });
+
+  // Then apply fuzzy search using Fuse.js
+  const filteredOrders = useMemo(() => {
+    if (!searchQuery.trim()) {
+      return statusAndModeFilteredOrders;
+    }
+
+    const searchFuse = new Fuse(statusAndModeFilteredOrders, fuseOptions);
+    const results = searchFuse.search(searchQuery);
+    return results.map((result) => result.item);
+  }, [statusAndModeFilteredOrders, searchQuery, fuseOptions]);
 
   return (
     <div className="h-fit w-full p-2 flex flex-col">
@@ -136,12 +162,20 @@ const Page = () => {
           <input
             type="text"
             className="size-full outline-none pl-10 text-xl font-medium"
-            placeholder="Search manufacturing orders..."
+            placeholder="Search orders, products, assignees..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
           />
         </div>
-        <Button variant="secondary" className="px-6 h-full shrink-0">
+        <Button
+          variant="secondary"
+          className="px-6 h-full shrink-0"
+          onClick={() => {
+            setSelectedFilter(null);
+            setSearchQuery("");
+            setMode("All");
+          }}
+        >
           <ArrowClockwise size={20} weight="regular" /> Reset
         </Button>
       </div>

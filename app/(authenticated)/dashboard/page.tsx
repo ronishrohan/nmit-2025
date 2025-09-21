@@ -5,7 +5,7 @@ import { MagnifyingGlass } from "@phosphor-icons/react/dist/ssr/MagnifyingGlass"
 import { Plus } from "@phosphor-icons/react/dist/ssr/Plus";
 import { List } from "@phosphor-icons/react/dist/ssr/List";
 import { Kanban } from "@phosphor-icons/react/dist/ssr/Kanban";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useMemo } from "react";
 import ProductionTable, { Column } from "./Table";
 import { getOrders } from "@/app/database/orders.database";
 import { motion } from "motion/react";
@@ -18,6 +18,7 @@ import { useMoStore } from "@/app/store/moStore";
 import { useProductStore } from "@/app/store/productStore";
 import { CaretDoubleUp } from "@phosphor-icons/react/dist/ssr/CaretDoubleUp";
 import { ManufacturingOrder, OrderStatus } from "@/app/types";
+import Fuse from "fuse.js";
 import {
   Bar,
   BarChart,
@@ -555,6 +556,29 @@ const Page = () => {
 
   const [ordersHidden, setOrdersHidden] = useState(false);
 
+  // Fuse.js configuration for fuzzy search
+  const fuseOptions = {
+    keys: [
+      { name: "id", weight: 0.3 },
+      { name: "productId", weight: 0.2 },
+      { name: "product.name", weight: 0.4 },
+      { name: "status", weight: 0.3 },
+      { name: "assignedTo.fullName", weight: 0.3 },
+      { name: "createdBy.fullName", weight: 0.2 },
+    ],
+    threshold: 0.4, // Lower = more strict, Higher = more fuzzy
+    includeScore: true,
+    ignoreLocation: true,
+    findAllMatches: true,
+    minMatchCharLength: 2,
+    shouldSort: true,
+  };
+
+  const fuse = useMemo(
+    () => new Fuse(manufacturingOrders, fuseOptions),
+    [manufacturingOrders]
+  );
+
   // Calculate counts for each filter dynamically
   const getFilterCounts = () => {
     const counts = {
@@ -603,41 +627,51 @@ const Page = () => {
     { key: "createdAt", label: "Created At" },
   ];
 
-  // Prepare base filtered data
-  const baseFilteredData = manufacturingOrders
-    .filter((order) => {
-      if (selectedFilter === null) return true;
-      const filterTitle = filters[selectedFilter].title;
+  // First apply status filters
+  const statusFilteredData = manufacturingOrders.filter((order) => {
+    if (selectedFilter === null) return true;
+    const filterTitle = filters[selectedFilter].title;
 
-      // Handle special filter cases
-      if (filterTitle === "not_assigned") {
-        return !order.assignedToId;
-      }
-      if (filterTitle === "late") {
-        return (
-          order.deadline &&
-          new Date(order.deadline) < new Date() &&
-          order.status !== "done" &&
-          order.status !== "cancelled"
-        );
-      }
-
-      // Handle regular status filters
-      return order.status === filterTitle;
-    })
-    .filter((order) => {
-      console.log("order", order);
+    // Handle special filter cases
+    if (filterTitle === "Not assigned") {
+      return !order.assignedToId;
+    }
+    if (filterTitle === "Late") {
       return (
-        order.id?.toString().includes(searchQuery) ||
-        order.productId?.toString().includes(searchQuery) ||
-        order.status?.toString().includes(searchQuery) ||
-        order.createdAt?.toString().includes(searchQuery)
+        order.deadline &&
+        new Date(order.deadline) < new Date() &&
+        order.status !== "done" &&
+        order.status !== "cancelled"
       );
-    });
+    }
+
+    // Handle regular status filters - map display titles to actual status values
+    const statusMap: { [key: string]: string } = {
+      Draft: "draft",
+      Confirmed: "confirmed",
+      "In progress": "in_progress",
+      "To close": "to_close",
+    };
+
+    const actualStatus = statusMap[filterTitle];
+    return actualStatus ? order.status === actualStatus : false;
+  });
+
+  // Then apply fuzzy search using Fuse.js
+  const baseFilteredData = useMemo(() => {
+    if (!searchQuery.trim()) {
+      return statusFilteredData;
+    }
+
+    const searchFuse = new Fuse(statusFilteredData, fuseOptions);
+    const results = searchFuse.search(searchQuery);
+    return results.map((result) => result.item);
+  }, [statusFilteredData, searchQuery, fuseOptions]);
 
   // Prepare data for the table with formatted dates
   const tableData = baseFilteredData.map((order) => ({
     ...order,
+    productName: order.product?.name || "Unknown Product",
     status:
       order.status.replace("_", " ").charAt(0).toUpperCase() +
       order.status.replace("_", " ").slice(1),
@@ -671,12 +705,19 @@ const Page = () => {
           <input
             type="text"
             className="size-full outline-none pl-10 text-xl font-medium"
-            placeholder="Search"
+            placeholder="Search orders, products, assignees..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
           />
         </div>
-        <Button variant="secondary" className="px-6 h-full shrink-0">
+        <Button
+          variant="secondary"
+          className="px-6 h-full shrink-0"
+          onClick={() => {
+            setSelectedFilter(null);
+            setSearchQuery("");
+          }}
+        >
           <ArrowClockwise size={20} weight="regular" /> Reset
         </Button>
         <Button
@@ -731,7 +772,15 @@ const Page = () => {
         className="w-full max-h-[50vh] border-2 border-border mt-2 bg-white flex flex-col rounded-xl overflow-hidden"
       >
         <div className="text-2xl p-4 px-6 flex w-full justify-between h-[70px] items-center relative">
-          <div className="font-medium">Manufacturing Orders</div>{" "}
+          <div className="font-medium flex items-center gap-3">
+            Manufacturing Orders
+            {searchQuery && (
+              <span className="text-sm font-normal bg-accent/10 text-accent px-2 py-1 rounded-md">
+                {baseFilteredData.length} result
+                {baseFilteredData.length !== 1 ? "s" : ""}
+              </span>
+            )}
+          </div>{" "}
           <div className="flex h-[70px] w-fit absolute right-0 p-2 gap-2">
             <div className="right-0 top-0 h-full aspect-square shrink-0">
               <button

@@ -3,11 +3,12 @@ import Button from "@/app/components/ui/button/Button";
 import { ArrowClockwise } from "@phosphor-icons/react/dist/ssr/ArrowClockwise";
 import { MagnifyingGlass } from "@phosphor-icons/react/dist/ssr/MagnifyingGlass";
 import { Plus } from "@phosphor-icons/react/dist/ssr/Plus";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { useUserStore } from "@/app/store/userStore";
 import { useBOMStore } from "@/app/store/bomStore";
 import { useProductStore } from "@/app/store/productStore";
+import Fuse from "fuse.js";
 
 const Page = () => {
   const router = useRouter();
@@ -26,16 +27,33 @@ const Page = () => {
     }
   }, [isLoggedIn, router, fetchBillOfMaterials, fetchProducts]);
 
-  // Filter and search logic
-  const filteredBOMs = billOfMaterials.filter((bom) => {
-    const product = products.find((p) => p.id === bom.productId);
-    return (
-      bom.productId.toString().includes(searchQuery) ||
-      bom.componentId.toString().includes(searchQuery) ||
-      (product &&
-        product.name.toLowerCase().includes(searchQuery.toLowerCase()))
-    );
-  });
+  // Fuse.js configuration for fuzzy search
+  const fuseOptions = {
+    keys: [
+      { name: "productId", weight: 0.3 },
+      { name: "componentId", weight: 0.3 },
+      { name: "product.name", weight: 0.4 },
+      { name: "component.name", weight: 0.4 },
+      { name: "quantity", weight: 0.2 },
+    ],
+    threshold: 0.4,
+    includeScore: true,
+    ignoreLocation: true,
+    findAllMatches: true,
+    minMatchCharLength: 2,
+    shouldSort: true,
+  };
+
+  // Filter and search logic using Fuse.js
+  const filteredBOMs = useMemo(() => {
+    if (!searchQuery.trim()) {
+      return billOfMaterials;
+    }
+
+    const searchFuse = new Fuse(billOfMaterials, fuseOptions);
+    const results = searchFuse.search(searchQuery);
+    return results.map((result) => result.item);
+  }, [billOfMaterials, searchQuery, fuseOptions]);
 
   return (
     <div className="h-fit w-full p-2 flex flex-col">
@@ -53,12 +71,18 @@ const Page = () => {
           <input
             type="text"
             className="size-full outline-none pl-10 text-xl font-medium"
-            placeholder="Search bill of materials..."
+            placeholder="Search products, components, quantities..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
           />
         </div>
-        <Button variant="secondary" className="px-6 h-full shrink-0">
+        <Button
+          variant="secondary"
+          className="px-6 h-full shrink-0"
+          onClick={() => {
+            setSearchQuery("");
+          }}
+        >
           <ArrowClockwise size={20} weight="regular" /> Reset
         </Button>
       </div>
